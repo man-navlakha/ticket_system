@@ -1,0 +1,123 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+model User {
+  id               String          @id @default(uuid())
+  username         String?         @unique
+  email            String          @unique
+  password         String?
+  role             Role            @default(USER)
+  status           UserStatus      @default(PENDING)
+  inviteToken      String?         @unique
+  inviteExpires    DateTime?
+  resetToken       String?
+  resetTokenExpiry DateTime?
+  tickets          Ticket[]
+  comments         Comment[]
+  inventory        InventoryItem[]
+  createdAt        DateTime        @default(now())
+}
+
+model Ticket {
+  id              String   @id @default(uuid())
+  title           String
+  description     String
+  status          Status   @default(OPEN)
+  priority        Priority @default(MEDIUM)
+  userId          String
+  user            User     @relation(fields: [userId], references: [id])
+  
+  // Link to inventory if applicable
+  inventoryItemId String?
+  inventoryItem   InventoryItem? @relation(fields: [inventoryItemId], references: [id])
+  
+  productName     String?  // For custom/personal products or inventory item name
+  componentName   String?  // Specifically which part is broken
+  
+  comments        Comment[]
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  content   String
+  ticketId  String
+  ticket    Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+model InventoryItem {
+  id              String    @id @default(uuid())
+  pid             String    @unique
+  type            ItemType
+  
+  userId          String?
+  user            User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  assignedDate    DateTime?
+  returnDate      DateTime?
+  maintenanceDate DateTime?
+  purchasedDate   DateTime?
+  warrantyDate    DateTime?
+
+  ownership       Ownership
+  brand           String?
+  model           String?
+  price           Float?
+  components      String[] // e.g. ["Mouse", "Keyboard"]
+  
+  warrantyType    String? // e.g., "Warranty" or "Guarantee"
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  tickets         Ticket[]
+}
+
+enum Role {
+  USER
+  AGENT
+  ADMIN
+}
+
+enum Status {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CANCELLED
+  REOPENED
+  CLOSED
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum ItemType {
+  COMPUTER
+  LAPTOP
+  OTHER
+}
+
+enum Ownership {
+  COMPANY
+  EMPLOYEE
+  RENTED
+}
+
+enum UserStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+}

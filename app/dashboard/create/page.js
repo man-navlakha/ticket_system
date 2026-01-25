@@ -1,0 +1,226 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+
+export default function CreateTicketPage() {
+    const router = useRouter();
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
+    const [inventory, setInventory] = useState([]);
+    const [issueType, setIssueType] = useState('inventory'); // 'inventory' or 'personal'
+
+    const [selectedItem, setSelectedItem] = useState(null);
+    const [selectedComponent, setSelectedComponent] = useState('');
+    const [customProduct, setCustomProduct] = useState('');
+
+    useEffect(() => {
+        fetchInventory();
+    }, []);
+
+    async function fetchInventory() {
+        try {
+            const res = await fetch('/api/inventory');
+            if (res.ok) {
+                const data = await res.json();
+                setInventory(data);
+                if (data.length > 0) {
+                    setSelectedItem(data[0]);
+                } else {
+                    setIssueType('personal');
+                }
+            }
+        } catch (err) {
+            console.error('Failed to fetch inventory:', err);
+        }
+    }
+
+    async function onSubmit(e) {
+        e.preventDefault();
+        setLoading(true);
+        setError('');
+
+        const formData = new FormData(e.currentTarget);
+        const data = {
+            title: formData.get('title'),
+            description: formData.get('description'),
+            priority: formData.get('priority'),
+            isPersonalIssue: issueType === 'personal',
+            inventoryItemId: issueType === 'inventory' ? selectedItem?.id : null,
+            productName: issueType === 'inventory' ? `${selectedItem?.brand} ${selectedItem?.model} (${selectedItem?.pid})` : customProduct,
+            componentName: issueType === 'inventory' ? selectedComponent : null,
+        };
+
+        try {
+            const res = await fetch('/api/tickets', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data),
+            });
+
+            if (!res.ok) {
+                const json = await res.json();
+                throw new Error(json.error || 'Failed to create ticket');
+            }
+
+            router.push('/dashboard');
+            router.refresh();
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    return (
+        <div className="max-w-3xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <div className="mb-10">
+                <Link
+                    href="/dashboard"
+                    className="group text-sm text-gray-400 hover:text-white mb-6 inline-flex items-center gap-2 transition-colors"
+                >
+                    <span className="group-hover:-translate-x-1 transition-transform">←</span> Back to Dashboard
+                </Link>
+                <h1 className="text-4xl font-bold tracking-tight">Report an Issue</h1>
+                <p className="text-gray-400 mt-2 text-lg">We&apos;ll get back to you as soon as possible.</p>
+            </div>
+
+            <form onSubmit={onSubmit} className="space-y-8">
+                {error && (
+                    <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm font-medium">
+                        {error}
+                    </div>
+                )}
+
+                {/* Issue Type Selector */}
+                <div className="space-y-3">
+                    <label className="text-xs font-semibold uppercase tracking-widest text-gray-500">What are you reporting?</label>
+                    <div className="grid grid-cols-2 gap-4">
+                        <button
+                            type="button"
+                            onClick={() => setIssueType('inventory')}
+                            disabled={inventory.length === 0}
+                            className={`p-4 rounded-xl border text-left transition-all ${issueType === 'inventory' ? 'bg-white border-white text-black shadow-xl' : 'bg-white/5 border-white/10 text-gray-400 hover:border-white/20 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed'}`}
+                        >
+                            <span className="block font-bold">Company Device</span>
+                            <span className="text-xs opacity-70">Laptop, monitor, or hardware assigned to you.</span>
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setIssueType('personal')}
+                            className={`p-4 rounded-xl border text-left transition-all ${issueType === 'personal' ? 'bg-white border-white text-black shadow-xl' : 'bg-white/5 border-white/10 text-gray-400 hover:border-white/20 hover:text-white'}`}
+                        >
+                            <span className="block font-bold">Personal/Custom Issue</span>
+                            <span className="text-xs opacity-70">Internet, software, or personal hardware issues.</span>
+                        </button>
+                    </div>
+                </div>
+
+                {/* Device Selection Context */}
+                {issueType === 'inventory' && inventory.length > 0 && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 rounded-2xl bg-white/[0.03] border border-white/10">
+                        <div className="space-y-2">
+                            <label className="text-xs font-semibold uppercase tracking-widest text-gray-500">Select Device</label>
+                            <select
+                                className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-white transition-all outline-none appearance-none"
+                                value={selectedItem?.id || ''}
+                                onChange={(e) => {
+                                    const item = inventory.find(i => i.id === e.target.value);
+                                    setSelectedItem(item);
+                                    setSelectedComponent('');
+                                }}
+                            >
+                                {inventory.map(item => (
+                                    <option key={item.id} value={item.id} className="bg-gray-900 font-sans">
+                                        {item.brand} {item.model} ({item.pid})
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="text-xs font-semibold uppercase tracking-widest text-gray-500">Affected Component (Optional)</label>
+                            <select
+                                className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-white transition-all outline-none appearance-none disabled:opacity-30"
+                                value={selectedComponent}
+                                onChange={(e) => setSelectedComponent(e.target.value)}
+                                disabled={!selectedItem?.components?.length}
+                            >
+                                <option value="" className="bg-gray-900 font-sans">Whole Device / General</option>
+                                {selectedItem?.components?.map(comp => (
+                                    <option key={comp} value={comp} className="bg-gray-900 font-sans">{comp}</option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
+                )}
+
+                {issueType === 'personal' && (
+                    <div className="space-y-2 p-6 rounded-2xl bg-white/[0.03] border border-white/10">
+                        <label className="text-xs font-semibold uppercase tracking-widest text-gray-500">Custom Product / Service Name</label>
+                        <input
+                            type="text"
+                            required={issueType === 'personal'}
+                            value={customProduct}
+                            onChange={(e) => setCustomProduct(e.target.value)}
+                            placeholder="e.g. WiFi Router, VPN Connection, Personal Mouse"
+                            className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-gray-600 focus:border-white transition-all outline-none"
+                        />
+                    </div>
+                )}
+
+                <div className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="md:col-span-2 space-y-2">
+                            <label htmlFor="title" className="text-xs font-semibold uppercase tracking-widest text-gray-500">Subject</label>
+                            <input
+                                type="text"
+                                id="title"
+                                name="title"
+                                required
+                                placeholder="Short summary of the problem"
+                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-gray-600 focus:border-white transition-all outline-none"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <label htmlFor="priority" className="text-xs font-semibold uppercase tracking-widest text-gray-500">Priority</label>
+                            <select
+                                id="priority"
+                                name="priority"
+                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-white transition-all outline-none appearance-none"
+                                defaultValue="MEDIUM"
+                            >
+                                <option value="LOW" className="bg-gray-900">Low</option>
+                                <option value="MEDIUM" className="bg-gray-900">Medium</option>
+                                <option value="HIGH" className="bg-gray-900">High</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div className="space-y-2">
+                        <label htmlFor="description" className="text-xs font-semibold uppercase tracking-widest text-gray-500">Detailed Description</label>
+                        <textarea
+                            id="description"
+                            name="description"
+                            required
+                            rows={6}
+                            placeholder="Tell us more about the issue. When did it start? What have you tried?"
+                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-gray-600 focus:border-white transition-all outline-none resize-none"
+                        />
+                    </div>
+                </div>
+
+                <div className="flex justify-end pt-6 border-t border-white/10">
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        className="group relative inline-flex items-center justify-center rounded-full bg-white px-10 py-4 text-sm font-bold text-black hover:bg-gray-200 transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:hover:scale-100"
+                    >
+                        {loading ? 'Submitting...' : 'Submit Ticket'}
+                    </button>
+                </div>
+            </form>
+        </div>
+    );
+}
