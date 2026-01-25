@@ -85,7 +85,7 @@ This project is pre-configured for **Netlify**. Follow these steps:
 3. **Environment Variables**: In Netlify UI, go to *Site Settings > Build & deploy > Environment variables* and add:
    - `DATABASE_URL` (From Neon or your DB provider)
    - `ZOHO_EMAIL` & `ZOHO_PASSWORD`
-   - `NEXT_PUBLIC_APP_URL` (Set this to your `.netlify.app` domain)
+   - `NEXT_PUBLIC_APP_URL` (Set this to `https://man-it-support.netlify.app`)
    - `NEXTAUTH_SECRET` (A random secure string)
 4. **Build Settings**: Netlify will automatically use the `netlify.toml` settings:
    - Build Command: `npm run build`
