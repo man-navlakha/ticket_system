@@ -1,4 +1,4 @@
-# 🎟️ Man's Ticket System
+# 🎟️ Man's Support Desk
 
 A high-performance, enterprise-grade support infrastructure built with **Next.js 15**, **Prisma**, and **PostgreSQL**. Designed with the sleek **Vercel Aesthetic**, this system streamlines hardware support and asset management for modern teams.
 
@@ -85,7 +85,7 @@ This project is pre-configured for **Netlify**. Follow these steps:
 3. **Environment Variables**: In Netlify UI, go to *Site Settings > Build & deploy > Environment variables* and add:
    - `DATABASE_URL` (From Neon or your DB provider)
    - `ZOHO_EMAIL` & `ZOHO_PASSWORD`
-   - `NEXT_PUBLIC_APP_URL` (Set this to `https://man-it-support.netlify.app`)
+   - `NEXT_PUBLIC_APP_URL` (Set this to `https://man-support-desk.netlify.app`)
    - `NEXTAUTH_SECRET` (A random secure string)
 4. **Build Settings**: Netlify will automatically use the `netlify.toml` settings:
    - Build Command: `npm run build`

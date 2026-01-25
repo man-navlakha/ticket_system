@@ -10,7 +10,7 @@ export default async function DashboardLayout({ children }) {
             <header className="sticky top-0 z-50 border-b border-white/10 bg-black/50 backdrop-blur-xl">
                 <div className="container mx-auto flex h-16 items-center justify-between px-6">
                     <Link href="/dashboard" className="text-xl font-bold tracking-tight">
-                        Man's <span className="text-gray-500">Ticket System</span>
+                        Man&apos;s <span className="text-gray-500">Support Desk</span>
                     </Link>
                     <nav className="flex items-center gap-6">
                         <Link

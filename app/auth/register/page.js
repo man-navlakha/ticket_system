@@ -39,64 +39,32 @@ export default function RegisterPage() {
 
     return (
         <div className="w-full">
-            <h1 className="text-2xl font-bold tracking-tight text-center mb-6">Create an account</h1>
-
-            <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-1.5">
-                    <label className="text-xs font-medium uppercase tracking-wider text-[#666666] dark:text-[#888888]">Username</label>
-                    <input
-                        type="text"
-                        placeholder="johndoe"
-                        className="w-full px-3 py-2 bg-white dark:bg-black border border-[#eaeaea] dark:border-[#333333] rounded-md focus:outline-none focus:ring-1 focus:ring-black dark:focus:ring-white transition-all duration-200 text-sm"
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
-                        required
-                    />
+            <div className="text-center mb-10">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-500 mb-6">
+                    <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
                 </div>
-                <div className="space-y-1.5">
-                    <label className="text-xs font-medium uppercase tracking-wider text-[#666666] dark:text-[#888888]">Email Address</label>
-                    <input
-                        type="email"
-                        placeholder="user@example.com"
-                        className="w-full px-3 py-2 bg-white dark:bg-black border border-[#eaeaea] dark:border-[#333333] rounded-md focus:outline-none focus:ring-1 focus:ring-black dark:focus:ring-white transition-all duration-200 text-sm"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                    />
-                </div>
-                <div className="space-y-1.5">
-                    <label className="text-xs font-medium uppercase tracking-wider text-[#666666] dark:text-[#888888]">Password</label>
-                    <input
-                        type="password"
-                        placeholder="••••••••"
-                        className="w-full px-3 py-2 bg-white dark:bg-black border border-[#eaeaea] dark:border-[#333333] rounded-md focus:outline-none focus:ring-1 focus:ring-black dark:focus:ring-white transition-all duration-200 text-sm"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                    />
-                </div>
+                <h1 className="text-3xl font-bold tracking-tight text-white mb-2">Invite Only</h1>
+                <p className="text-gray-400 text-sm leading-relaxed">
+                    Nexus is currently restricted to authorized personnel. <br />
+                    To join, please ask your administrator for an invitation link.
+                </p>
+            </div>
 
-                {error && (
-                    <div className="bg-[#fee2e2] dark:bg-[#450a0a] border border-[#ef4444] text-[#b91c1c] dark:text-[#f87171] px-3 py-2 rounded-md text-xs">
-                        {error}
-                    </div>
-                )}
-
-                <button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full bg-black dark:bg-white text-white dark:text-black py-2 px-4 rounded-md font-medium text-sm hover:opacity-90 active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            <div className="space-y-4">
+                <Link
+                    href="/auth/login"
+                    className="flex items-center justify-center w-full bg-white text-black py-3 rounded-xl font-bold hover:bg-gray-200 transition-all active:scale-[0.98]"
                 >
-                    {loading ? 'Creating account...' : 'Sign Up'}
-                </button>
-            </form>
+                    Return to Login
+                </Link>
+            </div>
 
-            <div className="mt-8 pt-6 border-t border-[#eaeaea] dark:border-[#333333] text-center">
-                <p className="text-sm text-[#666666] dark:text-[#888888]">
-                    Already have an account?{' '}
-                    <Link href="/auth/login" className="font-medium text-black dark:text-white hover:underline underline-offset-4">
-                        Log in
-                    </Link>
+            <div className="mt-8 pt-6 border-t border-white/10 text-center">
+                <p className="text-sm text-gray-500">
+                    Received an invitation? <br />
+                    Check your email for the <span className="text-white font-medium">Setup Account</span> button.
                 </p>
             </div>
         </div>

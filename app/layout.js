@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 export const metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'),
   title: {
-    default: "Man's Ticket System | Professional Support Infrastructure",
-    template: "%s | Man's Ticket System"
+    default: "Man's Support Desk | IT Infrastructure",
+    template: "%s | Man's Support Desk"
   },
   description: "A high-performance, invite-only support ticket system with smart inventory management and real-time notifications.",
   keywords: ["ticket system", "support", "inventory management", "it support", "helpdesk"],
@@ -32,10 +32,10 @@ export const metadata = {
     apple: '/favicon.png',
   },
   openGraph: {
-    title: "Man's Ticket System",
-    description: "Streamline your support infrastructure with automated workflows and smart inventory tracking.",
-    url: 'https://man-it-support.netlify.app',
-    siteName: "Man's Ticket System",
+    title: "Man's Support Desk",
+    description: "Streamline your IT support infrastructure with automated workflows and smart inventory tracking.",
+    url: 'https://man-support-desk.netlify.app',
+    siteName: "Man's Support Desk",
     images: [
       {
         url: '/favicon.png',
@@ -48,8 +48,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Man's Ticket System",
-    description: "Invite-based support infrastructure for modern hardware teams.",
+    title: "Man's Support Desk",
+    description: "Invite-based IT support infrastructure for modern teams.",
     images: ['/favicon.png'],
   },
 };
