@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
-export default function SetupAccountPage() {
+function SetupForm() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const token = searchParams.get('token');
@@ -137,5 +137,19 @@ export default function SetupAccountPage() {
                 </div>
             </div>
         </div>
+    );
+}
+
+export default function SetupAccountPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-black text-white flex items-center justify-center p-6">
+                <div className="max-w-md w-full text-center">
+                    <p className="text-gray-400">Loading setup...</p>
+                </div>
+            </div>
+        }>
+            <SetupForm />
+        </Suspense>
     );
 }

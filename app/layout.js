@@ -12,6 +12,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'),
   title: {
     default: "Man's Ticket System | Professional Support Infrastructure",
     template: "%s | Man's Ticket System"
@@ -33,7 +34,7 @@ export const metadata = {
   openGraph: {
     title: "Man's Ticket System",
     description: "Streamline your support infrastructure with automated workflows and smart inventory tracking.",
-    url: 'https://mans-ticket-system.vercel.app',
+    url: 'https://man-it-support.netlify.app',
     siteName: "Man's Ticket System",
     images: [
       {
