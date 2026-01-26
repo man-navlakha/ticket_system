@@ -19,6 +19,7 @@ function SetupForm() {
 
         const formData = new FormData(e.currentTarget);
         const username = formData.get('username');
+        const phoneNumber = formData.get('phoneNumber');
         const password = formData.get('password');
         const confirmPassword = formData.get('confirmPassword');
 
@@ -32,7 +33,7 @@ function SetupForm() {
             const res = await fetch('/api/auth/setup', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ token, username, password }),
+                body: JSON.stringify({ token, username, phoneNumber, password }),
             });
 
             if (!res.ok) {
@@ -102,6 +103,17 @@ function SetupForm() {
                                 type="text"
                                 required
                                 placeholder="johndoe"
+                                className="w-full bg-black border border-white/20 rounded-md px-4 py-2 text-white focus:border-white focus:outline-none focus:ring-1 focus:ring-white transition-colors"
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-gray-300">Phone Number</label>
+                            <input
+                                name="phoneNumber"
+                                type="tel"
+                                required
+                                placeholder="+1 (555) 000-0000"
                                 className="w-full bg-black border border-white/20 rounded-md px-4 py-2 text-white focus:border-white focus:outline-none focus:ring-1 focus:ring-white transition-colors"
                             />
                         </div>

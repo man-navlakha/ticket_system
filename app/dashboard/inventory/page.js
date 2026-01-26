@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import UserInventoryLink from "@/components/UserInventoryLink";
+import InventoryActions from "@/components/InventoryActions";
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: "Hardware Inventory" };
@@ -13,13 +14,19 @@ export default async function InventoryPage() {
 
     const where = user.role === 'USER' ? { userId: user.id } : {};
 
-    const items = await prisma.inventoryItem.findMany({
-        where,
-        orderBy: { createdAt: 'desc' },
-        include: {
-            user: { select: { username: true, email: true } }
-        }
-    });
+    const [items, users] = await Promise.all([
+        prisma.inventoryItem.findMany({
+            where,
+            orderBy: { createdAt: 'desc' },
+            include: {
+                user: { select: { username: true, email: true } }
+            }
+        }),
+        // Only fetch users if admin/agent to save resources
+        (user.role === 'ADMIN' || user.role === 'AGENT')
+            ? prisma.user.findMany({ select: { id: true, username: true, email: true }, orderBy: { username: 'asc' } })
+            : Promise.resolve([])
+    ]);
 
     return (
         <div className="max-w-6xl mx-auto space-y-8">
@@ -56,7 +63,18 @@ export default async function InventoryPage() {
                     <tbody className="divide-y divide-white/10">
                         {items.map((item) => (
                             <tr key={item.id} className="hover:bg-white/5 transition-colors">
-                                <td className="px-6 py-4 font-mono text-white">{item.pid}</td>
+                                <td className="px-6 py-4">
+                                    <div className="flex flex-col gap-1">
+                                        <span className="font-mono text-white text-sm">{item.pid}</span>
+                                        {item.status !== 'ACTIVE' && (
+                                            <span className={`inline-block w-fit px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border 
+        ${item.status === 'MAINTENANCE' ? 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' :
+                                                    'bg-gray-500/10 text-gray-400 border-gray-500/20'}`}>
+                                                {item.status}
+                                            </span>
+                                        )}
+                                    </div>
+                                </td>
                                 <td className="px-6 py-4">
                                     <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium 
                     ${item.type === 'COMPUTER' ? 'bg-blue-500/20 text-blue-400' : 'bg-purple-500/20 text-purple-400'}`}>
@@ -85,9 +103,19 @@ export default async function InventoryPage() {
                                     {item.maintenanceDate ? new Date(item.maintenanceDate).toLocaleDateString() : '-'}
                                 </td>
                                 <td className="px-6 py-4 text-right">
-                                    <Link href={`/dashboard/inventory/${item.id}`} className="text-blue-400 hover:text-white hover:underline">
-                                        View
-                                    </Link>
+                                    <div className="flex items-center justify-end gap-3">
+                                        {(user.role === 'ADMIN' || user.role === 'AGENT') && (
+                                            <Link href={`/dashboard/create?inventoryId=${item.id}`} className="text-yellow-500 hover:text-white hover:underline text-xs font-bold" title="Report Issue">
+                                                Report
+                                            </Link>
+                                        )}
+                                        <Link href={`/dashboard/inventory/${item.id}`} className="text-blue-400 hover:text-white hover:underline">
+                                            View
+                                        </Link>
+                                        {(user.role === 'ADMIN' || user.role === 'AGENT') && (
+                                            <InventoryActions item={item} users={users} userRole={user.role} />
+                                        )}
+                                    </div>
                                 </td>
                             </tr>
                         ))}

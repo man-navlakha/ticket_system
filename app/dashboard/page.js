@@ -72,18 +72,18 @@ function TicketCard({ ticket }) {
     return (
         <Link
             href={`/dashboard/${ticket.id}`}
-            className="group block p-6 rounded-xl border border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/10 transition-all duration-200"
+            className="group block p-5 sm:p-6 rounded-xl border border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/10 transition-all duration-200"
         >
-            <div className="flex items-start justify-between gap-4">
-                <div className="space-y-1">
+            <div className="flex flex-col-reverse sm:flex-row sm:items-start justify-between gap-4">
+                <div className="space-y-1.5 w-full">
                     <h3 className="font-semibold text-lg text-white group-hover:text-blue-400 transition-colors">
                         {ticket.title}
                     </h3>
-                    <p className="text-sm text-gray-400 line-clamp-2">
+                    <p className="text-sm text-gray-400 line-clamp-2 leading-relaxed">
                         {ticket.description}
                     </p>
                 </div>
-                <div className={`px-3 py-1 rounded-full text-xs font-medium border ${statusColors[ticket.status] || statusColors.CLOSED}`}>
+                <div className={`self-start shrink-0 px-3 py-1 rounded-full text-xs font-medium border ${statusColors[ticket.status] || statusColors.CLOSED}`}>
                     {ticket.status.replace('_', ' ')}
                 </div>
             </div>
@@ -103,7 +103,7 @@ function TicketCard({ ticket }) {
                 </div>
             )}
 
-            <div className="mt-4 flex items-center gap-6 text-xs text-gray-500">
+            <div className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-3 text-xs text-gray-500 border-t border-white/5 pt-4 sm:border-0 sm:pt-0">
                 <div className="flex items-center gap-2">
                     <span className="font-medium text-gray-400">ID:</span>
                     <span className="font-mono text-gray-600">{ticket.id.slice(0, 8)}</span>
@@ -116,11 +116,11 @@ function TicketCard({ ticket }) {
                     <span className="font-medium text-gray-400">Priority:</span>
                     <span className={priorityColors[ticket.priority]}>{ticket.priority}</span>
                 </div>
-                <div className="flex items-center gap-2 ml-auto">
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div className="flex items-center gap-2 sm:ml-auto w-full sm:w-auto pt-2 sm:pt-0 border-t border-white/5 sm:border-0 justify-end sm:justify-start">
+                    <svg className="w-4 h-4 ml-auto sm:ml-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                     </svg>
-                    <span>{ticket._count.comments}</span>
+                    <span>{ticket._count.comments} Comments</span>
                 </div>
             </div>
         </Link>

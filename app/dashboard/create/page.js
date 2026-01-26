@@ -1,15 +1,18 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 
-export default function CreateTicketPage() {
+function CreateTicketForm() {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const preSelectedId = searchParams.get('inventoryId');
+
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [inventory, setInventory] = useState([]);
-    const [issueType, setIssueType] = useState('inventory'); // 'inventory' or 'personal'
+    const [issueType, setIssueType] = useState('inventory');
 
     const [selectedItem, setSelectedItem] = useState(null);
     const [selectedComponent, setSelectedComponent] = useState('');
@@ -25,7 +28,18 @@ export default function CreateTicketPage() {
             if (res.ok) {
                 const data = await res.json();
                 setInventory(data);
+
                 if (data.length > 0) {
+                    // If URL param exists, try to find that item
+                    if (preSelectedId) {
+                        const preItem = data.find(i => i.id === preSelectedId);
+                        if (preItem) {
+                            setSelectedItem(preItem);
+                            setIssueType('inventory');
+                            return;
+                        }
+                    }
+                    // Default behavior
                     setSelectedItem(data[0]);
                 } else {
                     setIssueType('personal');
@@ -222,5 +236,13 @@ export default function CreateTicketPage() {
                 </div>
             </form>
         </div>
+    );
+}
+
+export default function CreateTicketPage() {
+    return (
+        <Suspense fallback={<div className="text-center py-20 text-gray-500">Loading form...</div>}>
+            <CreateTicketForm />
+        </Suspense>
     );
 }

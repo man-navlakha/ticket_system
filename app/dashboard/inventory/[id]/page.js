@@ -13,7 +13,21 @@ export default async function InventoryItemPage({ params }) {
     const item = await prisma.inventoryItem.findUnique({
         where: { id },
         include: {
-            user: { select: { id: true, username: true, email: true } }
+            user: { select: { id: true, username: true, email: true } },
+            tickets: {
+                orderBy: { createdAt: 'desc' },
+                select: {
+                    id: true,
+                    title: true,
+                    status: true,
+                    priority: true,
+                    createdAt: true,
+                    componentName: true
+                }
+            },
+            maintenanceRecords: {
+                orderBy: { startDate: 'desc' }
+            }
         }
     });
 
@@ -101,6 +115,101 @@ export default async function InventoryItemPage({ params }) {
                         </div>
                     </div>
                 )}
+            </div>
+
+            {/* Repair & Maintenance History */}
+            <div className="space-y-6 pb-12">
+                <div className="flex items-center justify-between">
+                    <h2 className="text-2xl font-bold">Repair History</h2>
+                    <Link href={`/dashboard/create?inventoryId=${item.id}`} className="text-sm font-bold text-yellow-500 hover:text-white">
+                        + Report Issue
+                    </Link>
+                </div>
+
+                <div className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden p-6">
+                    {item.tickets.length === 0 ? (
+                        <p className="text-gray-500 text-center py-6">No repair history available for this item.</p>
+                    ) : (
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left text-sm text-gray-400">
+                                <thead className="bg-white/5 text-gray-200 uppercase font-bold text-xs">
+                                    <tr>
+                                        <th className="px-4 py-3">Date</th>
+                                        <th className="px-4 py-3">Issue</th>
+                                        <th className="px-4 py-3">Component</th>
+                                        <th className="px-4 py-3">Status</th>
+                                        <th className="px-4 py-3 text-right">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-white/10">
+                                    {item.tickets.map((ticket) => (
+                                        <tr key={ticket.id} className="hover:bg-white/5 transition-colors">
+                                            <td className="px-4 py-3">{new Date(ticket.createdAt).toLocaleDateString()}</td>
+                                            <td className="px-4 py-3 text-white font-medium">{ticket.title}</td>
+                                            <td className="px-4 py-3">{ticket.componentName || '-'}</td>
+                                            <td className="px-4 py-3">
+                                                <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border 
+                                                    ${ticket.status === 'OPEN' ? 'bg-green-500/10 text-green-400 border-green-500/20' :
+                                                        ticket.status === 'RESOLVED' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' :
+                                                            'bg-gray-500/10 text-gray-400 border-gray-500/20'}`}>
+                                                    {ticket.status}
+                                                </span>
+                                            </td>
+                                            <td className="px-4 py-3 text-right">
+                                                <Link href={`/dashboard/${ticket.id}`} className="text-blue-400 hover:text-white hover:underline">
+                                                    View
+                                                </Link>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            {/* Maintenance Logs */}
+            <div className="space-y-6 pb-20">
+                <h2 className="text-2xl font-bold">Maintenance Logs</h2>
+                <div className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden p-6">
+                    {item.maintenanceRecords.length === 0 ? (
+                        <p className="text-gray-500 text-center py-6">No maintenance records found.</p>
+                    ) : (
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left text-sm text-gray-400">
+                                <thead className="bg-white/5 text-gray-200 uppercase font-bold text-xs">
+                                    <tr>
+                                        <th className="px-4 py-3">Start Date</th>
+                                        <th className="px-4 py-3">End Date</th>
+                                        <th className="px-4 py-3">Description</th>
+                                        <th className="px-4 py-3">Technician</th>
+                                        <th className="px-4 py-3 text-right">Cost</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-white/10">
+                                    {item.maintenanceRecords.map((record) => (
+                                        <tr key={record.id} className="hover:bg-white/5 transition-colors">
+                                            <td className="px-4 py-3">{new Date(record.startDate).toLocaleDateString()}</td>
+                                            <td className="px-4 py-3">
+                                                {record.endDate ? (
+                                                    new Date(record.endDate).toLocaleDateString()
+                                                ) : (
+                                                    <span className="text-yellow-500 font-bold text-xs uppercase tracking-wider">Ongoing</span>
+                                                )}
+                                            </td>
+                                            <td className="px-4 py-3">{record.description || '-'}</td>
+                                            <td className="px-4 py-3">{record.technician || '-'}</td>
+                                            <td className="px-4 py-3 text-right font-mono text-white">
+                                                {record.cost ? `$${record.cost.toFixed(2)}` : '-'}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+                </div>
             </div>
 
         </div>

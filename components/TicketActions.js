@@ -56,19 +56,19 @@ export default function TicketActions({ ticketId, currentStatus, userRole }) {
     };
 
     return (
-        <div className="flex flex-wrap items-center gap-4 py-4 border-t border-white/5 mt-4">
+        <div className="flex flex-col md:flex-row items-start md:items-center gap-4 py-4 border-t border-white/5 mt-4">
             {isPrivileged && (
-                <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-gray-500 mr-2">Update Status</span>
-                    <div className="flex bg-white/5 p-1 rounded-lg border border-white/10">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full md:w-auto">
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1 sm:mb-0 sm:mr-2">Update Status</span>
+                    <div className="flex flex-wrap bg-white/5 p-1 rounded-lg border border-white/10 w-full sm:w-auto">
                         {['OPEN', 'IN_PROGRESS', 'RESOLVED', 'CLOSED'].map((status) => (
                             <button
                                 key={status}
                                 onClick={() => handleUpdateStatus(status)}
                                 disabled={isUpdating || currentStatus === status}
-                                className={`px-3 py-1 rounded-md text-[10px] font-bold transition-all ${currentStatus === status
-                                        ? 'bg-white text-black shadow-lg'
-                                        : 'text-gray-400 hover:text-white disabled:opacity-50'
+                                className={`flex-1 sm:flex-none px-3 py-1.5 rounded-md text-[10px] font-bold transition-all whitespace-nowrap ${currentStatus === status
+                                    ? 'bg-white text-black shadow-lg'
+                                    : 'text-gray-400 hover:text-white disabled:opacity-50'
                                     }`}
                             >
                                 {status.replace('_', ' ')}
@@ -81,7 +81,7 @@ export default function TicketActions({ ticketId, currentStatus, userRole }) {
             <button
                 onClick={handleDelete}
                 disabled={isDeleting}
-                className="ml-auto flex items-center gap-2 px-4 py-2 rounded-lg bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500 hover:text-white transition-all text-xs font-bold disabled:opacity-50"
+                className="w-full md:w-auto ml-0 md:ml-auto flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500 hover:text-white transition-all text-xs font-bold disabled:opacity-50"
             >
                 {isDeleting ? 'Deleting...' : (
                     <>

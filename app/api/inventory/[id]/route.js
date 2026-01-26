@@ -11,7 +11,7 @@ export async function GET(request, { params }) {
     try {
         const item = await prisma.inventoryItem.findUnique({
             where: { id },
-            include: { user: { select: { id: true, name: true, email: true } } }
+            include: { user: { select: { id: true, username: true, email: true } } }
         });
 
         if (!item) return NextResponse.json({ error: 'Item not found' }, { status: 404 });
@@ -37,24 +37,26 @@ export async function PUT(request, { params }) {
     const json = await request.json();
 
     try {
+        const data = {};
+        if (json.pid !== undefined) data.pid = json.pid;
+        if (json.type !== undefined) data.type = json.type;
+        if (json.userId !== undefined) data.userId = json.userId || null;
+        if (json.assignedDate !== undefined) data.assignedDate = json.assignedDate ? new Date(json.assignedDate) : null;
+        if (json.returnDate !== undefined) data.returnDate = json.returnDate ? new Date(json.returnDate) : null;
+        if (json.maintenanceDate !== undefined) data.maintenanceDate = json.maintenanceDate ? new Date(json.maintenanceDate) : null;
+        if (json.purchasedDate !== undefined) data.purchasedDate = json.purchasedDate ? new Date(json.purchasedDate) : null;
+        if (json.warrantyDate !== undefined) data.warrantyDate = json.warrantyDate ? new Date(json.warrantyDate) : null;
+        if (json.ownership !== undefined) data.ownership = json.ownership;
+        if (json.brand !== undefined) data.brand = json.brand;
+        if (json.model !== undefined) data.model = json.model;
+        if (json.price !== undefined) data.price = json.price ? parseFloat(json.price) : null;
+        if (json.components !== undefined) data.components = json.components;
+        if (json.warrantyType !== undefined) data.warrantyType = json.warrantyType;
+        if (json.status !== undefined) data.status = json.status;
+
         const updated = await prisma.inventoryItem.update({
             where: { id },
-            data: {
-                pid: json.pid,
-                type: json.type,
-                userId: json.userId || null,
-                assignedDate: json.assignedDate ? new Date(json.assignedDate) : null,
-                returnDate: json.returnDate ? new Date(json.returnDate) : null,
-                maintenanceDate: json.maintenanceDate ? new Date(json.maintenanceDate) : null,
-                purchasedDate: json.purchasedDate ? new Date(json.purchasedDate) : null,
-                warrantyDate: json.warrantyDate ? new Date(json.warrantyDate) : null,
-                ownership: json.ownership,
-                brand: json.brand,
-                model: json.model,
-                price: json.price ? parseFloat(json.price) : null,
-                components: json.components,
-                warrantyType: json.warrantyType
-            }
+            data
         });
         return NextResponse.json(updated);
     } catch (error) {

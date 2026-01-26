@@ -2,6 +2,7 @@ import { getCurrentUser } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { redirect, notFound } from "next/navigation";
 import CommentForm from "@/components/CommentForm";
+import InventoryInfoModal from "@/components/InventoryInfoModal";
 import TicketActions from "@/components/TicketActions";
 import Link from 'next/link';
 
@@ -27,7 +28,8 @@ export default async function TicketPage({ params }) {
     const ticket = await prisma.ticket.findUnique({
         where: { id },
         include: {
-            user: { select: { username: true, email: true } },
+            user: { select: { username: true, email: true, phoneNumber: true } },
+            inventoryItem: true,
             comments: {
                 include: { user: { select: { username: true, email: true, role: true } } },
                 orderBy: { createdAt: 'asc' }
@@ -70,24 +72,27 @@ export default async function TicketPage({ params }) {
             <div className="bg-white/5 border border-white/10 rounded-2xl p-8 mb-8 backdrop-blur-sm shadow-2xl">
                 <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
                     <div className="space-y-4 flex-1">
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                                <h1 className="text-3xl font-bold text-white leading-tight">{ticket.title}</h1>
-                                <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${statusColors[ticket.status] || statusColors.CLOSED}`}>
-                                    {ticket.status.replace('_', ' ')}
-                                </span>
-                            </div>
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                            <h1 className="text-2xl md:text-3xl font-bold text-white leading-tight">{ticket.title}</h1>
+                            <span className={`self-start md:self-center px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${statusColors[ticket.status] || statusColors.CLOSED}`}>
+                                {ticket.status.replace('_', ' ')}
+                            </span>
                         </div>
-                        <p className="text-gray-300 text-lg leading-relaxed whitespace-pre-wrap">{ticket.description}</p>
+                        <p className="text-gray-300 text-base md:text-lg leading-relaxed whitespace-pre-wrap">{ticket.description}</p>
 
                         {(ticket.productName || ticket.componentName) && (
                             <div className="flex flex-wrap gap-3 pt-2">
                                 {ticket.productName && (
                                     <div className="flex flex-col gap-1">
                                         <span className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Affected Product</span>
-                                        <span className="px-3 py-1 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20 text-sm font-medium">
-                                            {ticket.productName}
-                                        </span>
+                                        <div className="flex items-center gap-2">
+                                            <span className="px-3 py-1 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20 text-sm font-medium">
+                                                {ticket.productName}
+                                            </span>
+                                            {(user.role === 'ADMIN' || user.role === 'AGENT') && ticket.inventoryItem && (
+                                                <InventoryInfoModal item={ticket.inventoryItem} />
+                                            )}
+                                        </div>
                                     </div>
                                 )}
                                 {ticket.componentName && (
@@ -101,17 +106,30 @@ export default async function TicketPage({ params }) {
                             </div>
                         )}
 
-                        <div className="flex items-center gap-4 text-sm text-gray-500 pt-4 border-t border-white/5">
+                        <div className="flex flex-wrap items-center gap-y-2 gap-x-4 text-sm text-gray-500 pt-4 border-t border-white/5">
                             <div className="flex items-center gap-2">
                                 <div className="h-6 w-6 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 font-bold text-xs">
                                     {ticket.user.username?.[0]?.toUpperCase() || 'U'}
                                 </div>
-                                <span>{ticket.user.username || ticket.user.email}</span>
+                                <span className="font-medium text-white">{ticket.user.username || ticket.user.email}</span>
                             </div>
-                            <span>•</span>
+
+                            {(user.role === 'ADMIN' || user.role === 'AGENT') && ticket.user.phoneNumber && (
+                                <>
+                                    <span className="hidden sm:inline">•</span>
+                                    <a href={`tel:${ticket.user.phoneNumber}`} className="flex items-center gap-1.5 text-blue-400 hover:text-blue-300 transition-colors">
+                                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                                        </svg>
+                                        {ticket.user.phoneNumber}
+                                    </a>
+                                </>
+                            )}
+
+                            <span className="hidden sm:inline">•</span>
                             <span>{new Date(ticket.createdAt).toLocaleString()}</span>
-                            <span>•</span>
-                            <span className="font-medium text-gray-400">Priority: {ticket.priority}</span>
+                            <span className="hidden sm:inline">•</span>
+                            <span className="w-full sm:w-auto font-medium text-gray-400">Priority: <span className="text-white">{ticket.priority}</span></span>
                         </div>
 
                         <TicketActions

@@ -5,13 +5,18 @@ import { getCurrentUser } from '@/lib/session';
 export async function GET(request) {
     const user = await getCurrentUser();
 
-    // Only ADMIN can view all users
-    if (!user || user.role !== 'ADMIN') {
+    // Only ADMIN and AGENT can view users
+    if (!user || (user.role !== 'ADMIN' && user.role !== 'AGENT')) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 
     try {
         const users = await prisma.user.findMany({
+            where: {
+                role: {
+                    not: 'ADMIN'
+                }
+            },
             select: {
                 id: true,
                 username: true,

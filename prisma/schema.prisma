@@ -13,6 +13,7 @@ model User {
   username         String?         @unique
   email            String          @unique
   password         String?
+  phoneNumber      String?
   role             Role            @default(USER)
   status           UserStatus      @default(PENDING)
   inviteToken      String?         @unique
@@ -77,10 +78,36 @@ model InventoryItem {
   components      String[] // e.g. ["Mouse", "Keyboard"]
   
   warrantyType    String? // e.g., "Warranty" or "Guarantee"
+  status          InventoryStatus @default(ACTIVE)
 
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
   tickets         Ticket[]
+  maintenanceRecords MaintenanceRecord[]
+}
+
+model MaintenanceRecord {
+  id              String         @id @default(uuid())
+  inventoryItemId String
+  inventoryItem   InventoryItem  @relation(fields: [inventoryItemId], references: [id], onDelete: Cascade)
+  
+  description     String?
+  startDate       DateTime       @default(now())
+  endDate         DateTime?
+  
+  cost            Float?
+  technician      String?
+  
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+}
+
+enum InventoryStatus {
+  ACTIVE
+  MAINTENANCE
+  RETIRED
+  LOST
+  IN_STORAGE
 }
 
 enum Role {

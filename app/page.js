@@ -1,30 +1,11 @@
 import Link from "next/link";
+import LandingNav from "@/components/LandingNav";
 
 export default function Home() {
   return (
     <div className="flex min-h-screen flex-col bg-black text-white selection:bg-gray-800">
       {/* Navigation */}
-      <header className="fixed top-0 w-full z-50 border-b border-white/10 bg-black/50 backdrop-blur-xl">
-        <div className="container mx-auto flex h-16 items-center justify-between px-6">
-          <div className="text-xl font-bold tracking-tight">Man's <span className="text-gray-500">Ticket System</span></div>
-          <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-400">
-            <Link href="#features" className="hover:text-white transition-colors">Features</Link>
-            <Link href="#workflow" className="hover:text-white transition-colors">How It Works</Link>
-            <Link href="#tech" className="hover:text-white transition-colors">Tech Stack</Link>
-          </nav>
-          <div className="flex items-center gap-4">
-            <Link href="/auth/login" className="text-sm font-medium text-gray-400 hover:text-white transition-colors">
-              Log In
-            </Link>
-            <Link
-              href="/auth/register"
-              className="rounded-lg bg-white px-5 py-2 text-sm font-semibold text-black transition-colors hover:bg-gray-200"
-            >
-              Get Started
-            </Link>
-          </div>
-        </div>
-      </header>
+      <LandingNav />
 
       <main className="flex-1 pt-32">
         {/* Hero Section */}
@@ -347,7 +328,7 @@ model Ticket {
 
       <footer className="border-t border-white/10 bg-black py-12 text-center">
         <p className="text-sm text-gray-500">
-          © {new Date().getFullYear()} Man's Ticket System. Built with Next.js, Prisma & Neon.
+          © {new Date().getFullYear()} Man&apos;s Support Desk. Built with Next.js, Prisma & Neon.
         </p>
       </footer>
     </div>
