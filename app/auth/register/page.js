@@ -47,7 +47,7 @@ export default function RegisterPage() {
                 </div>
                 <h1 className="text-3xl font-bold tracking-tight text-white mb-2">Invite Only</h1>
                 <p className="text-gray-400 text-sm leading-relaxed">
-                    Nexus is currently restricted to authorized personnel. <br />
+                    Man's Support Desk is currently restricted to authorized personnel. <br />
                     To join, please ask your administrator for an invitation link.
                 </p>
             </div>

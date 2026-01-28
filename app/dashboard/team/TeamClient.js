@@ -124,6 +124,29 @@ export default function TeamClient({ user }) {
         }
     };
 
+    const handleDeleteUser = async (userId) => {
+        if (!confirm('Are you sure you want to delete this user? This action cannot be undone.')) return;
+
+        setLoading(true);
+        try {
+            const res = await fetch(`/api/admin/users/${userId}`, {
+                method: 'DELETE',
+            });
+
+            if (res.ok) {
+                setUsers(users.filter(u => u.id !== userId));
+                setMessage('User deleted successfully');
+            } else {
+                const data = await res.json();
+                setError(data.error || 'Failed to delete user');
+            }
+        } catch (err) {
+            setError('Failed to delete user');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     if (user.role === 'USER') {
         return (
             <div className="flex flex-col items-center justify-center min-h-[50vh] text-center">
@@ -226,15 +249,15 @@ export default function TeamClient({ user }) {
                                             </td>
                                             <td className="px-6 py-4">
                                                 <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${u.role === 'ADMIN' ? 'bg-purple-500/10 text-purple-400 border-purple-500/20' :
-                                                        u.role === 'AGENT' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' :
-                                                            'bg-gray-500/10 text-gray-400 border-gray-500/20'
+                                                    u.role === 'AGENT' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' :
+                                                        'bg-gray-500/10 text-gray-400 border-gray-500/20'
                                                     }`}>
                                                     {u.role}
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4">
                                                 <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${u.status === 'ACTIVE' ? 'bg-green-500/10 text-green-400 border-green-500/20' :
-                                                        'bg-yellow-500/10 text-yellow-400 border-yellow-500/20'
+                                                    'bg-yellow-500/10 text-yellow-400 border-yellow-500/20'
                                                     }`}>
                                                     {u.status}
                                                 </span>
@@ -251,6 +274,12 @@ export default function TeamClient({ user }) {
                                                     className="text-gray-400 hover:text-white text-xs transition-colors"
                                                 >
                                                     Send Reset Link
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDeleteUser(u.id)}
+                                                    className="text-red-500 hover:text-red-400 text-xs transition-colors"
+                                                >
+                                                    Delete
                                                 </button>
                                             </td>
                                         </tr>

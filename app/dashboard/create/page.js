@@ -60,9 +60,9 @@ function CreateTicketForm() {
             title: formData.get('title'),
             description: formData.get('description'),
             priority: formData.get('priority'),
-            isPersonalIssue: issueType === 'personal',
+            isPersonalIssue: issueType === 'personal' || issueType === 'email',
             inventoryItemId: issueType === 'inventory' ? selectedItem?.id : null,
-            productName: issueType === 'inventory' ? `${selectedItem?.brand} ${selectedItem?.model} (${selectedItem?.pid})` : customProduct,
+            productName: issueType === 'inventory' ? `${selectedItem?.brand} ${selectedItem?.model} (${selectedItem?.pid})` : (issueType === 'email' ? 'Email Service' : customProduct),
             componentName: issueType === 'inventory' ? selectedComponent : null,
         };
 
@@ -110,7 +110,7 @@ function CreateTicketForm() {
                 {/* Issue Type Selector */}
                 <div className="space-y-3">
                     <label className="text-xs font-semibold uppercase tracking-widest text-gray-500">What are you reporting?</label>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <button
                             type="button"
                             onClick={() => setIssueType('inventory')}
@@ -122,11 +122,19 @@ function CreateTicketForm() {
                         </button>
                         <button
                             type="button"
+                            onClick={() => setIssueType('email')}
+                            className={`p-4 rounded-xl border text-left transition-all ${issueType === 'email' ? 'bg-white border-white text-black shadow-xl' : 'bg-white/5 border-white/10 text-gray-400 hover:border-white/20 hover:text-white'}`}
+                        >
+                            <span className="block font-bold">Email Problem</span>
+                            <span className="text-xs opacity-70">Login, spam, or delivery issues.</span>
+                        </button>
+                        <button
+                            type="button"
                             onClick={() => setIssueType('personal')}
                             className={`p-4 rounded-xl border text-left transition-all ${issueType === 'personal' ? 'bg-white border-white text-black shadow-xl' : 'bg-white/5 border-white/10 text-gray-400 hover:border-white/20 hover:text-white'}`}
                         >
-                            <span className="block font-bold">Personal/Custom Issue</span>
-                            <span className="text-xs opacity-70">Internet, software, or personal hardware issues.</span>
+                            <span className="block font-bold">Other Issue</span>
+                            <span className="text-xs opacity-70">Internet, software, or other custom inquiries.</span>
                         </button>
                     </div>
                 </div>

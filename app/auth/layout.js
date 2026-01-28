@@ -14,6 +14,7 @@ export default function AuthLayout({ children }) {
                             priority
                         />
                     </div>
+                    <p className="text-lg font-bold">Man's Support Desk</p>
                 </div>
                 {children}
             </div>
