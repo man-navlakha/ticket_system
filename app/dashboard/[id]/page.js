@@ -4,6 +4,7 @@ import { redirect, notFound } from "next/navigation";
 import CommentForm from "@/components/CommentForm";
 import InventoryInfoModal from "@/components/InventoryInfoModal";
 import TicketActions from "@/components/TicketActions";
+import ImageGallery from "@/components/ImageGallery";
 import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
@@ -79,6 +80,10 @@ export default async function TicketPage({ params }) {
                             </span>
                         </div>
                         <p className="text-gray-300 text-base md:text-lg leading-relaxed whitespace-pre-wrap">{ticket.description}</p>
+
+                        {ticket.attachmentUrls && ticket.attachmentUrls.length > 0 && (
+                            <ImageGallery attachments={ticket.attachmentUrls} />
+                        )}
 
                         {(ticket.productName || ticket.componentName) && (
                             <div className="flex flex-wrap gap-3 pt-2">
@@ -173,6 +178,9 @@ export default async function TicketPage({ params }) {
                                 </div>
                                 <div className="bg-white/5 border border-white/10 rounded-xl rounded-tl-none p-4 text-gray-300">
                                     {comment.content}
+                                    {comment.attachmentUrls && comment.attachmentUrls.length > 0 && (
+                                        <ImageGallery attachments={comment.attachmentUrls} />
+                                    )}
                                 </div>
                             </div>
                         </div>

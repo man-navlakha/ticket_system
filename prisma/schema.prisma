@@ -43,6 +43,7 @@ model Ticket {
   componentName   String?  // Specifically which part is broken
   
   comments        Comment[]
+  attachmentUrls  String[]
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 }
@@ -54,6 +55,7 @@ model Comment {
   ticket    Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
   userId    String
   user      User     @relation(fields: [userId], references: [id])
+  attachmentUrls String[]
   createdAt DateTime @default(now())
 }
 

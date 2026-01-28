@@ -12,10 +12,10 @@ export async function POST(request, { params }) {
 
     try {
         const json = await request.json();
-        const { content } = json;
+        const { content, attachmentUrls } = json;
 
-        if (!content) {
-            return NextResponse.json({ error: 'Content is required' }, { status: 400 });
+        if (!content && (!attachmentUrls || attachmentUrls.length === 0)) {
+            return NextResponse.json({ error: 'Content or attachment is required' }, { status: 400 });
         }
 
         // Verify ticket exists
@@ -31,7 +31,8 @@ export async function POST(request, { params }) {
             data: {
                 content,
                 ticketId,
-                userId: user.id
+                userId: user.id,
+                attachmentUrls: attachmentUrls || []
             },
             include: {
                 user: {

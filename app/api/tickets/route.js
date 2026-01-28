@@ -40,14 +40,14 @@ export async function POST(request) {
 
     try {
         const json = await request.json();
-        const { title, description, priority, inventoryItemId, productName, componentName, isPersonalIssue } = json;
+        const { title, description, priority, inventoryItemId, productName, componentName, isPersonalIssue, attachmentUrls } = json;
 
         if (!title || !description) {
             return NextResponse.json({ error: 'Title and description are required' }, { status: 400 });
         }
 
         // If not a personal issue, check if user has inventory items
-        if (!isPersonalIssue) {
+        if (!isPersonalIssue && (!attachmentUrls || attachmentUrls.length === 0)) {
             const inventoryCount = await prisma.inventoryItem.count({
                 where: { userId: user.id }
             });
@@ -68,7 +68,8 @@ export async function POST(request) {
                 userId: user.id,
                 inventoryItemId: inventoryItemId || null,
                 productName: productName || null,
-                componentName: componentName || null
+                componentName: componentName || null,
+                attachmentUrls: attachmentUrls || []
             }
         });
 

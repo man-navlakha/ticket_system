@@ -56,6 +56,39 @@ function CreateTicketForm() {
         setError('');
 
         const formData = new FormData(e.currentTarget);
+
+        let attachmentUrls = [];
+        const files = formData.getAll('attachment'); // Get all selected files
+
+        // Filter out empty file inputs (if any)
+        const validFiles = files.filter(f => f.size > 0);
+
+        if (validFiles.length > 0) {
+            try {
+                // Upload files in parallel
+                const uploadPromises = validFiles.map(async (file) => {
+                    const uploadData = new FormData();
+                    uploadData.append('file', file);
+
+                    const uploadRes = await fetch('/api/upload', {
+                        method: 'POST',
+                        body: uploadData,
+                    });
+
+                    if (!uploadRes.ok) throw new Error('Failed to upload file');
+                    const uploadJson = await uploadRes.json();
+                    return uploadJson.url;
+                });
+
+                attachmentUrls = await Promise.all(uploadPromises);
+
+            } catch (err) {
+                setError('One or more files failed to upload. Please try again.');
+                setLoading(false);
+                return;
+            }
+        }
+
         const data = {
             title: formData.get('title'),
             description: formData.get('description'),
@@ -64,6 +97,7 @@ function CreateTicketForm() {
             inventoryItemId: issueType === 'inventory' ? selectedItem?.id : null,
             productName: issueType === 'inventory' ? `${selectedItem?.brand} ${selectedItem?.model} (${selectedItem?.pid})` : (issueType === 'email' ? 'Email Service' : customProduct),
             componentName: issueType === 'inventory' ? selectedComponent : null,
+            attachmentUrls,
         };
 
         try {
@@ -230,6 +264,19 @@ function CreateTicketForm() {
                             placeholder="Tell us more about the issue. When did it start? What have you tried?"
                             className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-gray-600 focus:border-white transition-all outline-none resize-none"
                         />
+                    </div>
+
+                    <div className="space-y-2">
+                        <label htmlFor="attachment" className="text-xs font-semibold uppercase tracking-widest text-gray-500">Attachment (Optional)</label>
+                        <input
+                            type="file"
+                            id="attachment"
+                            name="attachment"
+                            accept="image/*,application/pdf"
+                            multiple
+                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-white file:text-black hover:file:bg-gray-200 transition-all"
+                        />
+                        <p className="text-[10px] text-gray-500">Upload screenshots or documents (Max 5MB each)</p>
                     </div>
                 </div>
 
