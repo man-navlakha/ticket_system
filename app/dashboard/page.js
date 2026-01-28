@@ -6,13 +6,35 @@ import { redirect } from "next/navigation";
 export const dynamic = 'force-dynamic';
 export const metadata = { title: "Dashboard" };
 
-export default async function DashboardPage() {
+import DashboardSearch from "@/components/DashboardSearch";
+
+export default async function DashboardPage({ searchParams }) {
     const user = await getCurrentUser();
     if (!user) {
         redirect("/auth/login");
     }
 
-    const where = user.role === 'USER' ? { userId: user.id } : {};
+    const { search } = await searchParams || {};
+
+    // Base where clause based on role
+    let where = user.role === 'USER' ? { userId: user.id } : {};
+
+    // Add search filter if present
+    if (search) {
+        where = {
+            AND: [
+                where, // Keep the role restriction
+                {
+                    OR: [
+                        { title: { contains: search, mode: 'insensitive' } },
+                        { description: { contains: search, mode: 'insensitive' } },
+                        { id: { contains: search, mode: 'insensitive' } },
+                        { productName: { contains: search, mode: 'insensitive' } }
+                    ]
+                }
+            ]
+        };
+    }
 
     const tickets = await prisma.ticket.findMany({
         where,
@@ -25,18 +47,21 @@ export default async function DashboardPage() {
     });
 
     return (
-        <div className="max-w-5xl mx-auto">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+        <div className="max-w-6xl mx-auto">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
                 <div>
                     <h1 className="text-3xl font-bold">Dashboard</h1>
-                    <p className="text-gray-400 mt-1">Manage your support requests.</p>
+                    <p className="text-gray-400 mt-1">Manage, track, and resolve support requests.</p>
                 </div>
-                <Link
-                    href="/dashboard/create"
-                    className="inline-flex items-center justify-center h-10 px-6 rounded-full bg-white text-black text-sm font-semibold hover:bg-gray-200 transition-colors"
-                >
-                    Create New Ticket
-                </Link>
+                <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
+                    <DashboardSearch />
+                    <Link
+                        href="/dashboard/create"
+                        className="inline-flex items-center justify-center h-10 px-6 rounded-full bg-white text-black text-sm font-semibold hover:bg-gray-200 transition-colors whitespace-nowrap"
+                    >
+                        + New Ticket
+                    </Link>
+                </div>
             </div>
 
             <div className="grid gap-4">
@@ -44,8 +69,21 @@ export default async function DashboardPage() {
                     <TicketCard key={ticket.id} ticket={ticket} />
                 ))}
                 {tickets.length === 0 && (
-                    <div className="text-center py-12 border border-dashed border-white/10 rounded-xl">
-                        <p className="text-gray-500">No tickets found. Create one to get started.</p>
+                    <div className="text-center py-12 border border-dashed border-white/10 rounded-xl bg-white/5">
+                        <div className="bg-white/5 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+                            {search ? '🔍' : '🎫'}
+                        </div>
+                        <h3 className="font-bold text-lg text-white mb-1">
+                            {search ? 'No matches found' : 'No tickets yet'}
+                        </h3>
+                        <p className="text-gray-500 max-w-sm mx-auto">
+                            {search ? `We couldn't find any tickets matching "${search}". Try a different term.` : "Create your first support ticket to get started."}
+                        </p>
+                        {search && (
+                            <Link href="/dashboard" className="mt-4 inline-block text-blue-400 hover:text-blue-300 text-sm">
+                                Clear Search
+                            </Link>
+                        )}
                     </div>
                 )}
             </div>

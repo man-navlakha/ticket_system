@@ -17,6 +17,14 @@ export default function TeamClient({ user }) {
     const [editingUser, setEditingUser] = useState(null);
     const [newUsername, setNewUsername] = useState('');
 
+    // Search state
+    const [searchTerm, setSearchTerm] = useState('');
+
+    const filteredUsers = users.filter(u =>
+        (u.username && u.username.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (u.email && u.email.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
+
     useEffect(() => {
         if (mode === 'list') {
             fetchUsers();
@@ -196,6 +204,18 @@ export default function TeamClient({ user }) {
 
             {mode === 'list' ? (
                 <div className="bg-white/[0.02] border border-white/10 rounded-2xl shadow-2xl backdrop-blur-sm overflow-hidden">
+                    <div className="p-4 border-b border-white/10 flex justify-end">
+                        <div className="relative">
+                            <input
+                                type="text"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                placeholder="Search users by name or email..."
+                                className="bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-white w-64"
+                            />
+                            <svg className="w-4 h-4 text-gray-400 absolute right-3 top-2.5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                        </div>
+                    </div>
                     <div className="overflow-x-auto">
                         <table className="w-full text-left text-sm text-gray-400">
                             <thead className="bg-white/5 uppercase font-medium text-xs tracking-wider text-white">
@@ -207,14 +227,14 @@ export default function TeamClient({ user }) {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-white/10">
-                                {users.length === 0 ? (
+                                {filteredUsers.length === 0 ? (
                                     <tr>
                                         <td colSpan="4" className="px-6 py-8 text-center text-gray-500">
                                             No users found.
                                         </td>
                                     </tr>
                                 ) : (
-                                    users.map((u) => (
+                                    filteredUsers.map((u) => (
                                         <tr key={u.id} className="hover:bg-white/5 transition-colors">
                                             <td className="px-6 py-4">
                                                 {editingUser === u.id ? (
