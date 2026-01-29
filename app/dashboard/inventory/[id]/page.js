@@ -2,6 +2,7 @@ import { getCurrentUser } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import InventoryActions from "@/components/InventoryActions";
 
 export const dynamic = 'force-dynamic';
 
@@ -22,7 +23,8 @@ export default async function InventoryItemPage({ params }) {
                     status: true,
                     priority: true,
                     createdAt: true,
-                    componentName: true
+                    componentName: true,
+                    resolutionDetails: true
                 }
             },
             maintenanceRecords: {
@@ -65,9 +67,27 @@ export default async function InventoryItemPage({ params }) {
                             {item.model && <span className="text-gray-500"> — {item.model}</span>}
                         </p>
                     </div>
-                    <span className="px-3 py-1 rounded-full text-xs font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20">
-                        {item.ownership}
-                    </span>
+                    <div className="flex items-center gap-3">
+                        <span className={`px-3 py-1 rounded-full text-xs font-bold border ${item.status === 'ACTIVE' ? 'bg-green-500/10 text-green-400 border-green-500/20' :
+                            item.status === 'MAINTENANCE' ? 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' :
+                                item.status === 'RETIRED' ? 'bg-red-500/10 text-red-400 border-red-500/20' :
+                                    'bg-gray-500/10 text-gray-400 border-gray-500/20'
+                            }`}>
+                            {item.status || 'UNKNOWN'}
+                        </span>
+                        <span className="px-3 py-1 rounded-full text-xs font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                            {item.ownership}
+                        </span>
+                        {(user.role === 'ADMIN' || user.role === 'AGENT') && (
+                            <Link
+                                href={`/dashboard/inventory/${item.id}/edit`}
+                                className="px-4 py-2 bg-white/10 text-white rounded-lg text-sm font-bold hover:bg-white/20 transition-colors"
+                            >
+                                Edit
+                            </Link>
+                        )}
+                        <InventoryActions item={item} />
+                    </div>
                 </div>
 
                 <div className="grid md:grid-cols-2 gap-8">
@@ -102,6 +122,20 @@ export default async function InventoryItemPage({ params }) {
                         </div>
                     </div>
                 </div>
+
+                {item.systemSpecs && typeof item.systemSpecs === 'object' && Object.keys(item.systemSpecs).length > 0 && (
+                    <div className="mt-8 pt-6 border-t border-white/10">
+                        <h3 className="text-lg font-semibold mb-4">System Specifications</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {Object.entries(item.systemSpecs).map(([key, value]) => (
+                                <div key={key} className="flex flex-col bg-white/5 p-3 rounded-lg border border-white/5">
+                                    <span className="text-xs text-gray-400 uppercase font-bold tracking-wider mb-1">{key}</span>
+                                    <span className="text-white font-mono text-sm">{value}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
 
                 {item.components && item.components.length > 0 && (
                     <div className="mt-8 pt-6 border-t border-white/10">
@@ -138,6 +172,7 @@ export default async function InventoryItemPage({ params }) {
                                         <th className="px-4 py-3">Issue</th>
                                         <th className="px-4 py-3">Component</th>
                                         <th className="px-4 py-3">Status</th>
+                                        <th className="px-4 py-3">Resolution Notes</th>
                                         <th className="px-4 py-3 text-right">Action</th>
                                     </tr>
                                 </thead>
@@ -154,6 +189,9 @@ export default async function InventoryItemPage({ params }) {
                                                             'bg-gray-500/10 text-gray-400 border-gray-500/20'}`}>
                                                     {ticket.status}
                                                 </span>
+                                            </td>
+                                            <td className="px-4 py-3 text-gray-400 text-xs max-w-xs truncate" title={ticket.resolutionDetails}>
+                                                {ticket.resolutionDetails || '-'}
                                             </td>
                                             <td className="px-4 py-3 text-right">
                                                 <Link href={`/dashboard/${ticket.id}`} className="text-blue-400 hover:text-white hover:underline">

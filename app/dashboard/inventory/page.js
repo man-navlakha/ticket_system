@@ -53,7 +53,10 @@ export default async function InventoryPage() {
                         <tr>
                             <th className="px-6 py-4">PID</th>
                             <th className="px-6 py-4">Type</th>
-                            <th className="px-6 py-4">Brand</th>
+                            <th className="px-6 py-4">Status</th>
+                            <th className="px-6 py-4">Brand
+                                <span className="text-xs text-gray-600 italic" > Model</span>
+                            </th>
                             <th className="px-6 py-4">Assigned To</th>
                             <th className="px-6 py-4">Return Date</th>
                             <th className="px-6 py-4">Maintenance</th>
@@ -66,13 +69,6 @@ export default async function InventoryPage() {
                                 <td className="px-6 py-4">
                                     <div className="flex flex-col gap-1">
                                         <span className="font-mono text-white text-sm">{item.pid}</span>
-                                        {item.status !== 'ACTIVE' && (
-                                            <span className={`inline-block w-fit px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border 
-        ${item.status === 'MAINTENANCE' ? 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' :
-                                                    'bg-gray-500/10 text-gray-400 border-gray-500/20'}`}>
-                                                {item.status}
-                                            </span>
-                                        )}
                                     </div>
                                 </td>
                                 <td className="px-6 py-4">
@@ -81,7 +77,18 @@ export default async function InventoryPage() {
                                         {item.type}
                                     </span>
                                 </td>
-                                <td className="px-6 py-4">{item.brand || '-'}</td>
+                                <td className="px-6 py-4">
+                                    <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border 
+                                        ${item.status === 'ACTIVE' ? 'bg-green-500/10 text-green-400 border-green-500/20' :
+                                            item.status === 'MAINTENANCE' ? 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' :
+                                                item.status === 'RETIRED' ? 'bg-red-500/10 text-red-400 border-red-500/20' :
+                                                    'bg-gray-500/10 text-gray-400 border-gray-500/20'}`}>
+                                        {item.status || 'UNKNOWN'}
+                                    </span>
+                                </td>
+                                <td className="px-6 py-4">{item.brand || '-'}
+                                    <p className="text-xs text-gray-600 italic" >{item.model || '-'}</p>
+                                </td>
                                 <td className="px-6 py-4">
                                     {item.user ? (
                                         <div className="flex flex-col">
@@ -113,6 +120,11 @@ export default async function InventoryPage() {
                                             View
                                         </Link>
                                         {(user.role === 'ADMIN' || user.role === 'AGENT') && (
+                                            <Link href={`/dashboard/inventory/${item.id}/edit`} className="text-green-400 hover:text-white hover:underline">
+                                                Edit
+                                            </Link>
+                                        )}
+                                        {(user.role === 'ADMIN' || user.role === 'AGENT') && (
                                             <InventoryActions item={item} users={users} userRole={user.role} />
                                         )}
                                     </div>
@@ -129,6 +141,6 @@ export default async function InventoryPage() {
                     </tbody>
                 </table>
             </div>
-        </div>
+        </div >
     );
 }

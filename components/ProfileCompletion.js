@@ -29,7 +29,14 @@ export default function ProfileCompletion({ user }) {
             const res = await fetch('/api/inventory');
             if (res.ok) {
                 const data = await res.json();
-                setHasInventory(Array.isArray(data) && data.length > 0);
+                if (Array.isArray(data)) {
+                    // Filter to check if the current user owns any item
+                    // (Admins fetch all items, so we must filter by user.id)
+                    const userItems = data.filter(item => item.userId === user.id);
+                    setHasInventory(userItems.length > 0);
+                } else {
+                    setHasInventory(false);
+                }
             }
         } catch (err) {
             console.error('Failed to check inventory', err);

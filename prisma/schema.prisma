@@ -23,6 +23,8 @@ model User {
   tickets          Ticket[]
   comments         Comment[]
   inventory        InventoryItem[]
+  knowledgeBaseArticles KnowledgeBaseArticle[]
+  auditLogs        AuditLog[]
   createdAt        DateTime        @default(now())
 }
 
@@ -42,8 +44,25 @@ model Ticket {
   productName     String?  // For custom/personal products or inventory item name
   componentName   String?  // Specifically which part is broken
   
+  // AI Triage & Categorization
+  categoryId      String?
+  category        Category? @relation(fields: [categoryId], references: [id])
+  tags            TicketTag[]
+  aiSuggestedPriority Priority?
+  aiSuggestedCategoryId String?
+  
+  // SLA Tracking
+  firstResponseAt DateTime?
+  resolvedAt      DateTime?
+  slaBreached     Boolean  @default(false)
+
+  // Resolution
+  resolutionDetails String? 
+  
   comments        Comment[]
   attachmentUrls  String[]
+  auditLogs       AuditLog[]
+  knowledgeBaseArticles KnowledgeBaseArticle[]
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 }
@@ -79,6 +98,10 @@ model InventoryItem {
   price           Float?
   components      String[] // e.g. ["Mouse", "Keyboard"]
   
+  // System Specifications (stored as JSON)
+  // e.g. { "RAM": "16GB", "Processor": "i7", "OS": "Windows 11" }
+  systemSpecs     Json?
+
   warrantyType    String? // e.g., "Warranty" or "Guarantee"
   status          InventoryStatus @default(ACTIVE)
 
@@ -86,6 +109,7 @@ model InventoryItem {
   updatedAt       DateTime  @updatedAt
   tickets         Ticket[]
   maintenanceRecords MaintenanceRecord[]
+  auditLogs       AuditLog[]
 }
 
 model MaintenanceRecord {
@@ -149,4 +173,107 @@ enum UserStatus {
   PENDING
   ACTIVE
   SUSPENDED
+}
+
+// ============================================
+// ENTERPRISE FEATURES MODELS
+// ============================================
+
+model Category {
+  id          String   @id @default(uuid())
+  name        String   @unique // e.g., "Hardware", "Network", "Software", "Other"
+  description String?
+  icon        String?  // Emoji or icon identifier
+  color       String?  // Hex color for UI
+  tickets     Ticket[]
+  knowledgeBaseArticles KnowledgeBaseArticle[]
+  createdAt   DateTime @default(now())
+}
+
+model Tag {
+  id        String      @id @default(uuid())
+  name      String      @unique // e.g., "urgent", "battery", "wifi"
+  color     String?     // Hex color
+  tickets   TicketTag[]
+  knowledgeBaseArticles KBArticleTag[]
+  createdAt DateTime    @default(now())
+}
+
+model TicketTag {
+  ticketId  String
+  ticket    Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  tagId     String
+  tag       Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@id([ticketId, tagId])
+}
+
+model KnowledgeBaseArticle {
+  id              String   @id @default(uuid())
+  title           String
+  content         String   @db.Text // Full article content
+  summary         String?  // Short description
+  
+  // Source tracking
+  originalTicketId String?
+  originalTicket   Ticket?  @relation(fields: [originalTicketId], references: [id], onDelete: SetNull)
+  
+  // Categorization
+  categoryId      String?
+  category        Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  tags            KBArticleTag[]
+  
+  // Engagement metrics
+  views           Int      @default(0)
+  upvotes         Int      @default(0)
+  
+  // Authorship
+  createdById     String
+  createdBy       User     @relation(fields: [createdById], references: [id])
+  
+  published       Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model KBArticleTag {
+  articleId String
+  article   KnowledgeBaseArticle @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  tagId     String
+  tag       Tag                  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  createdAt DateTime             @default(now())
+
+  @@id([articleId, tagId])
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  
+  // What was changed
+  entityType String   // "Ticket", "InventoryItem", "User", etc.
+  entityId   String   // ID of the entity
+  action     String   // "CREATE", "UPDATE", "DELETE", "STATUS_CHANGE", etc.
+  
+  // Details
+  changes    Json?    // Before/after values: { field: { from: "old", to: "new" } }
+  metadata   Json?    // Additional context
+  
+  // Who made the change
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  
+  // Relations for easier querying
+  ticketId   String?
+  ticket     Ticket?  @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  
+  inventoryItemId String?
+  inventoryItem   InventoryItem? @relation(fields: [inventoryItemId], references: [id], onDelete: Cascade)
+  
+  createdAt  DateTime @default(now())
+  
+  @@index([entityType, entityId])
+  @@index([ticketId])
+  @@index([inventoryItemId])
+  @@index([createdAt])
 }

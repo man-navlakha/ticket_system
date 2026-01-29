@@ -18,6 +18,12 @@ function CreateTicketForm() {
     const [selectedComponent, setSelectedComponent] = useState('');
     const [customProduct, setCustomProduct] = useState('');
 
+    // AI Suggestions
+    const [aiSuggestions, setAiSuggestions] = useState(null);
+    const [aiLoading, setAiLoading] = useState(false);
+    const [title, setTitle] = useState('');
+    const [description, setDescription] = useState('');
+
     useEffect(() => {
         fetchInventory();
     }, []);
@@ -49,6 +55,36 @@ function CreateTicketForm() {
             console.error('Failed to fetch inventory:', err);
         }
     }
+
+    // Debounced AI suggestion fetching
+    useEffect(() => {
+        if (!title || !description || description.length < 10) {
+            setAiSuggestions(null);
+            return;
+        }
+
+        const timer = setTimeout(async () => {
+            setAiLoading(true);
+            try {
+                const res = await fetch('/api/ai/triage', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title, description }),
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    setAiSuggestions(data);
+                }
+            } catch (error) {
+                console.error('AI triage failed:', error);
+            } finally {
+                setAiLoading(false);
+            }
+        }, 1000); // Wait 1 second after user stops typing
+
+        return () => clearTimeout(timer);
+    }, [title, description]);
 
     async function onSubmit(e) {
         e.preventDefault();
@@ -235,6 +271,8 @@ function CreateTicketForm() {
                                 id="title"
                                 name="title"
                                 required
+                                value={title}
+                                onChange={(e) => setTitle(e.target.value)}
                                 placeholder="Short summary of the problem"
                                 className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-gray-600 focus:border-white transition-all outline-none"
                             />
@@ -245,7 +283,8 @@ function CreateTicketForm() {
                                 id="priority"
                                 name="priority"
                                 className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-white transition-all outline-none appearance-none"
-                                defaultValue="MEDIUM"
+                                defaultValue={aiSuggestions?.priority || "MEDIUM"}
+                                key={aiSuggestions?.priority} // Force re-render when AI suggests
                             >
                                 <option value="LOW" className="bg-gray-900">Low</option>
                                 <option value="MEDIUM" className="bg-gray-900">Medium</option>
@@ -254,6 +293,48 @@ function CreateTicketForm() {
                         </div>
                     </div>
 
+                    {/* AI Suggestions Banner */}
+                    {aiSuggestions && !aiLoading && (
+                        <div className="p-4 rounded-xl bg-purple-500/10 border border-purple-500/20 animate-in fade-in slide-in-from-top-2 duration-300">
+                            <div className="flex items-start gap-3">
+                                <div className="shrink-0 w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center">
+                                    ✨
+                                </div>
+                                <div className="flex-1 space-y-2">
+                                    <p className="text-sm font-bold text-purple-400">AI Suggestions</p>
+                                    <div className="flex flex-wrap gap-2 text-xs">
+                                        {aiSuggestions.priority && (
+                                            <span className="px-2 py-1 rounded-md bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                                                Priority: {aiSuggestions.priority}
+                                            </span>
+                                        )}
+                                        {aiSuggestions.categoryName && (
+                                            <span className="px-2 py-1 rounded-md bg-blue-500/20 text-blue-300 border border-blue-500/30">
+                                                Category: {aiSuggestions.categoryName}
+                                            </span>
+                                        )}
+                                        {aiSuggestions.tagNames && aiSuggestions.tagNames.length > 0 && (
+                                            <>
+                                                {aiSuggestions.tagNames.map(tag => (
+                                                    <span key={tag} className="px-2 py-1 rounded-md bg-gray-500/20 text-gray-300 border border-gray-500/30">
+                                                        #{tag}
+                                                    </span>
+                                                ))}
+                                            </>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {aiLoading && (
+                        <div className="p-4 rounded-xl bg-white/5 border border-white/10 flex items-center gap-3">
+                            <div className="w-4 h-4 border-2 border-purple-500/30 border-t-purple-500 rounded-full animate-spin" />
+                            <span className="text-sm text-gray-400">AI is analyzing your description...</span>
+                        </div>
+                    )}
+
                     <div className="space-y-2">
                         <label htmlFor="description" className="text-xs font-semibold uppercase tracking-widest text-gray-500">Detailed Description</label>
                         <textarea
@@ -261,6 +342,8 @@ function CreateTicketForm() {
                             name="description"
                             required
                             rows={6}
+                            value={description}
+                            onChange={(e) => setDescription(e.target.value)}
                             placeholder="Tell us more about the issue. When did it start? What have you tried?"
                             className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-gray-600 focus:border-white transition-all outline-none resize-none"
                         />

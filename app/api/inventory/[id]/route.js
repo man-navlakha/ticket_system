@@ -53,6 +53,7 @@ export async function PUT(request, { params }) {
         if (json.components !== undefined) data.components = json.components;
         if (json.warrantyType !== undefined) data.warrantyType = json.warrantyType;
         if (json.status !== undefined) data.status = json.status;
+        if (json.systemSpecs !== undefined) data.systemSpecs = json.systemSpecs;
 
         const updated = await prisma.inventoryItem.update({
             where: { id },

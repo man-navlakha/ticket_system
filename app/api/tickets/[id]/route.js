@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/session';
+import { createAuditLog } from '@/lib/audit';
 
 export async function PATCH(request, { params }) {
     const user = await getCurrentUser();
@@ -31,12 +32,49 @@ export async function PATCH(request, { params }) {
         }
 
         const updateData = {};
-        if (status && isPrivileged) updateData.status = status;
-        if (priority && (isOwner || isPrivileged)) updateData.priority = priority;
+        const changes = {};
+
+        if (status && isPrivileged) {
+            updateData.status = status;
+            changes.status = { from: ticket.status, to: status };
+
+            // Track SLA for resolved tickets
+            if ((status === 'RESOLVED' || status === 'CLOSED') && !ticket.resolvedAt) {
+                updateData.resolvedAt = new Date();
+                changes.resolvedAt = { from: null, to: new Date().toISOString() };
+            }
+        }
+
+        if (json.resolutionDetails && isPrivileged) {
+            updateData.resolutionDetails = json.resolutionDetails;
+            // Also add as a system comment for visibility
+            await prisma.comment.create({
+                data: {
+                    content: `**Resolution Notes:**\n${json.resolutionDetails}`,
+                    ticketId: id,
+                    userId: user.id
+                }
+            });
+        }
+
+        if (priority && (isOwner || isPrivileged)) {
+            updateData.priority = priority;
+            changes.priority = { from: ticket.priority, to: priority };
+        }
 
         const updatedTicket = await prisma.ticket.update({
             where: { id },
             data: updateData
+        });
+
+        // Create audit log
+        await createAuditLog({
+            entityType: 'Ticket',
+            entityId: id,
+            action: status ? 'STATUS_CHANGE' : 'UPDATE',
+            changes,
+            userId: user.id,
+            ticketId: id
         });
 
         return NextResponse.json(updatedTicket);
@@ -56,7 +94,13 @@ export async function DELETE(request, { params }) {
 
     try {
         const ticket = await prisma.ticket.findUnique({
-            where: { id }
+            where: { id },
+            select: {
+                id: true,
+                title: true,
+                userId: true,
+                status: true
+            }
         });
 
         if (!ticket) {
@@ -71,6 +115,18 @@ export async function DELETE(request, { params }) {
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
         }
 
+        // Create audit log before deletion
+        await createAuditLog({
+            entityType: 'Ticket',
+            entityId: id,
+            action: 'DELETE',
+            userId: user.id,
+            metadata: {
+                title: ticket.title,
+                status: ticket.status
+            }
+        });
+
         await prisma.ticket.delete({
             where: { id }
         });
@@ -81,3 +137,4 @@ export async function DELETE(request, { params }) {
         return NextResponse.json({ error: 'Failed to delete ticket' }, { status: 500 });
     }
 }
+

@@ -58,23 +58,30 @@ export async function POST(request) {
             userId = null;
         }
 
+        const data = {
+            pid: json.pid,
+            type: json.type,
+            status: json.status, // Allow setting status on create
+            assignedDate: json.assignedDate ? new Date(json.assignedDate) : null,
+            returnDate: json.returnDate ? new Date(json.returnDate) : null,
+            maintenanceDate: json.maintenanceDate ? new Date(json.maintenanceDate) : null,
+            purchasedDate: json.purchasedDate ? new Date(json.purchasedDate) : null,
+            warrantyDate: json.warrantyDate ? new Date(json.warrantyDate) : null,
+            ownership: json.ownership,
+            brand: json.brand,
+            model: json.model,
+            price: json.price ? parseFloat(json.price) : null,
+            components: json.components || [],
+            warrantyType: json.warrantyType,
+            systemSpecs: json.systemSpecs || undefined
+        };
+
+        if (userId) {
+            data.user = { connect: { id: userId } };
+        }
+
         const item = await prisma.inventoryItem.create({
-            data: {
-                pid: json.pid,
-                type: json.type,
-                userId: userId, // Can assign to a user immediately OR null
-                assignedDate: json.assignedDate ? new Date(json.assignedDate) : null,
-                returnDate: json.returnDate ? new Date(json.returnDate) : null,
-                maintenanceDate: json.maintenanceDate ? new Date(json.maintenanceDate) : null,
-                purchasedDate: json.purchasedDate ? new Date(json.purchasedDate) : null,
-                warrantyDate: json.warrantyDate ? new Date(json.warrantyDate) : null,
-                ownership: json.ownership,
-                brand: json.brand,
-                model: json.model,
-                price: json.price ? parseFloat(json.price) : null,
-                components: json.components || [],
-                warrantyType: json.warrantyType
-            }
+            data
         });
 
         return NextResponse.json(item);

@@ -13,6 +13,7 @@ export default function DashboardNav({ user }) {
         { href: '/dashboard', label: 'Overview' },
         { href: '/dashboard/create', label: 'New Ticket' },
         { href: '/dashboard/inventory', label: 'Inventory' },
+        { href: '/dashboard/knowledge-base', label: 'Knowledge Base' },
     ];
 
     if (user?.role === 'ADMIN' || user?.role === 'AGENT') {

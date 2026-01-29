@@ -7,19 +7,28 @@ export default function TicketActions({ ticketId, currentStatus, userRole }) {
     const router = useRouter();
     const [isDeleting, setIsDeleting] = useState(false);
     const [isUpdating, setIsUpdating] = useState(false);
+    const [showResolutionModal, setShowResolutionModal] = useState(false);
+    const [resolutionText, setResolutionText] = useState('');
 
     const isPrivileged = userRole === 'ADMIN' || userRole === 'AGENT';
 
-    const handleUpdateStatus = async (newStatus) => {
+    const handleUpdateStatus = async (newStatus, resolutionDetails = null) => {
         setIsUpdating(true);
         try {
+            const body = { status: newStatus };
+            if (resolutionDetails) {
+                body.resolutionDetails = resolutionDetails;
+            }
+
             const res = await fetch(`/api/tickets/${ticketId}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ status: newStatus }),
+                body: JSON.stringify(body),
             });
 
             if (res.ok) {
+                setShowResolutionModal(false);
+                setResolutionText('');
                 router.refresh();
             } else {
                 const data = await res.json();
@@ -30,6 +39,19 @@ export default function TicketActions({ ticketId, currentStatus, userRole }) {
         } finally {
             setIsUpdating(false);
         }
+    };
+
+    const onStatusClick = (status) => {
+        if (status === 'RESOLVED' && currentStatus !== 'RESOLVED') {
+            setShowResolutionModal(true);
+        } else {
+            handleUpdateStatus(status);
+        }
+    };
+
+    const submitResolution = (e) => {
+        e.preventDefault();
+        handleUpdateStatus('RESOLVED', resolutionText);
     };
 
     const handleDelete = async () => {
@@ -64,7 +86,7 @@ export default function TicketActions({ ticketId, currentStatus, userRole }) {
                         {['OPEN', 'IN_PROGRESS', 'RESOLVED', 'CLOSED'].map((status) => (
                             <button
                                 key={status}
-                                onClick={() => handleUpdateStatus(status)}
+                                onClick={() => onStatusClick(status)}
                                 disabled={isUpdating || currentStatus === status}
                                 className={`flex-1 sm:flex-none px-3 py-1.5 rounded-md text-[10px] font-bold transition-all whitespace-nowrap ${currentStatus === status
                                     ? 'bg-white text-black shadow-lg'
@@ -92,6 +114,46 @@ export default function TicketActions({ ticketId, currentStatus, userRole }) {
                     </>
                 )}
             </button>
+
+            {/* Resolution Modal */}
+            {showResolutionModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+                    <div className="bg-gray-900 border border-white/10 p-6 rounded-2xl w-full max-w-lg shadow-2xl">
+                        <h3 className="text-xl font-bold text-white mb-2">Resolution Details</h3>
+                        <p className="text-gray-400 text-sm mb-4">
+                            Please provide a detailed description of how this issue was resolved.
+                            This information will be used to automatically generate a Knowledge Base article.
+                        </p>
+
+                        <form onSubmit={submitResolution}>
+                            <textarea
+                                value={resolutionText}
+                                onChange={(e) => setResolutionText(e.target.value)}
+                                className="w-full h-32 bg-white/5 border border-white/20 rounded-xl p-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4"
+                                placeholder="Describe the steps taken to resolve the issue..."
+                                required
+                            />
+
+                            <div className="flex justify-end gap-3">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowResolutionModal(false)}
+                                    className="px-4 py-2 rounded-lg bg-white/5 text-gray-300 hover:bg-white/10 font-bold text-sm"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={!resolutionText.trim() || isUpdating}
+                                    className="px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 font-bold text-sm disabled:opacity-50"
+                                >
+                                    {isUpdating ? 'Resolving...' : 'Confirm Resolution'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
