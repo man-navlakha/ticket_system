@@ -122,7 +122,7 @@ export default function KnowledgeBasePage() {
                             {/* Tags */}
                             {article.tags && article.tags.length > 0 && (
                                 <div className="flex flex-wrap gap-2 mb-4">
-                                    {article.tags.slice(0, 4).map(({ tag }) => (
+                                    {article.tags.slice(0, 4).map((tag) => (
                                         <span
                                             key={tag.id}
                                             className="px-2 py-1 rounded-md text-xs bg-white/5 text-gray-400 border border-white/10"
