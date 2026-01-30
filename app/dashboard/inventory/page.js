@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import UserInventoryLink from "@/components/UserInventoryLink";
-import InventoryActions from "@/components/InventoryActions";
+import InventorySearch from "@/components/InventorySearch";
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: "Hardware Inventory" };
@@ -28,6 +28,18 @@ export default async function InventoryPage() {
             : Promise.resolve([])
     ]);
 
+    // Serialize dates for client component
+    const serializedItems = items.map(item => ({
+        ...item,
+        createdAt: item.createdAt?.toISOString(),
+        updatedAt: item.updatedAt?.toISOString(),
+        assignedDate: item.assignedDate?.toISOString() || null,
+        returnDate: item.returnDate?.toISOString() || null,
+        maintenanceDate: item.maintenanceDate?.toISOString() || null,
+        purchasedDate: item.purchasedDate?.toISOString() || null,
+        warrantyDate: item.warrantyDate?.toISOString() || null,
+    }));
+
     return (
         <div className="max-w-6xl mx-auto space-y-8">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -47,100 +59,11 @@ export default async function InventoryPage() {
 
             {user.role === 'USER' && <UserInventoryLink />}
 
-            <div className="overflow-x-auto rounded-xl border border-white/10 bg-white/5">
-                <table className="w-full text-left text-sm text-gray-400">
-                    <thead className="bg-white/5 text-gray-200 uppercase font-bold text-xs">
-                        <tr>
-                            <th className="px-6 py-4">PID</th>
-                            <th className="px-6 py-4">Type</th>
-                            <th className="px-6 py-4">Status</th>
-                            <th className="px-6 py-4">Brand
-                                <span className="text-xs text-gray-600 italic" > Model</span>
-                            </th>
-                            <th className="px-6 py-4">Assigned To</th>
-                            <th className="px-6 py-4">Return Date</th>
-                            <th className="px-6 py-4">Maintenance</th>
-                            <th className="px-6 py-4 text-right">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-white/10">
-                        {items.map((item) => (
-                            <tr key={item.id} className="hover:bg-white/5 transition-colors">
-                                <td className="px-6 py-4">
-                                    <div className="flex flex-col gap-1">
-                                        <span className="font-mono text-white text-sm">{item.pid}</span>
-                                    </div>
-                                </td>
-                                <td className="px-6 py-4">
-                                    <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium 
-                    ${item.type === 'COMPUTER' ? 'bg-blue-500/20 text-blue-400' : 'bg-purple-500/20 text-purple-400'}`}>
-                                        {item.type}
-                                    </span>
-                                </td>
-                                <td className="px-6 py-4">
-                                    <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border 
-                                        ${item.status === 'ACTIVE' ? 'bg-green-500/10 text-green-400 border-green-500/20' :
-                                            item.status === 'MAINTENANCE' ? 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' :
-                                                item.status === 'RETIRED' ? 'bg-red-500/10 text-red-400 border-red-500/20' :
-                                                    'bg-gray-500/10 text-gray-400 border-gray-500/20'}`}>
-                                        {item.status || 'UNKNOWN'}
-                                    </span>
-                                </td>
-                                <td className="px-6 py-4">{item.brand || '-'}
-                                    <p className="text-xs text-gray-600 italic" >{item.model || '-'}</p>
-                                </td>
-                                <td className="px-6 py-4">
-                                    {item.user ? (
-                                        <div className="flex flex-col">
-                                            <span className="text-white">{item.user.username}</span>
-                                            <span className="text-xs">{item.user.email}</span>
-                                        </div>
-                                    ) : (
-                                        <span className="text-gray-600 italic">Unassigned</span>
-                                    )}
-                                </td>
-                                <td className="px-6 py-4">
-                                    {item.returnDate ? (
-                                        <span className={new Date(item.returnDate) < new Date() ? 'text-red-400' : ''}>
-                                            {new Date(item.returnDate).toLocaleDateString()}
-                                        </span>
-                                    ) : '-'}
-                                </td>
-                                <td className="px-6 py-4 font-mono text-xs">
-                                    {item.maintenanceDate ? new Date(item.maintenanceDate).toLocaleDateString() : '-'}
-                                </td>
-                                <td className="px-6 py-4 text-right">
-                                    <div className="flex items-center justify-end gap-3">
-                                        {(user.role === 'ADMIN' || user.role === 'AGENT') && (
-                                            <Link href={`/dashboard/create?inventoryId=${item.id}`} className="text-yellow-500 hover:text-white hover:underline text-xs font-bold" title="Report Issue">
-                                                Report
-                                            </Link>
-                                        )}
-                                        <Link href={`/dashboard/inventory/${item.id}`} className="text-blue-400 hover:text-white hover:underline">
-                                            View
-                                        </Link>
-                                        {(user.role === 'ADMIN' || user.role === 'AGENT') && (
-                                            <Link href={`/dashboard/inventory/${item.id}/edit`} className="text-green-400 hover:text-white hover:underline">
-                                                Edit
-                                            </Link>
-                                        )}
-                                        {(user.role === 'ADMIN' || user.role === 'AGENT') && (
-                                            <InventoryActions item={item} users={users} userRole={user.role} />
-                                        )}
-                                    </div>
-                                </td>
-                            </tr>
-                        ))}
-                        {items.length === 0 && (
-                            <tr>
-                                <td colSpan={7} className="px-6 py-12 text-center text-gray-500">
-                                    No inventory items found.
-                                </td>
-                            </tr>
-                        )}
-                    </tbody>
-                </table>
-            </div>
-        </div >
+            <InventorySearch
+                items={serializedItems}
+                users={users}
+                userRole={user.role}
+            />
+        </div>
     );
 }
