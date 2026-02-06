@@ -214,6 +214,7 @@ export default function InventorySearch({ items, users, userRole }) {
                                 </th>
                             )}
                             <th className="px-6 py-4">PID</th>
+                            <th className="px-6 py-4">Serial No.</th>
                             <th className="px-6 py-4">Type</th>
                             <th className="px-6 py-4">Status</th>
                             <th className="px-6 py-4">Brand
@@ -242,6 +243,9 @@ export default function InventorySearch({ items, users, userRole }) {
                                     <div className="flex flex-col gap-1">
                                         <span className="font-mono text-white text-sm">{item.pid}</span>
                                     </div>
+                                </td>
+                                <td className="px-6 py-4">
+                                    <span className="font-mono text-xs text-gray-300">{item.serialNumber || '-'}</span>
                                 </td>
                                 <td className="px-6 py-4">
                                     <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium 

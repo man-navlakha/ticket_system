@@ -62,6 +62,37 @@ export default async function InventoryPage() {
                 )}
             </div>
 
+            {/* Dashboard Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="bg-white/5 border border-white/10 rounded-xl p-5 hover:bg-white/10 transition-colors">
+                    <p className="text-sm font-medium text-gray-400">Total Assets</p>
+                    <p className="text-3xl font-bold text-white mt-2">{items.length}</p>
+                </div>
+                <div className="bg-white/5 border border-white/10 rounded-xl p-5 hover:bg-white/10 transition-colors">
+                    <p className="text-sm font-medium text-gray-400">Assigned</p>
+                    <div className="flex items-baseline gap-2 mt-2">
+                        <p className="text-3xl font-bold text-blue-400">
+                            {items.filter(i => i.userId).length}
+                        </p>
+                        <span className="text-sm text-gray-500">
+                            ({((items.filter(i => i.userId).length / items.length) * 100).toFixed(0)}%)
+                        </span>
+                    </div>
+                </div>
+                <div className="bg-white/5 border border-white/10 rounded-xl p-5 hover:bg-white/10 transition-colors">
+                    <p className="text-sm font-medium text-gray-400">In Maintenance</p>
+                    <p className="text-3xl font-bold text-yellow-400 mt-2">
+                        {items.filter(i => i.status === 'MAINTENANCE').length}
+                    </p>
+                </div>
+                <div className="bg-white/5 border border-white/10 rounded-xl p-5 hover:bg-white/10 transition-colors">
+                    <p className="text-sm font-medium text-gray-400">Total Value</p>
+                    <p className="text-3xl font-bold text-green-400 mt-2">
+                        ${items.reduce((acc, curr) => acc + (curr.price || 0), 0).toLocaleString()}
+                    </p>
+                </div>
+            </div>
+
             {user.role === 'USER' && <UserInventoryLink />}
 
             <InventorySearch
