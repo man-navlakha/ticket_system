@@ -271,6 +271,8 @@ export default function InventorySearch({ items, users, userRole }) {
                                             <span className="text-white">{item.user.username}</span>
                                             <span className="text-xs">{item.user.email}</span>
                                         </div>
+                                    ) : item.assignedUser ? (
+                                        <span className="text-white italic">{item.assignedUser}</span>
                                     ) : (
                                         <span className="text-gray-600 italic">Unassigned</span>
                                     )}

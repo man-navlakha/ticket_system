@@ -98,6 +98,7 @@ model InventoryItem {
   serialNumber    String?
   oldTag          String?
   oldUser         String?
+  assignedUser    String?
   price           Float?
   components      String[] // e.g. ["Mouse", "Keyboard"]
   

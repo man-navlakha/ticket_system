@@ -95,7 +95,9 @@ export default async function InventoryItemPage({ params }) {
                         <h3 className="text-lg font-semibold border-b border-white/10 pb-2">Assignment Details</h3>
                         <div className="grid grid-cols-3 gap-2 text-sm">
                             <span className="text-gray-500">Assigned To:</span>
-                            <span className="col-span-2 text-white font-medium">{item.user ? `${item.user.username} (${item.user.email})` : 'Unassigned'}</span>
+                            <span className="col-span-2 text-white font-medium">
+                                {item.user ? `${item.user.username} (${item.user.email})` : (item.assignedUser || 'Unassigned')}
+                            </span>
 
                             <span className="text-gray-500">Assigned Date:</span>
                             <span className="col-span-2 text-white">{item.assignedDate ? new Date(item.assignedDate).toLocaleDateString() : '-'}</span>

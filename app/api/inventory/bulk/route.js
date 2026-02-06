@@ -98,6 +98,16 @@ export async function POST(request) {
                     }
                 }
 
+                // If no system user found, or even if found, store the raw name for reference if needed
+                // But the user asked: "in Assigned user can we add just a name"
+                // So let's store it in `assignedUser` field if `userId` is NOT set, OR just always store the raw string?
+                // Best approach: If userId is matched, we link to user. If not, and we have a name, we store in assignedUser.
+                let assignedUserString = null;
+                const rawUserStr = String(userIdentifier || '').trim();
+                if (!userId && rawUserStr.length > 0 && rawUserStr !== '-') {
+                    assignedUserString = rawUserStr;
+                }
+
                 // COMPONENTS & SPECS
                 let components = [];
                 const compsStr = getVal('Components');
@@ -156,6 +166,7 @@ export async function POST(request) {
                     maintenanceDate,
                     purchasedDate,
                     warrantyDate,
+                    assignedUser: assignedUserString,
                     components,
                     systemSpecs: Object.keys(systemSpecs).length > 0 ? systemSpecs : undefined,
                 };
