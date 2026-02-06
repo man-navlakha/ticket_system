@@ -95,6 +95,9 @@ model InventoryItem {
   ownership       Ownership
   brand           String?
   model           String?
+  serialNumber    String?
+  oldTag          String?
+  oldUser         String?
   price           Float?
   components      String[] // e.g. ["Mouse", "Keyboard"]
   

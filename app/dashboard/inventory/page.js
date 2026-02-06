@@ -8,6 +8,8 @@ import InventorySearch from "@/components/InventorySearch";
 export const dynamic = 'force-dynamic';
 export const metadata = { title: "Hardware Inventory" };
 
+import BulkInventoryUpload from "@/components/BulkInventoryUpload";
+
 export default async function InventoryPage() {
     const user = await getCurrentUser();
     if (!user) redirect("/auth/login");
@@ -48,12 +50,15 @@ export default async function InventoryPage() {
                     <p className="text-gray-400 mt-2 text-lg">Manage hardware assets and assignments.</p>
                 </div>
                 {(user.role === 'ADMIN' || user.role === 'AGENT') && (
-                    <Link
-                        href="/dashboard/inventory/create"
-                        className="inline-flex items-center justify-center h-12 px-8 rounded-full bg-white text-black text-sm font-bold hover:bg-gray-200 transition-all active:scale-95 shadow-lg"
-                    >
-                        Add New Item
-                    </Link>
+                    <div className="flex gap-4">
+                        <BulkInventoryUpload />
+                        <Link
+                            href="/dashboard/inventory/create"
+                            className="inline-flex items-center justify-center h-12 px-8 rounded-full bg-white text-black text-sm font-bold hover:bg-gray-200 transition-all active:scale-95 shadow-lg"
+                        >
+                            Add New Item
+                        </Link>
+                    </div>
                 )}
             </div>
 

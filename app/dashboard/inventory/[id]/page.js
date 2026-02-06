@@ -102,12 +102,21 @@ export default async function InventoryItemPage({ params }) {
 
                             <span className="text-gray-500">Return Date:</span>
                             <span className="col-span-2 text-white">{item.returnDate ? new Date(item.returnDate).toLocaleDateString() : '-'}</span>
+
+                            <span className="text-gray-500">Old User:</span>
+                            <span className="col-span-2 text-white">{item.oldUser || '-'}</span>
+
+                            <span className="text-gray-500">Old Tag:</span>
+                            <span className="col-span-2 text-white">{item.oldTag || '-'}</span>
                         </div>
                     </div>
 
                     <div className="space-y-4">
                         <h3 className="text-lg font-semibold border-b border-white/10 pb-2">Asset Details</h3>
                         <div className="grid grid-cols-3 gap-2 text-sm">
+                            <span className="text-gray-500">Serial Number:</span>
+                            <span className="col-span-2 text-white font-mono">{item.serialNumber || '-'}</span>
+
                             <span className="text-gray-500">Purchased:</span>
                             <span className="col-span-2 text-white">{item.purchasedDate ? new Date(item.purchasedDate).toLocaleDateString() : '-'}</span>
 
@@ -130,7 +139,9 @@ export default async function InventoryItemPage({ params }) {
                             {Object.entries(item.systemSpecs).map(([key, value]) => (
                                 <div key={key} className="flex flex-col bg-white/5 p-3 rounded-lg border border-white/5">
                                     <span className="text-xs text-gray-400 uppercase font-bold tracking-wider mb-1">{key}</span>
-                                    <span className="text-white font-mono text-sm">{value}</span>
+                                    <span className="text-white font-mono text-sm">
+                                        {typeof value === 'boolean' ? (value ? 'Yes' : 'No') : value}
+                                    </span>
                                 </div>
                             ))}
                         </div>

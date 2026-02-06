@@ -2,12 +2,16 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import InventoryActions from './InventoryActions';
 
 export default function InventorySearch({ items, users, userRole }) {
+    const router = useRouter();
     const [searchQuery, setSearchQuery] = useState('');
     const [statusFilter, setStatusFilter] = useState('ALL');
     const [typeFilter, setTypeFilter] = useState('ALL');
+    const [selectedIds, setSelectedIds] = useState([]);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     // Get unique statuses and types for filters
     const statuses = useMemo(() => {
@@ -52,6 +56,50 @@ export default function InventorySearch({ items, users, userRole }) {
 
     const hasActiveFilters = searchQuery || statusFilter !== 'ALL' || typeFilter !== 'ALL';
 
+    // Bulk Actions
+    const handleSelectAll = (e) => {
+        if (e.target.checked) {
+            setSelectedIds(filteredItems.map(item => item.id));
+        } else {
+            setSelectedIds([]);
+        }
+    };
+
+    const handleSelectOne = (id) => {
+        if (selectedIds.includes(id)) {
+            setSelectedIds(selectedIds.filter(itemId => itemId !== id));
+        } else {
+            setSelectedIds([...selectedIds, id]);
+        }
+    };
+
+    const handleBulkDelete = async () => {
+        if (!confirm(`Are you sure you want to delete ${selectedIds.length} items? This action cannot be undone.`)) return;
+
+        setIsDeleting(true);
+        try {
+            const res = await fetch('/api/inventory/bulk/delete', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ids: selectedIds })
+            });
+
+            if (res.ok) {
+                setSelectedIds([]);
+                router.refresh();
+            } else {
+                const data = await res.json();
+                alert(data.error || 'Failed to delete items');
+            }
+        } catch (error) {
+            alert('An error occurred while deleting');
+        } finally {
+            setIsDeleting(false);
+        }
+    };
+
+    const isAdmin = userRole === 'ADMIN';
+
     return (
         <div className="space-y-6">
             {/* Search and Filter Bar */}
@@ -84,6 +132,17 @@ export default function InventorySearch({ items, users, userRole }) {
 
                 {/* Filter Dropdowns */}
                 <div className="flex flex-wrap gap-3">
+                    {/* Bulk Delete Button */}
+                    {isAdmin && selectedIds.length > 0 && (
+                        <button
+                            onClick={handleBulkDelete}
+                            disabled={isDeleting}
+                            className="px-4 py-3 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2 animate-in fade-in zoom-in duration-200"
+                        >
+                            {isDeleting ? 'Deleting...' : `Delete (${selectedIds.length})`}
+                        </button>
+                    )}
+
                     {/* Status Filter */}
                     <select
                         value={statusFilter}
@@ -144,6 +203,16 @@ export default function InventorySearch({ items, users, userRole }) {
                 <table className="w-full text-left text-sm text-gray-400">
                     <thead className="bg-white/5 text-gray-200 uppercase font-bold text-xs">
                         <tr>
+                            {isAdmin && (
+                                <th className="px-6 py-4 w-10">
+                                    <input
+                                        type="checkbox"
+                                        checked={filteredItems.length > 0 && selectedIds.length === filteredItems.length}
+                                        onChange={handleSelectAll}
+                                        className="rounded border-gray-600 bg-gray-700 text-blue-500 focus:ring-blue-500 focus:ring-offset-gray-900"
+                                    />
+                                </th>
+                            )}
                             <th className="px-6 py-4">PID</th>
                             <th className="px-6 py-4">Type</th>
                             <th className="px-6 py-4">Status</th>
@@ -158,7 +227,17 @@ export default function InventorySearch({ items, users, userRole }) {
                     </thead>
                     <tbody className="divide-y divide-white/10">
                         {filteredItems.map((item) => (
-                            <tr key={item.id} className="hover:bg-white/5 transition-colors">
+                            <tr key={item.id} className={`hover:bg-white/5 transition-colors ${selectedIds.includes(item.id) ? 'bg-blue-500/10' : ''}`}>
+                                {isAdmin && (
+                                    <td className="px-6 py-4">
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedIds.includes(item.id)}
+                                            onChange={() => handleSelectOne(item.id)}
+                                            className="rounded border-gray-600 bg-gray-700 text-blue-500 focus:ring-blue-500 focus:ring-offset-gray-900"
+                                        />
+                                    </td>
+                                )}
                                 <td className="px-6 py-4">
                                     <div className="flex flex-col gap-1">
                                         <span className="font-mono text-white text-sm">{item.pid}</span>
@@ -226,7 +305,7 @@ export default function InventorySearch({ items, users, userRole }) {
                         ))}
                         {filteredItems.length === 0 && (
                             <tr>
-                                <td colSpan={8} className="px-6 py-12 text-center">
+                                <td colSpan={isAdmin ? 9 : 8} className="px-6 py-12 text-center">
                                     <div className="flex flex-col items-center gap-3">
                                         <svg className="h-12 w-12 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -254,3 +333,4 @@ export default function InventorySearch({ items, users, userRole }) {
         </div>
     );
 }
+
