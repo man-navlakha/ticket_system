@@ -43,7 +43,7 @@ export default async function InventoryPage() {
     }));
 
     return (
-        <div className="max-w-6xl mx-auto space-y-8">
+        <div className="max-w-[100%] mx-auto space-y-8">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-4xl font-bold tracking-tight">Inventory</h1>

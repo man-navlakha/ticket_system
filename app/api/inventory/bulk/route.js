@@ -56,17 +56,9 @@ export async function POST(request) {
 
                 const pid = String(pidVal).trim();
 
-                // Check for duplicate PID (skip check if just validating file structure?) 
-                // No, we want to skip duplicates or error. Let's error.
-                const existing = await prisma.inventoryItem.findUnique({
-                    where: { pid }
-                });
-
-                if (existing) {
-                    results.failed++;
-                    results.errors.push(`Row ${rowNumber}: PID '${pid}' already exists (Skipped)`);
-                    continue;
-                }
+                // Check for duplicate PID (Removed to allow upsert/update)
+                // const existing = await prisma.inventoryItem.findUnique({ where: { pid } });
+                // if (existing) { ... }
 
                 // MAPPING ENUMS
                 // Handle "C" for Company, etc.
@@ -147,27 +139,33 @@ export async function POST(request) {
                 const brandVal = getVal('Brand');
                 const priceVal = getVal('PRICE') || getVal('Price');
 
-                // CREATE ITEM
-                await prisma.inventoryItem.create({
-                    data: {
+                // UPSERT ITEM (Create or Update)
+                const itemData = {
+                    type,
+                    status,
+                    ownership,
+                    brand: brandVal ? String(brandVal) : null,
+                    model: modelVal ? String(modelVal) : null,
+                    serialNumber: serial ? String(serial) : null,
+                    oldTag: oldTag ? String(oldTag) : null,
+                    oldUser: oldUserForField ? String(oldUserForField) : null,
+                    price: priceVal ? parseFloat(priceVal) : null,
+                    userId,
+                    assignedDate,
+                    returnDate,
+                    maintenanceDate,
+                    purchasedDate,
+                    warrantyDate,
+                    components,
+                    systemSpecs: Object.keys(systemSpecs).length > 0 ? systemSpecs : undefined,
+                };
+
+                await prisma.inventoryItem.upsert({
+                    where: { pid },
+                    update: itemData,
+                    create: {
                         pid,
-                        type,
-                        status,
-                        ownership,
-                        brand: brandVal ? String(brandVal) : null,
-                        model: modelVal ? String(modelVal) : null,
-                        serialNumber: serial ? String(serial) : null,
-                        oldTag: oldTag ? String(oldTag) : null,
-                        oldUser: oldUserForField ? String(oldUserForField) : null,
-                        price: priceVal ? parseFloat(priceVal) : null,
-                        userId,
-                        assignedDate,
-                        returnDate,
-                        maintenanceDate,
-                        purchasedDate,
-                        warrantyDate,
-                        components,
-                        systemSpecs: Object.keys(systemSpecs).length > 0 ? systemSpecs : undefined,
+                        ...itemData
                     }
                 });
 
