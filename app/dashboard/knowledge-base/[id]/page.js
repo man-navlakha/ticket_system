@@ -11,10 +11,25 @@ export default function ArticleDetailPage() {
     const router = useRouter();
     const [article, setArticle] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [user, setUser] = useState(null);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     useEffect(() => {
         fetchArticle();
+        fetchUser();
     }, [params.id]);
+
+    const fetchUser = async () => {
+        try {
+            const res = await fetch('/api/auth/me');
+            if (res.ok) {
+                const data = await res.json();
+                setUser(data.user);
+            }
+        } catch (error) {
+            console.error('Failed to fetch user:', error);
+        }
+    };
 
     const fetchArticle = async () => {
         try {
@@ -33,6 +48,32 @@ export default function ArticleDetailPage() {
         }
     };
 
+    const handleDelete = async () => {
+        if (!confirm('Are you sure you want to delete this article? This action cannot be undone.')) {
+            return;
+        }
+
+        setIsDeleting(true);
+        try {
+            const res = await fetch(`/api/kb/${params.id}`, {
+                method: 'DELETE',
+            });
+
+            if (res.ok) {
+                router.push('/dashboard/knowledge-base');
+                router.refresh();
+            } else {
+                const data = await res.json();
+                alert(data.error || 'Failed to delete article');
+            }
+        } catch (error) {
+            console.error('Failed to delete article:', error);
+            alert('An error occurred while deleting the article');
+        } finally {
+            setIsDeleting(false);
+        }
+    };
+
     if (loading) {
         return (
             <div className="max-w-4xl mx-auto text-center py-20">
@@ -48,12 +89,33 @@ export default function ArticleDetailPage() {
 
     return (
         <div className="max-w-4xl mx-auto">
-            <Link
-                href="/dashboard/knowledge-base"
-                className="text-sm text-gray-400 hover:text-white mb-6 inline-flex items-center gap-2 transition-colors"
-            >
-                <span>←</span> Back to Knowledge Base
-            </Link>
+            <div className="flex items-center justify-between mb-6">
+                <Link
+                    href="/dashboard/knowledge-base"
+                    className="text-sm text-gray-400 hover:text-white inline-flex items-center gap-2 transition-colors"
+                >
+                    <span>←</span> Back to Knowledge Base
+                </Link>
+
+                {user?.role === 'ADMIN' && (
+                    <button
+                        onClick={handleDelete}
+                        disabled={isDeleting}
+                        className="px-4 py-2 bg-red-500/10 text-red-500 border border-red-500/20 rounded-xl hover:bg-red-500/20 transition-colors flex items-center gap-2 text-sm font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        {isDeleting ? (
+                            <>
+                                <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                                Deleting...
+                            </>
+                        ) : (
+                            <>
+                                🗑️ Delete Article
+                            </>
+                        )}
+                    </button>
+                )}
+            </div>
 
             <article className="bg-white/5 border border-white/10 rounded-2xl p-8 md:p-12">
                 {/* Category Badge */}
