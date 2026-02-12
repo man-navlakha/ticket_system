@@ -18,6 +18,7 @@ export default function DashboardNav({ user }) {
 
     if (user?.role === 'ADMIN' || user?.role === 'AGENT') {
         links.push({ href: '/dashboard/team', label: 'Team' });
+        links.push({ href: '/dashboard/proposals', label: 'Proposals' });
     }
 
     const handleLogout = async () => {

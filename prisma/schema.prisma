@@ -25,7 +25,39 @@ model User {
   inventory        InventoryItem[]
   knowledgeBaseArticles KnowledgeBaseArticle[]
   auditLogs        AuditLog[]
+  createdProposals Proposal[] @relation("CreatedProposals")
+  assignedProposals Proposal[] @relation("ApproverProposals")
   createdAt        DateTime        @default(now())
+}
+
+model Proposal {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  status      ProposalStatus @default(PENDING)
+  
+  createdById String
+  createdBy   User     @relation("CreatedProposals", fields: [createdById], references: [id])
+  
+  approverId  String
+  approver    User     @relation("ApproverProposals", fields: [approverId], references: [id])
+  
+  adminComment String?
+  
+  inventoryItemId String?
+  inventoryItem   InventoryItem? @relation(fields: [inventoryItemId], references: [id])
+  
+  ticketId    String?
+  ticket      Ticket?  @relation(fields: [ticketId], references: [id])
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+enum ProposalStatus {
+  PENDING
+  APPROVED
+  REJECTED
 }
 
 model Ticket {
@@ -60,6 +92,7 @@ model Ticket {
   resolutionDetails String? 
   
   comments        Comment[]
+  proposals       Proposal[]
   attachmentUrls  String[]
   auditLogs       AuditLog[]
   knowledgeBaseArticles KnowledgeBaseArticle[]
@@ -112,6 +145,7 @@ model InventoryItem {
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
   tickets         Ticket[]
+  proposals       Proposal[]
   maintenanceRecords MaintenanceRecord[]
   auditLogs       AuditLog[]
 }
