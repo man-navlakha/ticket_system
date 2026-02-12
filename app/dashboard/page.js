@@ -2,6 +2,8 @@ import { getCurrentUser } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { getDashboardStats } from "@/lib/stats";
+import DashboardCharts from "@/components/DashboardCharts";
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: "Dashboard" };
@@ -46,6 +48,11 @@ export default async function DashboardPage({ searchParams }) {
         }
     });
 
+    let stats = null;
+    if (user.role === 'ADMIN' || user.role === 'AGENT') {
+        stats = await getDashboardStats();
+    }
+
     return (
         <div className="max-w-6xl mx-auto">
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
@@ -63,6 +70,8 @@ export default async function DashboardPage({ searchParams }) {
                     </Link>
                 </div>
             </div>
+
+            {stats && <DashboardCharts data={stats} userName={user.username} />}
 
             <div className="grid gap-4">
                 {tickets.map((ticket) => (
