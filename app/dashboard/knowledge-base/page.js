@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import PageHeader from "@/components/PageHeader";
 
 export default function KnowledgeBasePage() {
     const [articles, setArticles] = useState([]);
@@ -81,47 +82,55 @@ export default function KnowledgeBasePage() {
 
     return (
         <div className="max-w-6xl mx-auto">
-            <div className="mb-10 flex items-center justify-between">
-                <div>
-                    <h1 className="text-4xl font-bold tracking-tight mb-2">📚 Knowledge Base</h1>
-                    <p className="text-gray-400 text-lg">Browse solutions to common issues</p>
-                </div>
-                <Link
-                    href="/dashboard/knowledge-base/create"
-                    className="px-4 py-2 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-500 transition-colors flex items-center gap-2"
-                >
-                    <span className="text-xl">+</span> Create Article
-                </Link>
-            </div>
-
-            {/* Search & Filters */}
-            <div className="bg-white/5 border border-white/10 rounded-2xl p-6 mb-8">
-                <form onSubmit={handleSearch} className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div className="md:col-span-2 relative">
-                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                            <span className="text-purple-400">✨</span>
+            <PageHeader title="Knowledge Base">
+                <form onSubmit={handleSearch} className="relative w-full sm:w-64 md:w-96 flex items-center gap-2">
+                    <div className="relative flex-1">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <span className="text-purple-400 text-sm">✨</span>
                         </div>
                         <input
                             type="text"
-                            placeholder="Describe your issue or search..."
+                            placeholder="Search articles..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full pl-10 pr-4 bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-gray-600 focus:border-purple-500 transition-all outline-none"
+                            className="w-full bg-white/5 border border-white/10 rounded-full py-2 pl-9 pr-8 text-sm text-white focus:outline-none focus:ring-1 focus:ring-purple-500 transition-all placeholder:text-gray-500"
                         />
                         {searchQuery && (
                             <button
                                 type="button"
                                 onClick={clearSearch}
-                                className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-white"
+                                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-white"
                             >
                                 ✕
                             </button>
                         )}
                     </div>
+                    <button
+                        type="submit"
+                        disabled={isAiSearching}
+                        className="bg-white/10 hover:bg-white/20 text-white rounded-full p-2 transition-colors disabled:opacity-50"
+                        title="Search"
+                    >
+                        {isAiSearching ? (
+                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        ) : (
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        )}
+                    </button>
+                </form>
+            </PageHeader>
+
+            <div className="mb-8 flex flex-col md:flex-row items-center justify-between gap-4 mt-6">
+                <div>
+                    <p className="text-gray-400 text-lg">Browse solutions to common issues</p>
+                </div>
+                <div className="flex items-center gap-4">
                     <select
                         value={categoryFilter}
                         onChange={(e) => setCategoryFilter(e.target.value)}
-                        className="bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-white transition-all outline-none appearance-none"
+                        className="bg-black/50 border border-white/10 rounded-xl px-4 py-2 text-sm text-white focus:border-white transition-all outline-none appearance-none"
                     >
                         <option value="" className="bg-gray-900">All Categories</option>
                         <option value="Hardware" className="bg-gray-900">💻 Hardware</option>
@@ -130,27 +139,15 @@ export default function KnowledgeBasePage() {
                         <option value="Access & Security" className="bg-gray-900">🔒 Access & Security</option>
                         <option value="Other" className="bg-gray-900">📋 Other</option>
                     </select>
-                    <button
-                        type="submit"
-                        disabled={isAiSearching}
-                        className="bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl px-6 py-3 font-bold hover:opacity-90 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                    <Link
+                        href="/dashboard/knowledge-base/create"
+                        className="px-4 py-2 bg-blue-600 text-white rounded-xl text-sm font-bold hover:bg-blue-500 transition-colors flex items-center gap-2"
                     >
-                        {isAiSearching ? (
-                            <>
-                                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                Searching...
-                            </>
-                        ) : (
-                            <>
-                                <span>🔍</span> Search
-                            </>
-                        )}
-                    </button>
-                </form>
-                <p className="text-gray-500 text-xs mt-3 flex items-center gap-1">
-                    <span className="text-purple-400">✨</span> AI-powered search finds the best solutions for your issues
-                </p>
+                        <span className="text-lg">+</span> Create
+                    </Link>
+                </div>
             </div>
+
 
             {/* AI Message */}
             {aiMessage && (

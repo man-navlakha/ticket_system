@@ -40,35 +40,16 @@ export default function DashboardNav({ user }) {
     return (
         <>
             {/* Desktop Header */}
-            <header className="sticky top-0 z-50 border-b border-white/10 bg-black/50 backdrop-blur-xl hidden md:block">
-                <div className="container mx-auto px-6">
-                    <div className="flex h-16 items-center justify-between">
-                        {/* Logo */}
-                        <Link href="/dashboard" className="flex items-center gap-3 text-xl font-bold tracking-tight">
-                            <Image
-                                src="/logo_my.png"
-                                alt="Logo"
-                                width={32}
-                                height={32}
-                                className="rounded-lg"
-                            />
-                            <span>Man&apos;s <span className="text-gray-500">Support Desk</span></span>
-                        </Link>
+            {/* Desktop Header */}
+            <header className="sticky top-4 z-50 hidden md:block px-4">
+                <div className="mx-auto w-full max-w-6xl rounded-2xl border border-white/10 bg-black/80 backdrop-blur-xl shadow-2xl">
+                    <div className="flex h-16 items-center justify-end px-6">
 
-                        {/* Desktop Nav */}
-                        <nav className="flex items-center gap-6">
-                            {links.map((link) => (
-                                <Link
-                                    key={link.href}
-                                    href={link.href}
-                                    className={`text-sm font-medium transition-colors ${isActive(link.href) ? 'text-white' : 'text-gray-400 hover:text-white'
-                                        }`}
-                                >
-                                    {link.label}
-                                </Link>
-                            ))}
+                        {/* Actions */}
+                        <div className="flex items-center gap-4">
+                            <div className="h-6 w-[1px] bg-white/10 hidden lg:block"></div>
                             <LogoutButton />
-                        </nav>
+                        </div>
                     </div>
                 </div>
             </header>

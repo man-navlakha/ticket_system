@@ -9,6 +9,7 @@ export const dynamic = 'force-dynamic';
 export const metadata = { title: "Hardware Inventory" };
 
 import BulkInventoryUpload from "@/components/BulkInventoryUpload";
+import PageHeader from "@/components/PageHeader";
 
 export default async function InventoryPage() {
     const user = await getCurrentUser();
@@ -44,7 +45,8 @@ export default async function InventoryPage() {
 
     return (
         <div className="max-w-[100%] mx-auto space-y-8">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <PageHeader title="Inventory" />
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mt-6">
                 <div>
                     <h1 className="text-4xl font-bold tracking-tight">Inventory</h1>
                     <p className="text-gray-400 mt-2 text-lg">Manage hardware assets and assignments.</p>
