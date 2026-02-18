@@ -7,13 +7,62 @@ import FloatingLines from '@/components/FloatingLines';
 
 export default function Home() {
   const [searchTicket, setSearchTicket] = useState('');
-  const [ticketFound, setTicketFound] = useState(false);
+  const [ticketData, setTicketData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const [formData, setFormData] = useState({ name: '', email: '', department: '' });
+  const [requestStatus, setRequestStatus] = useState('idle'); // idle, loading, success, error
+  const [requestError, setRequestError] = useState('');
+  const [isVisible, setIsVisible] = useState(true);
 
-  const handleSearch = (e) => {
+  // ... (handleSearch remains the same)
+
+  const handleRequestAccess = async (e) => {
     e.preventDefault();
-    if (searchTicket.trim()) {
-      setTicketFound(true);
+    setRequestStatus('loading');
+    setRequestError('');
+
+    try {
+      const res = await fetch('/api/access-requests', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Something went wrong');
+      }
+
+      setRequestStatus('success');
+      setFormData({ name: '', email: '', department: '' }); // Reset form
+    } catch (err) {
+      setRequestStatus('error');
+      setRequestError(err.message);
+    }
+  };
+
+  const handleSearch = async (e) => {
+    e.preventDefault();
+    if (!searchTicket.trim()) return;
+
+    setLoading(true);
+    setError('');
+    setTicketData(null);
+
+    try {
+      const res = await fetch(`/api/tickets/track?id=${searchTicket.trim()}`);
+      if (!res.ok) {
+        if (res.status === 404) throw new Error('Ticket not found. Please check the ID and try again.');
+        throw new Error('Something went wrong. Please try again later.');
+      }
+      const data = await res.json();
+      setTicketData(data);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -51,16 +100,22 @@ export default function Home() {
       <LandingNav />
 
       {/* Announcement Banner */}
-      <div className="fixed top-16 left-0 right-0 z-40 bg-[#141820] border-b border-white/5">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between text-sm">
-          <p className="text-gray-400">
-            System Status: <span className="font-medium text-white">All Systems Operational</span>
-          </p>
-          <button className="text-xs text-gray-500 hover:text-white transition-colors">
-            Dismiss
-          </button>
+      {/* Announcement Banner */}
+      {isVisible && (
+        <div className="fixed top-16 left-0 right-0 z-40 bg-[#141820] border-b border-white/5">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between text-sm">
+            <p className="text-gray-400">
+              System Status: <span className="font-medium text-white">All Systems Operational</span>
+            </p>
+            <button
+              onClick={() => setIsVisible(false)}
+              className="text-xs text-gray-500 hover:text-white transition-colors"
+            >
+              Dismiss
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
       <main className="pt-24">
         {/* Hero Section */}
@@ -119,34 +174,49 @@ export default function Home() {
               <div className="flex gap-2 relative">
                 <input
                   type="text"
-                  placeholder="Enter ticket ID (e.g., TKT-001)"
+                  placeholder="Enter ticket ID (e.g., cl...)"
                   value={searchTicket}
                   onChange={(e) => setSearchTicket(e.target.value)}
                   className="flex-1 bg-[#141820] border border-white/10 rounded-xl px-5 py-4 text-white placeholder:text-gray-500 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/20 transition-all shadow-inner"
                 />
                 <button
                   type="submit"
-                  className="absolute right-2 top-2 bottom-2 px-6 rounded-lg bg-white text-black font-semibold text-sm hover:bg-gray-200 transition-colors"
+                  disabled={loading}
+                  className="absolute right-2 top-2 bottom-2 px-6 rounded-lg bg-white text-black font-semibold text-sm hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Search
+                  {loading ? 'Searching...' : 'Search'}
                 </button>
               </div>
-              {ticketFound && (
+
+              {error && (
+                <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm text-center animate-in fade-in slide-in-from-top-2">
+                  {error}
+                </div>
+              )}
+
+              {ticketData && (
                 <div className="p-5 rounded-xl bg-[#141820] border border-white/10 animate-in fade-in slide-in-from-bottom-2 shadow-lg">
                   <div className="flex items-start justify-between mb-2">
                     <div>
-                      <p className="font-semibold text-white">Ticket {searchTicket}</p>
+                      <p className="font-semibold text-white">Ticket #{ticketData.id.slice(0, 8)}</p>
                       <div className="flex items-center gap-2 mt-1">
-                        <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
-                        <p className="text-sm text-gray-400">Status: In Progress</p>
+                        <span className={`w-2 h-2 rounded-full ${ticketData.status === 'OPEN' ? 'bg-green-500' :
+                          ticketData.status === 'IN_PROGRESS' ? 'bg-amber-500' :
+                            ticketData.status === 'RESOLVED' ? 'bg-blue-500' :
+                              'bg-gray-500'
+                          } animate-pulse`}></span>
+                        <p className="text-sm text-gray-400">Status: {ticketData.status.replace('_', ' ')}</p>
                       </div>
                     </div>
-                    <span className="px-3 py-1 rounded-full text-xs font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20">
-                      Medium Priority
+                    <span className={`px-3 py-1 rounded-full text-xs font-medium border ${ticketData.priority === 'HIGH' ? 'bg-red-500/10 text-red-400 border-red-500/20' :
+                      ticketData.priority === 'MEDIUM' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
+                        'bg-green-500/10 text-green-400 border-green-500/20'
+                      }`}>
+                      {ticketData.priority} Priority
                     </span>
                   </div>
                   <div className="mt-4 pt-3 border-t border-white/5 flex justify-between text-xs text-gray-500">
-                    <span>Last updated: 2 hours ago</span>
+                    <span>Last updated: {new Date(ticketData.updatedAt || ticketData.createdAt).toLocaleString()}</span>
                     <span>Assigned to: Support Team</span>
                   </div>
                 </div>
@@ -268,10 +338,11 @@ export default function Home() {
               This is an invite-only platform. Contact your system administrator or submit your information below.
             </p>
 
-            <form className="space-y-5 bg-[#141820] p-8 rounded-2xl border border-white/5 shadow-2xl">
+            <form onSubmit={handleRequestAccess} className="space-y-5 bg-[#141820] p-8 rounded-2xl border border-white/5 shadow-2xl">
               <div className="space-y-2">
                 <label className="text-xs font-medium text-gray-400 uppercase tracking-wide">Full Name</label>
                 <input
+                  required
                   type="text"
                   name="name"
                   placeholder="John Doe"
@@ -284,6 +355,7 @@ export default function Home() {
               <div className="space-y-2">
                 <label className="text-xs font-medium text-gray-400 uppercase tracking-wide">Work Email</label>
                 <input
+                  required
                   type="email"
                   name="email"
                   placeholder="john@company.com"
@@ -296,6 +368,7 @@ export default function Home() {
               <div className="space-y-2">
                 <label className="text-xs font-medium text-gray-400 uppercase tracking-wide">Department</label>
                 <input
+                  required
                   type="text"
                   name="department"
                   placeholder="e.g., Engineering, Marketing"
@@ -305,11 +378,24 @@ export default function Home() {
                 />
               </div>
 
+              {requestStatus === 'success' && (
+                <div className="p-3 bg-green-500/10 border border-green-500/20 text-green-400 text-sm rounded-lg text-center animate-in fade-in slide-in-from-top-2">
+                  Request submitted successfully! We will contact you shortly.
+                </div>
+              )}
+
+              {requestStatus === 'error' && (
+                <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-400 text-sm rounded-lg text-center animate-in fade-in slide-in-from-top-2">
+                  {requestError || 'Something went wrong. Please try again.'}
+                </div>
+              )}
+
               <button
                 type="submit"
-                className="w-full px-6 py-4 rounded-lg bg-white text-black font-bold text-sm hover:bg-gray-200 transition-all mt-4 transform hover:scale-[1.02]"
+                disabled={requestStatus === 'loading' || requestStatus === 'success'}
+                className="w-full px-6 py-4 rounded-lg bg-white text-black font-bold text-sm hover:bg-gray-200 transition-all mt-4 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Submit Request
+                {requestStatus === 'loading' ? 'Submitting...' : 'Submit Request'}
               </button>
             </form>
           </div>

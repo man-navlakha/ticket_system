@@ -315,3 +315,13 @@ model AuditLog {
   @@index([inventoryItemId])
   @@index([createdAt])
 }
+
+model AccessRequest {
+  id          String   @id @default(uuid())
+  name        String
+  email       String   @unique
+  department  String
+  status      String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
