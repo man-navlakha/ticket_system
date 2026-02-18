@@ -14,11 +14,11 @@ const geistMono = Geist_Mono({
 export const metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'),
   title: {
-    default: "Man's Support Desk | IT Infrastructure",
+    default: "Man's Support Desk | Enterprise IT Ticketing System",
     template: "%s | Man's Support Desk"
   },
-  description: "A high-performance, invite-only support ticket system with smart inventory management and real-time notifications.",
-  keywords: ["ticket system", "support", "inventory management", "it support", "helpdesk"],
+  description: "A high-performance, invite-only support ticket system with smart inventory management and real-time notifications. specific for enterprise IT infrastructure.",
+  keywords: ["ticket system", "support", "inventory management", "it support", "helpdesk", "enterprise ticketing system", "IT asset management", "help desk software", "issue tracking"],
   authors: [{ name: "Man" }],
   creator: "Man",
   publisher: "Man",
@@ -32,8 +32,8 @@ export const metadata = {
     apple: '/favicon.png',
   },
   openGraph: {
-    title: "Man's Support Desk",
-    description: "Streamline your IT support infrastructure with automated workflows and smart inventory tracking.",
+    title: "Man's Support Desk | Enterprise IT Ticketing System",
+    description: "Streamline your IT support infrastructure with automated workflows and smart inventory tracking. Built for modern teams.",
     url: 'https://man-support-desk.netlify.app',
     siteName: "Man's Support Desk",
     images: [
@@ -41,6 +41,7 @@ export const metadata = {
         url: '/favicon.png',
         width: 800,
         height: 600,
+        alt: "Man's Support Desk Logo",
       },
     ],
     locale: 'en_US',
@@ -48,8 +49,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Man's Support Desk",
-    description: "Invite-based IT support infrastructure for modern teams.",
+    title: "Man's Support Desk | Enterprise IT Ticketing System",
+    description: "Invite-based IT support infrastructure for modern teams. Manage tickets and inventory in one place.",
     images: ['/favicon.png'],
   },
 };

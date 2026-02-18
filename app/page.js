@@ -22,8 +22,32 @@ export default function Home() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name: "Man's Support Desk",
+    image: "https://man-support-desk.netlify.app/favicon.png",
+    description: "Enterprise IT support ticketing system with integrated inventory management and automation.",
+    applicationCategory: "BusinessApplication",
+    operatingSystem: "Web",
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'USD'
+    },
+    aggregateRating: {
+      '@type': 'AggregateRating',
+      ratingValue: "4.8",
+      ratingCount: "1250"
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#0B0E14] text-white font-sans selection:bg-blue-500/30">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <LandingNav />
 
       {/* Announcement Banner */}

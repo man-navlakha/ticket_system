@@ -47,222 +47,244 @@ export default async function InventoryItemPage({ params }) {
     }
 
     return (
-        <div className="max-w-4xl mx-auto">
-            <Link
-                href="/dashboard/inventory"
-                className="text-sm text-gray-400 hover:text-white mb-6 inline-block transition-colors"
-            >
-                ← Back to Inventory
-            </Link>
-
-            <div className="bg-white/5 border border-white/10 rounded-2xl p-8 mb-8">
-                <div className="flex justify-between items-start mb-6">
-                    <div>
-                        <h1 className="text-3xl font-bold text-white flex items-center gap-3">
-                            {item.pid}
-                            <span className="text-lg font-normal text-gray-400">({item.type})</span>
-                        </h1>
-                        <p className="text-gray-400 mt-1">
-                            {item.brand || 'Unknown Brand'}
-                            {item.model && <span className="text-gray-500"> — {item.model}</span>}
-                        </p>
-                    </div>
-                    <div className="flex items-center gap-3">
-                        <span className={`px-3 py-1 rounded-full text-xs font-bold border ${item.status === 'ACTIVE' ? 'bg-green-500/10 text-green-400 border-green-500/20' :
-                            item.status === 'MAINTENANCE' ? 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' :
-                                item.status === 'RETIRED' ? 'bg-red-500/10 text-red-400 border-red-500/20' :
-                                    'bg-gray-500/10 text-gray-400 border-gray-500/20'
-                            }`}>
-                            {item.status || 'UNKNOWN'}
-                        </span>
-                        <span className="px-3 py-1 rounded-full text-xs font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20">
-                            {item.ownership}
-                        </span>
-                        {(user.role === 'ADMIN' || user.role === 'AGENT') && (
-                            <Link
-                                href={`/dashboard/inventory/${item.id}/edit`}
-                                className="px-4 py-2 bg-white/10 text-white rounded-lg text-sm font-bold hover:bg-white/20 transition-colors"
-                            >
-                                Edit
-                            </Link>
-                        )}
-                        <InventoryActions item={item} />
-                    </div>
-                </div>
-
-                <div className="grid md:grid-cols-2 gap-8">
-                    <div className="space-y-4">
-                        <h3 className="text-lg font-semibold border-b border-white/10 pb-2">Assignment Details</h3>
-                        <div className="grid grid-cols-3 gap-2 text-sm">
-                            <span className="text-gray-500">Assigned To:</span>
-                            <span className="col-span-2 text-white font-medium">
-                                {item.user ? `${item.user.username} (${item.user.email})` : (item.assignedUser || 'Unassigned')}
-                            </span>
-
-                            <span className="text-gray-500">Assigned Date:</span>
-                            <span className="col-span-2 text-white">{item.assignedDate ? new Date(item.assignedDate).toLocaleDateString() : '-'}</span>
-
-                            <span className="text-gray-500">Return Date:</span>
-                            <span className="col-span-2 text-white">{item.returnDate ? new Date(item.returnDate).toLocaleDateString() : '-'}</span>
-
-                            <span className="text-gray-500">Old User:</span>
-                            <span className="col-span-2 text-white">{item.oldUser || '-'}</span>
-
-                            <span className="text-gray-500">Old Tag:</span>
-                            <span className="col-span-2 text-white">{item.oldTag || '-'}</span>
-                        </div>
-                    </div>
-
-                    <div className="space-y-4">
-                        <h3 className="text-lg font-semibold border-b border-white/10 pb-2">Asset Details</h3>
-                        <div className="grid grid-cols-3 gap-2 text-sm">
-                            <span className="text-gray-500">Serial Number:</span>
-                            <span className="col-span-2 text-white font-mono">{item.serialNumber || '-'}</span>
-
-                            <span className="text-gray-500">Purchased:</span>
-                            <span className="col-span-2 text-white">{item.purchasedDate ? new Date(item.purchasedDate).toLocaleDateString() : '-'}</span>
-
-                            <span className="text-gray-500">Price:</span>
-                            <span className="col-span-2 text-white font-mono">{item.price ? `$${item.price.toFixed(2)}` : '-'}</span>
-
-                            <span className="text-gray-500">Maintenance:</span>
-                            <span className="col-span-2 text-white">{item.maintenanceDate ? new Date(item.maintenanceDate).toLocaleDateString() : '-'}</span>
-
-                            <span className="text-gray-500">{item.warrantyType || 'Warranty'}:</span>
-                            <span className="col-span-2 text-white">{item.warrantyDate ? new Date(item.warrantyDate).toLocaleDateString() : '-'}</span>
-                        </div>
-                    </div>
-                </div>
-
-                {item.systemSpecs && typeof item.systemSpecs === 'object' && Object.keys(item.systemSpecs).length > 0 && (
-                    <div className="mt-8 pt-6 border-t border-white/10">
-                        <h3 className="text-lg font-semibold mb-4">System Specifications</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {Object.entries(item.systemSpecs).map(([key, value]) => (
-                                <div key={key} className="flex flex-col bg-white/5 p-3 rounded-lg border border-white/5">
-                                    <span className="text-xs text-gray-400 uppercase font-bold tracking-wider mb-1">{key}</span>
-                                    <span className="text-white font-mono text-sm">
-                                        {typeof value === 'boolean' ? (value ? 'Yes' : 'No') : value}
-                                    </span>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                )}
-
-                {item.components && item.components.length > 0 && (
-                    <div className="mt-8 pt-6 border-t border-white/10">
-                        <h3 className="text-lg font-semibold mb-4">Components & Accessories</h3>
-                        <div className="flex flex-wrap gap-2">
-                            {item.components.map((comp, i) => (
-                                <span key={i} className="px-3 py-1 bg-white/10 rounded-full text-sm text-gray-300 border border-white/5">
-                                    {comp}
-                                </span>
-                            ))}
-                        </div>
-                    </div>
-                )}
-            </div>
-
-            {/* Repair & Maintenance History */}
-            <div className="space-y-6 pb-12">
-                <div className="flex items-center justify-between">
-                    <h2 className="text-2xl font-bold">Repair History</h2>
-                    <Link href={`/dashboard/create?inventoryId=${item.id}`} className="text-sm font-bold text-yellow-500 hover:text-white">
-                        + Report Issue
+        <div className="min-h-screen rounded-xl bg-[#0B0E14] text-white p-6 md:p-12 font-sans">
+            <div className="max-w-6xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                {/* Header Section */}
+                <div className="space-y-6">
+                    <Link
+                        href="/dashboard/inventory"
+                        className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors"
+                    >
+                        <span>←</span> Back to Inventory
                     </Link>
+
+                    <div className="flex flex-col xl:flex-row justify-between items-start xl:items-end gap-6 border-b border-white/5 pb-8">
+                        <div>
+                            <div className="flex flex-wrap items-baseline gap-3 mb-2">
+                                <h1 className="text-3xl md:text-5xl font-light tracking-tight text-white mb-2">{item.pid}</h1>
+                                <span className={`self-center px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border ${item.status === 'ACTIVE' ? 'bg-green-500/10 text-green-400 border-green-500/20' :
+                                    item.status === 'MAINTENANCE' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
+                                        item.status === 'RETIRED' ? 'bg-red-500/10 text-red-400 border-red-500/20' :
+                                            'bg-gray-500/10 text-gray-400 border-gray-500/20'
+                                    }`}>
+                                    {item.status || 'UNKNOWN'}
+                                </span>
+                            </div>
+                            <p className="text-gray-400 text-lg">
+                                {item.brand || 'Unknown Brand'} <span className="text-gray-600 mx-2">|</span> {item.model}
+                            </p>
+                        </div>
+
+                        <div className="flex flex-wrap items-center gap-3">
+                            <span className="px-4 py-2 rounded-lg text-sm font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                                {item.ownership}
+                            </span>
+                            {(user.role === 'ADMIN' || user.role === 'AGENT') && (
+                                <Link
+                                    href={`/dashboard/inventory/${item.id}/edit`}
+                                    className="px-6 py-2 bg-white/5 text-white rounded-lg text-sm font-bold hover:bg-white/10 border border-white/10 transition-colors"
+                                >
+                                    Edit Details
+                                </Link>
+                            )}
+                            <InventoryActions item={item} />
+                        </div>
+                    </div>
                 </div>
 
-                <div className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden p-6">
-                    {item.tickets.length === 0 ? (
-                        <p className="text-gray-500 text-center py-6">No repair history available for this item.</p>
-                    ) : (
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-left text-sm text-gray-400">
-                                <thead className="bg-white/5 text-gray-200 uppercase font-bold text-xs">
-                                    <tr>
-                                        <th className="px-4 py-3">Date</th>
-                                        <th className="px-4 py-3">Issue</th>
-                                        <th className="px-4 py-3">Component</th>
-                                        <th className="px-4 py-3">Status</th>
-                                        <th className="px-4 py-3">Resolution Notes</th>
-                                        <th className="px-4 py-3 text-right">Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-white/10">
-                                    {item.tickets.map((ticket) => (
-                                        <tr key={ticket.id} className="hover:bg-white/5 transition-colors">
-                                            <td className="px-4 py-3">{new Date(ticket.createdAt).toLocaleDateString()}</td>
-                                            <td className="px-4 py-3 text-white font-medium">{ticket.title}</td>
-                                            <td className="px-4 py-3">{ticket.componentName || '-'}</td>
-                                            <td className="px-4 py-3">
-                                                <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border 
-                                                    ${ticket.status === 'OPEN' ? 'bg-green-500/10 text-green-400 border-green-500/20' :
-                                                        ticket.status === 'RESOLVED' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' :
-                                                            'bg-gray-500/10 text-gray-400 border-gray-500/20'}`}>
-                                                    {ticket.status}
-                                                </span>
-                                            </td>
-                                            <td className="px-4 py-3 text-gray-400 text-xs max-w-xs truncate" title={ticket.resolutionDetails}>
-                                                {ticket.resolutionDetails || '-'}
-                                            </td>
-                                            <td className="px-4 py-3 text-right">
-                                                <Link href={`/dashboard/${ticket.id}`} className="text-blue-400 hover:text-white hover:underline">
-                                                    View
-                                                </Link>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    {/* Assignment Details Card */}
+                    <div className="bg-[#141820] border border-transparent hover:border-white/5 rounded-2xl p-8 shadow-sm transition-all">
+                        <h3 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-6">Assignment Details</h3>
+                        <div className="space-y-4">
+                            <div className="flex justify-between items-center py-2 border-b border-white/5">
+                                <span className="text-gray-500 text-sm">Assigned To</span>
+                                <span className="font-medium text-white text-right">
+                                    {item.user ? (
+                                        <div className="flex items-center gap-2 justify-end">
+                                            <div className="h-6 w-6 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 font-bold text-xs">
+                                                {item.user.username?.[0]?.toUpperCase()}
+                                            </div>
+                                            {item.user.username}
+                                        </div>
+                                    ) : (item.assignedUser || 'Unassigned')}
+                                </span>
+                            </div>
+                            <div className="flex justify-between items-center py-2 border-b border-white/5">
+                                <span className="text-gray-500 text-sm">Assigned Date</span>
+                                <span className="text-white">{item.assignedDate ? new Date(item.assignedDate).toLocaleDateString() : '-'}</span>
+                            </div>
+                            <div className="flex justify-between items-center py-2 border-b border-white/5">
+                                <span className="text-gray-500 text-sm">Return Date</span>
+                                <span className="text-white">{item.returnDate ? new Date(item.returnDate).toLocaleDateString() : '-'}</span>
+                            </div>
+                            <div className="flex justify-between items-center py-2 border-b border-white/5">
+                                <span className="text-gray-500 text-sm">Previous User</span>
+                                <span className="text-white">{item.oldUser || '-'}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Asset Details Card */}
+                    <div className="bg-[#141820] border border-transparent hover:border-white/5 rounded-2xl p-8 shadow-sm transition-all">
+                        <h3 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-6">Asset Details</h3>
+                        <div className="space-y-4">
+                            <div className="flex justify-between items-center py-2 border-b border-white/5">
+                                <span className="text-gray-500 text-sm">Serial Number</span>
+                                <span className="font-mono text-white tracking-wider">{item.serialNumber || '-'}</span>
+                            </div>
+                            <div className="flex justify-between items-center py-2 border-b border-white/5">
+                                <span className="text-gray-500 text-sm">Purchased Date</span>
+                                <span className="text-white">{item.purchasedDate ? new Date(item.purchasedDate).toLocaleDateString() : '-'}</span>
+                            </div>
+                            <div className="flex justify-between items-center py-2 border-b border-white/5">
+                                <span className="text-gray-500 text-sm">Price</span>
+                                <span className="font-mono text-green-400">{item.price ? `$${item.price.toFixed(2)}` : '-'}</span>
+                            </div>
+                            <div className="flex justify-between items-center py-2 border-b border-white/5">
+                                <span className="text-gray-500 text-sm">Warranty Expiry</span>
+                                <span className="text-white">{item.warrantyDate ? new Date(item.warrantyDate).toLocaleDateString() : '-'}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* System Specs & Components */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    {item.systemSpecs && typeof item.systemSpecs === 'object' && Object.keys(item.systemSpecs).length > 0 && (
+                        <div className="md:col-span-2 bg-[#141820] border border-transparent hover:border-white/5 rounded-2xl p-8 shadow-sm transition-all h-full">
+                            <h3 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-6">System Specifications</h3>
+                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                                {Object.entries(item.systemSpecs).map(([key, value]) => (
+                                    <div key={key} className="bg-white/5 p-4 rounded-xl border border-white/5 hover:bg-white/10 transition-colors">
+                                        <div className="text-[10px] text-gray-400 uppercase font-bold tracking-wider mb-1 opacity-70">{key}</div>
+                                        <div className="text-white font-mono text-sm break-all">
+                                            {typeof value === 'boolean' ? (value ? 'Yes' : 'No') : value}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {item.components && item.components.length > 0 && (
+                        <div className="md:col-span-1 bg-[#141820] border border-transparent hover:border-white/5 rounded-2xl p-8 shadow-sm transition-all h-full">
+                            <h3 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-6">Components</h3>
+                            <div className="flex flex-wrap gap-2 content-start">
+                                {item.components.map((comp, i) => (
+                                    <span key={i} className="px-3 py-1.5 bg-white/5 rounded-lg text-sm text-gray-300 border border-white/10 font-medium">
+                                        {comp}
+                                    </span>
+                                ))}
+                            </div>
                         </div>
                     )}
                 </div>
-            </div>
 
-            {/* Maintenance Logs */}
-            <div className="space-y-6 pb-20">
-                <h2 className="text-2xl font-bold">Maintenance Logs</h2>
-                <div className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden p-6">
-                    {item.maintenanceRecords.length === 0 ? (
-                        <p className="text-gray-500 text-center py-6">No maintenance records found.</p>
-                    ) : (
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-left text-sm text-gray-400">
-                                <thead className="bg-white/5 text-gray-200 uppercase font-bold text-xs">
-                                    <tr>
-                                        <th className="px-4 py-3">Start Date</th>
-                                        <th className="px-4 py-3">End Date</th>
-                                        <th className="px-4 py-3">Description</th>
-                                        <th className="px-4 py-3">Technician</th>
-                                        <th className="px-4 py-3 text-right">Cost</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-white/10">
-                                    {item.maintenanceRecords.map((record) => (
-                                        <tr key={record.id} className="hover:bg-white/5 transition-colors">
-                                            <td className="px-4 py-3">{new Date(record.startDate).toLocaleDateString()}</td>
-                                            <td className="px-4 py-3">
-                                                {record.endDate ? (
-                                                    new Date(record.endDate).toLocaleDateString()
-                                                ) : (
-                                                    <span className="text-yellow-500 font-bold text-xs uppercase tracking-wider">Ongoing</span>
-                                                )}
-                                            </td>
-                                            <td className="px-4 py-3">{record.description || '-'}</td>
-                                            <td className="px-4 py-3">{record.technician || '-'}</td>
-                                            <td className="px-4 py-3 text-right font-mono text-white">
-                                                {record.cost ? `$${record.cost.toFixed(2)}` : '-'}
-                                            </td>
+                {/* Repair History */}
+                <div className="space-y-6">
+                    <div className="flex items-center justify-between border-b border-white/5 pb-4">
+                        <h2 className="text-2xl font-light text-white">Repair History</h2>
+                        <Link href={`/dashboard/create?inventoryId=${item.id}`} className="text-sm font-bold text-amber-400 hover:text-amber-300 transition-colors">
+                            + Report Issue
+                        </Link>
+                    </div>
+
+                    <div className="bg-[#141820] border border-transparent hover:border-white/5 rounded-2xl overflow-hidden shadow-sm transition-all">
+                        {item.tickets.length === 0 ? (
+                            <div className="text-center py-12">
+                                <div className="text-4xl mb-3 opacity-20">🔧</div>
+                                <p className="text-gray-500">No repair history available.</p>
+                            </div>
+                        ) : (
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-left text-sm text-gray-400">
+                                    <thead className="bg-white/5 text-gray-300 uppercase font-bold text-xs tracking-wider">
+                                        <tr>
+                                            <th className="px-6 py-4 font-bold">Date</th>
+                                            <th className="px-6 py-4 font-bold">Issue</th>
+                                            <th className="px-6 py-4 font-bold">Component</th>
+                                            <th className="px-6 py-4 font-bold">Status</th>
+                                            <th className="px-6 py-4 font-bold text-right">Action</th>
                                         </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    )}
+                                    </thead>
+                                    <tbody className="divide-y divide-white/5">
+                                        {item.tickets.map((ticket) => (
+                                            <tr key={ticket.id} className="hover:bg-white/[0.02] transition-colors group">
+                                                <td className="px-6 py-4 font-mono text-gray-500">{new Date(ticket.createdAt).toLocaleDateString()}</td>
+                                                <td className="px-6 py-4 text-white font-medium group-hover:text-amber-400 transition-colors">{ticket.title}</td>
+                                                <td className="px-6 py-4">{ticket.componentName || '-'}</td>
+                                                <td className="px-6 py-4">
+                                                    <span className={`inline-block px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider border 
+                                                        ${ticket.status === 'OPEN' ? 'bg-green-500/10 text-green-400 border-green-500/20' :
+                                                            ticket.status === 'RESOLVED' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' :
+                                                                'bg-gray-500/10 text-gray-400 border-gray-500/20'}`}>
+                                                        {ticket.status}
+                                                    </span>
+                                                </td>
+                                                <td className="px-6 py-4 text-right">
+                                                    <Link href={`/dashboard/${ticket.id}`} className="text-gray-500 hover:text-white font-medium text-xs uppercase tracking-wider">
+                                                        View Details →
+                                                    </Link>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
+                    </div>
                 </div>
-            </div>
 
+                {/* Maintenance Logs */}
+                <div className="space-y-6 pb-12">
+                    <div className="border-b border-white/5 pb-4">
+                        <h2 className="text-2xl font-light text-white">Maintenance Logs</h2>
+                    </div>
+                    <div className="bg-[#141820] border border-transparent hover:border-white/5 rounded-2xl overflow-hidden shadow-sm transition-all">
+                        {item.maintenanceRecords.length === 0 ? (
+                            <div className="text-center py-12">
+                                <div className="text-4xl mb-3 opacity-20">📋</div>
+                                <p className="text-gray-500">No maintenance records found.</p>
+                            </div>
+                        ) : (
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-left text-sm text-gray-400">
+                                    <thead className="bg-white/5 text-gray-300 uppercase font-bold text-xs tracking-wider">
+                                        <tr>
+                                            <th className="px-6 py-4 font-bold">Start Date</th>
+                                            <th className="px-6 py-4 font-bold">End Date</th>
+                                            <th className="px-6 py-4 font-bold">Description</th>
+                                            <th className="px-6 py-4 font-bold">Technician</th>
+                                            <th className="px-6 py-4 font-bold text-right">Cost</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-white/5">
+                                        {item.maintenanceRecords.map((record) => (
+                                            <tr key={record.id} className="hover:bg-white/[0.02] transition-colors">
+                                                <td className="px-6 py-4 font-mono text-gray-500">{new Date(record.startDate).toLocaleDateString()}</td>
+                                                <td className="px-6 py-4">
+                                                    {record.endDate ? (
+                                                        <span className="font-mono text-gray-500">{new Date(record.endDate).toLocaleDateString()}</span>
+                                                    ) : (
+                                                        <span className="text-amber-400 font-bold text-[10px] uppercase tracking-wider bg-amber-400/10 px-2 py-1 rounded border border-amber-400/20">Ongoing</span>
+                                                    )}
+                                                </td>
+                                                <td className="px-6 py-4 text-white">{record.description || '-'}</td>
+                                                <td className="px-6 py-4">{record.technician || '-'}</td>
+                                                <td className="px-6 py-4 text-right font-mono text-green-400 bg-green-400/5">
+                                                    {record.cost ? `$${record.cost.toFixed(2)}` : '-'}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+            </div>
         </div>
     );
 }
