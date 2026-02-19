@@ -27,7 +27,7 @@ const quickLinks = [
     {
         title: "Create Ticket",
         description: "Report an issue or request a service.",
-        href: "/dashboard/tickets/create",
+        href: "/dashboard/create",
         icon: (
             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v16m8-8H4" />

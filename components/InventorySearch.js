@@ -55,63 +55,50 @@ export default function InventorySearch({ items, users, userRole }) {
 
     return (
         <div className="flex flex-col h-full">
-            {/* Control Bar */}
-            <div className="p-4 border-b border-white/5 bg-white/[0.01] flex flex-col lg:flex-row gap-4">
-                <div className="flex-1 relative">
-                    <svg className="absolute left-3.5 top-3 w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                    <input
-                        type="text"
-                        placeholder="Search assets..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full h-10 pl-10 pr-4 bg-black border border-white/10 rounded-lg text-sm text-white placeholder:text-gray-700 focus:outline-none focus:border-white/30 transition-all [color-scheme:dark]"
-                    />
-                </div>
-
-                <div className="flex items-center gap-3">
-                    {/* Status Select */}
-                    <select
-                        value={statusFilter}
-                        onChange={(e) => setStatusFilter(e.target.value)}
-                        className="h-10 px-4 bg-black border border-white/10 rounded-lg text-xs font-bold text-gray-400 focus:outline-none focus:border-white/30 transition-all cursor-pointer hover:bg-white/[0.02] [color-scheme:dark]"
+            {/* Active Filter Indicators */}
+            {(searchQuery || statusFilter !== 'ALL' || typeFilter !== 'ALL') && (
+                <div className="px-5 py-4 flex items-center gap-4 bg-white/[0.01] border-b border-white/5">
+                    <span className="text-[10px] font-bold text-gray-600 uppercase tracking-[0.2em]">Active Matrix:</span>
+                    <div className="flex flex-wrap gap-2">
+                        {searchQuery && <FilterTag label={`Scope: ${searchQuery}`} onClear={() => setSearchQuery('')} />}
+                        {statusFilter !== 'ALL' && <FilterTag label={`Status: ${statusFilter}`} onClear={() => setStatusFilter('ALL')} />}
+                        {typeFilter !== 'ALL' && <FilterTag label={`Type: ${typeFilter}`} onClear={() => setTypeFilter('ALL')} />}
+                    </div>
+                    <button
+                        onClick={clearFilters}
+                        className="ml-auto text-[10px] font-bold text-blue-500 hover:text-blue-400 uppercase tracking-widest transition-colors"
                     >
-                        <option value="ALL">All Status</option>
-                        {statuses.map(s => <option key={s} value={s}>{s}</option>)}
-                    </select>
-
-                    {/* Type Select */}
-                    <select
-                        value={typeFilter}
-                        onChange={(e) => setTypeFilter(e.target.value)}
-                        className="h-10 px-4 bg-black border border-white/10 rounded-lg text-xs font-bold text-gray-400 focus:outline-none focus:border-white/30 transition-all cursor-pointer hover:bg-white/[0.02] [color-scheme:dark]"
-                    >
-                        <option value="ALL">All Types</option>
-                        {types.map(t => <option key={t} value={t}>{t}</option>)}
-                    </select>
-
-                    {(searchQuery || statusFilter !== 'ALL' || typeFilter !== 'ALL') && (
-                        <button
-                            onClick={clearFilters}
-                            className="h-10 px-3 text-[11px] font-bold text-gray-500 hover:text-white transition-colors uppercase tracking-widest"
-                        >
-                            Reset
-                        </button>
-                    )}
+                        Reset Fleet View
+                    </button>
                 </div>
-            </div>
+            )}
 
             {/* Table Area */}
             <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                     <thead className="bg-transparent border-b border-white/5">
                         <tr>
-                            <th className="px-5 py-4 text-[10px] font-bold text-gray-600 uppercase tracking-[0.2em]">Asset ID</th>
-                            <th className="px-5 py-4 text-[10px] font-bold text-gray-600 uppercase tracking-[0.2em]">Hardware</th>
-                            <th className="px-5 py-4 text-[10px] font-bold text-gray-600 uppercase tracking-[0.2em]">Status</th>
+                            <th className="px-5 py-4">
+                                <div className="text-[10px] font-bold text-gray-600 uppercase tracking-[0.2em]">Asset ID</div>
+                            </th>
+                            <th className="px-5 py-4">
+                                <HeaderFilter
+                                    label="Category"
+                                    value={typeFilter}
+                                    onChange={setTypeFilter}
+                                    options={types}
+                                />
+                            </th>
+                            <th className="px-5 py-4">
+                                <HeaderFilter
+                                    label="Status"
+                                    value={statusFilter}
+                                    onChange={setStatusFilter}
+                                    options={statuses}
+                                />
+                            </th>
                             <th className="px-5 py-4 text-[10px] font-bold text-gray-600 uppercase tracking-[0.2em]">Assigned To</th>
-                            <th className="px-5 py-4 text-[10px] font-bold text-gray-600 uppercase tracking-[0.2em]">Action</th>
+                            <th className="px-5 py-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest text-right">Action</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-white/[0.03]">
@@ -247,5 +234,39 @@ function StatusBadge({ status }) {
         <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider border ${colors[status] || 'bg-gray-500/10 text-gray-500 border-gray-500/20'}`}>
             {status}
         </span>
+    );
+}
+function HeaderFilter({ label, value, onChange, options }) {
+    return (
+        <div className="relative group/filter inline-block">
+            <select
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+                className="appearance-none bg-transparent pr-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest focus:outline-none cursor-pointer hover:text-white transition-colors"
+                title={`Filter by ${label}`}
+            >
+                <option value="ALL" className="bg-black text-white">{label}</option>
+                {options.map(opt => (
+                    <option key={opt} value={opt} className="bg-black text-white">{opt.replace('_', ' ')}</option>
+                ))}
+            </select>
+            <div className="absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none text-gray-600 group-hover/filter:text-white transition-colors">
+                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 9l-7 7-7-7" />
+                </svg>
+            </div>
+            {value !== 'ALL' && (
+                <div className="absolute -top-1 -right-2 w-1.5 h-1.5 bg-blue-500 rounded-full" />
+            )}
+        </div>
+    );
+}
+
+function FilterTag({ label, onClear }) {
+    return (
+        <div className="flex items-center gap-1.5 px-2 py-1 bg-white/5 border border-white/10 rounded-lg text-[9px] font-bold uppercase tracking-widest text-gray-400">
+            <span>{label}</span>
+            <button onClick={onClear} className="hover:text-white transition-colors">✕</button>
+        </div>
     );
 }

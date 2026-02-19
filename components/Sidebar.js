@@ -65,9 +65,9 @@ export default function Sidebar({ user }) {
                         </svg>
                     ),
                     subItems: [
-                        { label: 'All Tickets', href: '/dashboard' },
-                        { label: 'My Assigned', href: '/dashboard?filter=assigned' },
-                        { label: 'Open Issues', href: '/dashboard?status=OPEN' },
+                        { label: 'All Tickets', href: '/dashboard/tickets' },
+                        { label: 'My Assigned', href: '/dashboard/tickets?filter=assigned' },
+                        { label: 'Open Issues', href: '/dashboard/tickets?status=OPEN' },
                         { label: 'Create New', href: '/dashboard/create' },
                     ]
                 },

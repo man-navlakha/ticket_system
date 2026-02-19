@@ -12,6 +12,8 @@ export default function TeamClient({ user }) {
     const [inviteEmail, setInviteEmail] = useState('');
     const [inviteRole, setInviteRole] = useState('USER');
     const [feedback, setFeedback] = useState({ type: '', msg: '' });
+    const [roleFilter, setRoleFilter] = useState('ALL');
+    const [statusFilter, setStatusFilter] = useState('ALL');
 
     useEffect(() => {
         if (activeTab === 'members') fetchUsers();
@@ -91,10 +93,17 @@ export default function TeamClient({ user }) {
         }
     };
 
-    const filteredUsers = users.filter(u =>
-        u.username?.toLowerCase().includes(search.toLowerCase()) ||
-        u.email?.toLowerCase().includes(search.toLowerCase())
-    );
+    const filteredUsers = users.filter(u => {
+        const query = search.toLowerCase().trim();
+        const matchesSearch = !query ||
+            u.username?.toLowerCase().includes(query) ||
+            u.email?.toLowerCase().includes(query);
+
+        const matchesRole = roleFilter === 'ALL' || u.role === roleFilter;
+        const matchesStatus = statusFilter === 'ALL' || u.status === statusFilter;
+
+        return matchesSearch && matchesRole && matchesStatus;
+    });
 
     return (
         <div className="space-y-12 animate-in fade-in duration-700">
@@ -133,15 +142,34 @@ export default function TeamClient({ user }) {
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
                 {activeTab === 'members' && (
                     <div className="space-y-8">
-                        <div className="relative group max-w-md">
-                            <input
-                                type="text"
-                                placeholder="Filter by username or email sequence..."
-                                className="w-full h-11 bg-white/[0.03] border border-white/5 rounded-xl px-4 text-xs text-white placeholder:text-gray-700 focus:outline-none focus:border-white/20 transition-all font-medium [color-scheme:dark]"
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
-                            />
-                            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none opacity-20">🔍</div>
+                        <div className="flex flex-col gap-4">
+                            <div className="relative group max-w-md">
+                                <input
+                                    type="text"
+                                    placeholder="Filter by username or email sequence..."
+                                    className="w-full h-11 bg-white/[0.03] border border-white/5 rounded-xl px-4 text-xs text-white placeholder:text-gray-700 focus:outline-none focus:border-white/20 transition-all font-medium [color-scheme:dark]"
+                                    value={search}
+                                    onChange={(e) => setSearch(e.target.value)}
+                                />
+                                <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none opacity-20">🔍</div>
+                            </div>
+
+                            {(search || roleFilter !== 'ALL' || statusFilter !== 'ALL') && (
+                                <div className="flex items-center gap-4">
+                                    <span className="text-[10px] font-bold text-gray-700 uppercase tracking-widest">Filters:</span>
+                                    <div className="flex flex-wrap gap-2">
+                                        {search && <FilterTag label={`Scope: ${search}`} onClear={() => setSearch('')} />}
+                                        {roleFilter !== 'ALL' && <FilterTag label={`Role: ${roleFilter}`} onClear={() => setRoleFilter('ALL')} />}
+                                        {statusFilter !== 'ALL' && <FilterTag label={`Status: ${statusFilter}`} onClear={() => setStatusFilter('ALL')} />}
+                                    </div>
+                                    <button
+                                        onClick={() => { setSearch(''); setRoleFilter('ALL'); setStatusFilter('ALL'); }}
+                                        className="text-[10px] font-bold text-blue-500 hover:text-blue-400 uppercase tracking-widest transition-colors"
+                                    >
+                                        Clear All
+                                    </button>
+                                </div>
+                            )}
                         </div>
 
                         <div className="rounded-[2rem] border border-white/5 bg-white/[0.02] overflow-hidden">
@@ -149,8 +177,22 @@ export default function TeamClient({ user }) {
                                 <thead>
                                     <tr className="border-b border-white/5 bg-white/[0.02]">
                                         <th className="px-8 py-4 text-[10px] font-black text-gray-600 uppercase tracking-widest">Operational Identity</th>
-                                        <th className="px-8 py-4 text-[10px] font-black text-gray-600 uppercase tracking-widest">Authority Role</th>
-                                        <th className="px-8 py-4 text-[10px] font-black text-gray-600 uppercase tracking-widest">Status</th>
+                                        <th className="px-8 py-4">
+                                            <HeaderFilter
+                                                label="Authority Role"
+                                                value={roleFilter}
+                                                onChange={setRoleFilter}
+                                                options={['ADMIN', 'AGENT', 'USER']}
+                                            />
+                                        </th>
+                                        <th className="px-8 py-4">
+                                            <HeaderFilter
+                                                label="Operational Status"
+                                                value={statusFilter}
+                                                onChange={setStatusFilter}
+                                                options={['ACTIVE', 'INACTIVE', 'PENDING']}
+                                            />
+                                        </th>
                                         <th className="px-8 py-4 text-[10px] font-black text-gray-600 uppercase tracking-widest text-right">Actions</th>
                                     </tr>
                                 </thead>
@@ -331,5 +373,39 @@ function ActionBtn({ label, color, onClick }) {
         <button onClick={onClick} className={`h-8 px-4 rounded-xl text-[9px] font-black uppercase tracking-widest border transition-all hover:text-white active:scale-95 ${colors[color]}`}>
             {label}
         </button>
+    );
+}
+function HeaderFilter({ label, value, onChange, options }) {
+    return (
+        <div className="relative group/filter flex items-center gap-2">
+            <select
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+                className="appearance-none bg-transparent pr-4 text-[10px] font-black text-gray-600 uppercase tracking-widest focus:outline-none cursor-pointer hover:text-white transition-colors"
+                title={`Filter by ${label}`}
+            >
+                <option value="ALL" className="bg-black text-white">{label}</option>
+                {options.map(opt => (
+                    <option key={opt} value={opt} className="bg-black text-white">{opt}</option>
+                ))}
+            </select>
+            <div className="absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none text-gray-700 group-hover/filter:text-white transition-colors">
+                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 9l-7 7-7-7" />
+                </svg>
+            </div>
+            {value !== 'ALL' && (
+                <div className="absolute -top-1.5 -right-2 w-1.5 h-1.5 bg-blue-500 rounded-full" />
+            )}
+        </div>
+    );
+}
+
+function FilterTag({ label, onClear }) {
+    return (
+        <div className="flex items-center gap-1.5 px-2 py-1 bg-white/5 border border-white/10 rounded-lg text-[9px] font-bold uppercase tracking-widest text-gray-400">
+            <span>{label}</span>
+            <button onClick={onClear} className="hover:text-white transition-colors">✕</button>
+        </div>
     );
 }
