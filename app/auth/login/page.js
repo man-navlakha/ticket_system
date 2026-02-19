@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
@@ -10,6 +10,18 @@ export default function LoginPage() {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const router = useRouter();
+
+    useEffect(() => {
+        const checkSession = async () => {
+            try {
+                const res = await fetch('/api/auth/me');
+                if (res.ok) router.push('/dashboard');
+            } catch (err) {
+                console.error('Session check failed:', err);
+            }
+        };
+        checkSession();
+    }, [router]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -27,50 +39,53 @@ export default function LoginPage() {
                 router.push('/dashboard');
             } else {
                 const data = await res.json();
-                setError(data.error || 'Login failed');
+                setError(data.error || 'Invalid credentials');
             }
         } catch (err) {
-            setError('An error occurred');
+            setError('An error occurred. Please try again.');
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div className="w-full">
-            <h1 className="text-2xl font-bold tracking-tight text-center mb-6">Log in to your account</h1>
+        <div className="space-y-8">
+            <div className="text-center space-y-2">
+                <h1 className="text-2xl font-bold tracking-tight text-white">Welcome back</h1>
+                <p className="text-sm text-gray-500 font-medium">Log in to your enterprise workspace.</p>
+            </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-1.5">
-                    <label className="text-xs font-medium uppercase tracking-wider text-[#666666] dark:text-[#888888]">Username or Email</label>
-                    <input
-                        type="text"
-                        placeholder="user@example.com"
-                        className="w-full px-3 py-2 bg-white dark:bg-black border border-[#eaeaea] dark:border-[#333333] rounded-md focus:outline-none focus:ring-1 focus:ring-black dark:focus:ring-white transition-all duration-200 text-sm"
-                        value={identifier}
-                        onChange={(e) => setIdentifier(e.target.value)}
-                        required
-                    />
-                </div>
-                <div className="space-y-1.5">
-                    <div className="flex justify-between items-center">
-                        <label className="text-xs font-medium uppercase tracking-wider text-[#666666] dark:text-[#888888]">Password</label>
-                        <Link href="/auth/forgot-password" size="sm" className="text-xs text-[#666666] dark:text-[#888888] hover:text-black dark:hover:text-white transition-colors duration-200">
-                            Forgot password?
-                        </Link>
+            <form onSubmit={handleSubmit} className="space-y-5">
+                <div className="space-y-4">
+                    <div className="space-y-2">
+                        <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 ml-1">Identity</label>
+                        <input
+                            type="text"
+                            placeholder="Email or Username"
+                            required
+                            className="w-full h-12 px-4 bg-black border border-white/10 rounded-xl text-sm text-white placeholder:text-gray-700 focus:outline-none focus:border-white/30 transition-all focus:bg-white/[0.02]"
+                            value={identifier}
+                            onChange={(e) => setIdentifier(e.target.value)}
+                        />
                     </div>
-                    <input
-                        type="password"
-                        placeholder="••••••••"
-                        className="w-full px-3 py-2 bg-white dark:bg-black border border-[#eaeaea] dark:border-[#333333] rounded-md focus:outline-none focus:ring-1 focus:ring-black dark:focus:ring-white transition-all duration-200 text-sm"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                    />
+                    <div className="space-y-2">
+                        <div className="flex justify-between items-center ml-1">
+                            <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500">Password</label>
+                            <Link href="/auth/forgot-password" size="sm" className="text-[10px] font-bold text-gray-600 hover:text-white transition-colors">Forgot?</Link>
+                        </div>
+                        <input
+                            type="password"
+                            placeholder="••••••••"
+                            required
+                            className="w-full h-12 px-4 bg-black border border-white/10 rounded-xl text-sm text-white placeholder:text-gray-700 focus:outline-none focus:border-white/30 transition-all focus:bg-white/[0.02]"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                        />
+                    </div>
                 </div>
 
                 {error && (
-                    <div className="bg-[#fee2e2] dark:bg-[#450a0a] border border-[#ef4444] text-[#b91c1c] dark:text-[#f87171] px-3 py-2 rounded-md text-xs">
+                    <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-bold rounded-xl text-center">
                         {error}
                     </div>
                 )}
@@ -78,18 +93,16 @@ export default function LoginPage() {
                 <button
                     type="submit"
                     disabled={loading}
-                    className="w-full bg-black dark:bg-white text-white dark:text-black py-2 px-4 rounded-md font-medium text-sm hover:opacity-90 active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full h-12 bg-white text-black font-bold text-xs uppercase tracking-widest rounded-xl hover:bg-gray-200 transition-all active:scale-[0.98] disabled:opacity-50 mt-2 shadow-lg shadow-white/5"
                 >
-                    {loading ? 'Logging in...' : 'Log In'}
+                    {loading ? 'Authenticating...' : 'Sign In'}
                 </button>
             </form>
 
-            <div className="mt-8 pt-6 border-t border-[#eaeaea] dark:border-[#333333] text-center">
-                <p className="text-sm text-[#666666] dark:text-[#888888]">
-                    Don&apos;t have an account?{' '}
-                    <Link href="/auth/register" className="font-medium text-black dark:text-white hover:underline underline-offset-4">
-                        Sign up for free
-                    </Link>
+            <div className="pt-6 border-t border-white/5 text-center">
+                <p className="text-xs text-gray-500 font-medium">
+                    Don't have an account? {' '}
+                    <Link href="/auth/register" className="text-white font-bold hover:underline underline-offset-4">Request Access</Link>
                 </p>
             </div>
         </div>

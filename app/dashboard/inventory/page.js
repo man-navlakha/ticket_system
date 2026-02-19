@@ -8,7 +8,14 @@ import BulkInventoryUpload from "@/components/BulkInventoryUpload";
 import PageHeader from "@/components/PageHeader";
 
 export const dynamic = 'force-dynamic';
-export const metadata = { title: "Hardware Inventory" };
+export const metadata = {
+    title: "Hardware Inventory & Asset Management",
+    description: "Track and manage enterprise hardware assets. Real-time visibility into laptop assignments, warranty status, and lifecycle management.",
+    openGraph: {
+        title: "Hardware Inventory | Man's Support Desk",
+        description: "Enterprise-grade asset management for modern IT teams.",
+    }
+};
 
 export default async function InventoryPage() {
     const user = await getCurrentUser();

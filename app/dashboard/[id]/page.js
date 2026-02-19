@@ -17,11 +17,18 @@ export async function generateMetadata({ params }) {
     const { id } = await params;
     const ticket = await prisma.ticket.findUnique({
         where: { id },
-        select: { title: true }
+        select: { title: true, status: true, priority: true }
     });
 
+    if (!ticket) return { title: "Ticket Not Found" };
+
     return {
-        title: ticket ? `Ticket: ${ticket.title}` : "Ticket Not Found"
+        title: `Ticket: ${ticket.title}`,
+        description: `Status: ${ticket.status} | Priority: ${ticket.priority} - Enterprise IT support ticket in Man's Support Desk workspace.`,
+        openGraph: {
+            title: ticket.title,
+            description: `IT Support Ticket #${id.slice(0, 8)}`,
+        }
     };
 }
 
@@ -122,8 +129,8 @@ export default async function TicketPage({ params }) {
                                 <div className="flex items-center gap-2">
                                     <span>Priority:</span>
                                     <span className={`font-medium ${ticket.priority === 'HIGH' ? 'text-red-400' :
-                                            ticket.priority === 'MEDIUM' ? 'text-amber-400' :
-                                                'text-green-400'
+                                        ticket.priority === 'MEDIUM' ? 'text-amber-400' :
+                                            'text-green-400'
                                         }`}>{ticket.priority}</span>
                                 </div>
 

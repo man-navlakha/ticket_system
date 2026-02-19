@@ -1,11 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import LandingNav from '@/components/LandingNav';
 import FloatingLines from '@/components/FloatingLines';
 
 export default function Home() {
+  const router = useRouter();
   const [searchTicket, setSearchTicket] = useState('');
   const [ticketData, setTicketData] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -14,6 +16,20 @@ export default function Home() {
   const [requestStatus, setRequestStatus] = useState('idle'); // idle, loading, success, error
   const [requestError, setRequestError] = useState('');
   const [isVisible, setIsVisible] = useState(true);
+
+  useEffect(() => {
+    const checkSession = async () => {
+      try {
+        const res = await fetch('/api/auth/me');
+        if (res.ok) {
+          router.push('/dashboard');
+        }
+      } catch (err) {
+        console.error('Session check failed:', err);
+      }
+    };
+    checkSession();
+  }, [router]);
 
   // ... (handleSearch remains the same)
 
@@ -100,22 +116,7 @@ export default function Home() {
       <LandingNav />
 
       {/* Announcement Banner */}
-      {/* Announcement Banner */}
-      {isVisible && (
-        <div className="fixed top-16 left-0 right-0 z-40 bg-[#141820] border-b border-white/5">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between text-sm">
-            <p className="text-gray-400">
-              System Status: <span className="font-medium text-white">All Systems Operational</span>
-            </p>
-            <button
-              onClick={() => setIsVisible(false)}
-              className="text-xs text-gray-500 hover:text-white transition-colors"
-            >
-              Dismiss
-            </button>
-          </div>
-        </div>
-      )}
+
 
       <main className="pt-24">
         {/* Hero Section */}
@@ -166,264 +167,242 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Quick Ticket Lookup */}
-        <section className="px-4 sm:px-6 lg:px-8 py-16 border-t border-white/5 bg-[#0B0E14]/50">
-          <div className="max-w-2xl mx-auto">
-            <h2 className="text-2xl font-light tracking-tight mb-6 text-center text-white">Track Your Ticket</h2>
-            <form onSubmit={handleSearch} className="space-y-4">
-              <div className="flex gap-2 relative">
-                <input
-                  type="text"
-                  placeholder="Enter ticket ID (e.g., cl...)"
-                  value={searchTicket}
-                  onChange={(e) => setSearchTicket(e.target.value)}
-                  className="flex-1 bg-[#141820] border border-white/10 rounded-xl px-5 py-4 text-white placeholder:text-gray-500 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/20 transition-all shadow-inner"
-                />
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="absolute right-2 top-2 bottom-2 px-6 rounded-lg bg-white text-black font-semibold text-sm hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {loading ? 'Searching...' : 'Search'}
-                </button>
+        {/* Statistics - Vercel Style */}
+        <section className="border-y border-white/10 bg-black">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-white/10">
+              <div className="py-8 md:py-12 px-8 text-center">
+                <div className="text-4xl md:text-5xl font-bold tracking-tight text-white mb-2">1,250+</div>
+                <div className="text-sm text-gray-400 font-mono uppercase tracking-wider">Tickets Resolved</div>
               </div>
+              <div className="py-8 md:py-12 px-8 text-center">
+                <div className="text-4xl md:text-5xl font-bold tracking-tight text-white mb-2">98%</div>
+                <div className="text-sm text-gray-400 font-mono uppercase tracking-wider">Satisfaction Rate</div>
+              </div>
+              <div className="py-8 md:py-12 px-8 text-center">
+                <div className="text-4xl md:text-5xl font-bold tracking-tight text-white mb-2">15m</div>
+                <div className="text-sm text-gray-400 font-mono uppercase tracking-wider">Avg Response</div>
+              </div>
+            </div>
+          </div>
+        </section>
 
-              {error && (
-                <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm text-center animate-in fade-in slide-in-from-top-2">
-                  {error}
-                </div>
-              )}
+        {/* Quick Ticket Lookup - Vercel Style */}
+        <section className="py-24 px-4 border-b border-white/10 bg-black relative overflow-hidden">
+          {/* Background grid pattern */}
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
 
-              {ticketData && (
-                <div className="p-5 rounded-xl bg-[#141820] border border-white/10 animate-in fade-in slide-in-from-bottom-2 shadow-lg">
-                  <div className="flex items-start justify-between mb-2">
-                    <div>
-                      <p className="font-semibold text-white">Ticket #{ticketData.id.slice(0, 8)}</p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className={`w-2 h-2 rounded-full ${ticketData.status === 'OPEN' ? 'bg-green-500' :
-                          ticketData.status === 'IN_PROGRESS' ? 'bg-amber-500' :
-                            ticketData.status === 'RESOLVED' ? 'bg-blue-500' :
-                              'bg-gray-500'
-                          } animate-pulse`}></span>
-                        <p className="text-sm text-gray-400">Status: {ticketData.status.replace('_', ' ')}</p>
-                      </div>
-                    </div>
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium border ${ticketData.priority === 'HIGH' ? 'bg-red-500/10 text-red-400 border-red-500/20' :
-                      ticketData.priority === 'MEDIUM' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
-                        'bg-green-500/10 text-green-400 border-green-500/20'
-                      }`}>
-                      {ticketData.priority} Priority
-                    </span>
-                  </div>
-                  <div className="mt-4 pt-3 border-t border-white/5 flex justify-between text-xs text-gray-500">
-                    <span>Last updated: {new Date(ticketData.updatedAt || ticketData.createdAt).toLocaleString()}</span>
-                    <span>Assigned to: Support Team</span>
-                  </div>
+          <div className="max-w-3xl mx-auto relative z-10 text-center">
+            <h2 className="text-3xl font-bold tracking-tight text-white mb-8">Track Ticket Status</h2>
+            <form onSubmit={handleSearch} className="relative max-w-lg mx-auto transform transition-all">
+              <div className="relative group">
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-pink-600 to-purple-600 rounded-lg blur opacity-20 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
+                <div className="relative flex items-center bg-black rounded-lg border border-white/10 p-1">
+                  <input
+                    type="text"
+                    placeholder="Enter ticket ID (e.g., ticket-123...)"
+                    value={searchTicket}
+                    onChange={(e) => setSearchTicket(e.target.value)}
+                    className="flex-1 bg-transparent px-4 py-3 text-white placeholder:text-gray-500 focus:outline-none text-sm font-mono"
+                  />
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="px-6 py-2 bg-white text-black rounded text-sm font-semibold hover:bg-gray-200 transition-colors disabled:opacity-50"
+                  >
+                    {loading ? 'Searching...' : 'Track'}
+                  </button>
                 </div>
-              )}
-              <p className="text-xs text-gray-500 text-center">No account needed to check ticket status</p>
+              </div>
             </form>
+
+            {error && (
+              <div className="mt-6 p-4 rounded border border-red-500/20 bg-red-500/10 text-red-400 text-sm">
+                {error}
+              </div>
+            )}
+
+            {ticketData && (
+              <div className="mt-8 p-6 rounded-xl border border-white/10 bg-zinc-900/50 backdrop-blur text-left max-w-lg mx-auto animate-in fade-in slide-in-from-bottom-4 shadow-2xl">
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <h3 className="text-white font-medium">Ticket #{ticketData.id.slice(0, 8)}</h3>
+                    <div className="mt-1 flex items-center gap-2">
+                      <div className={`w-2 h-2 rounded-full ${ticketData.status === 'OPEN' ? 'bg-green-500' : ticketData.status === 'RESOLVED' ? 'bg-blue-500' : 'bg-gray-500'}`} />
+                      <span className="text-xs text-gray-400 capitalize">{ticketData.status.replace('_', ' ').toLowerCase()}</span>
+                    </div>
+                  </div>
+                  <span className="text-xs font-mono border border-white/10 px-2 py-1 rounded text-gray-400">{ticketData.priority}</span>
+                </div>
+                <div className="text-xs text-gray-500 pt-4 border-t border-white/5 flex justify-between">
+                  <span>Updated {new Date(ticketData.updatedAt || ticketData.createdAt).toLocaleDateString()}</span>
+                </div>
+              </div>
+            )}
           </div>
         </section>
 
-        {/* Live Statistics */}
-        <section className="px-4 sm:px-6 lg:px-8 py-20 border-t border-white/5">
-          <div className="max-w-6xl mx-auto">
-            <h2 className="text-2xl font-light tracking-tight mb-12 text-center text-white">By The Numbers</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div className="p-8 rounded-2xl bg-[#141820] border border-white/5 text-center hover:border-white/10 transition-colors group">
-                <div className="text-4xl font-light text-white mb-2 group-hover:text-blue-400 transition-colors">1,250+</div>
-                <p className="text-gray-500 text-sm uppercase tracking-wider font-semibold">Tickets Resolved</p>
+        {/* Features - Vercel Style: Bento Grid */}
+        <section className="py-32 px-4 sm:px-6 lg:px-8 bg-black">
+          <div className="max-w-7xl mx-auto">
+            <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-center mb-20 bg-clip-text text-transparent bg-gradient-to-b from-white to-white/50">
+              Everything you need to <br /> scale support.
+            </h2>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Large Card 1 */}
+              <div className="md:col-span-2 p-8 rounded-3xl border border-white/10 bg-zinc-900/20 hover:border-white/20 transition-colors relative overflow-hidden group">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/10 blur-[80px] rounded-full group-hover:bg-purple-500/20 transition-all duration-500"></div>
+                <div className="relative z-10">
+                  <div className="w-12 h-12 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center mb-6 text-2xl">⚡</div>
+                  <h3 className="text-xl font-semibold text-white mb-3">Smart Automation</h3>
+                  <p className="text-gray-400 leading-relaxed max-w-md">
+                    Auto-assign tickets based on priority and team expertise. SLA monitoring keeps everyone accountable with automated escalations.
+                  </p>
+                </div>
               </div>
-              <div className="p-8 rounded-2xl bg-[#141820] border border-white/5 text-center hover:border-white/10 transition-colors group">
-                <div className="text-4xl font-light text-white mb-2 group-hover:text-green-400 transition-colors">98%</div>
-                <p className="text-gray-500 text-sm uppercase tracking-wider font-semibold">Satisfaction Rate</p>
+
+              {/* Card 2 */}
+              <div className="p-8 rounded-3xl border border-white/10 bg-zinc-900/20 hover:border-white/20 transition-colors relative overflow-hidden group">
+                <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-blue-500/10 to-transparent opacity-50 group-hover:opacity-100 transition-opacity"></div>
+                <div className="relative z-10">
+                  <div className="w-12 h-12 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center mb-6 text-2xl">📦</div>
+                  <h3 className="text-xl font-semibold text-white mb-3">Inventory Sync</h3>
+                  <p className="text-gray-400 text-sm leading-relaxed">
+                    Link assets directly to support tickets for complete context.
+                  </p>
+                </div>
               </div>
-              <div className="p-8 rounded-2xl bg-[#141820] border border-white/5 text-center hover:border-white/10 transition-colors group">
-                <div className="text-4xl font-light text-white mb-2 group-hover:text-purple-400 transition-colors">15m</div>
-                <p className="text-gray-500 text-sm uppercase tracking-wider font-semibold">Average Response</p>
+
+              {/* Card 3 */}
+              <div className="p-8 rounded-3xl border border-white/10 bg-zinc-900/20 hover:border-white/20 transition-colors relative overflow-hidden group">
+                <div className="relative z-10">
+                  <div className="w-12 h-12 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center mb-6 text-2xl">👥</div>
+                  <h3 className="text-xl font-semibold text-white mb-3">Collaboration</h3>
+                  <p className="text-gray-400 text-sm leading-relaxed">
+                    Mention team members and maintain internal notes in real-time.
+                  </p>
+                </div>
+              </div>
+
+              {/* Large Card 2 */}
+              <div className="md:col-span-2 p-8 rounded-3xl border border-white/10 bg-zinc-900/20 hover:border-white/20 transition-colors relative overflow-hidden group">
+                <div className="absolute top-0 left-0 w-64 h-64 bg-pink-500/10 blur-[80px] rounded-full group-hover:bg-pink-500/20 transition-all duration-500"></div>
+                <div className="relative z-10">
+                  <div className="w-12 h-12 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center mb-6 text-2xl">✨</div>
+                  <h3 className="text-xl font-semibold text-white mb-3">AI Suggestions</h3>
+                  <p className="text-gray-400 leading-relaxed max-w-md">
+                    Automatic priority detection and categorization. Intelligent tagging accelerates resolution time by learning from past tickets.
+                  </p>
+                </div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* Features */}
-        <section className="px-4 sm:px-6 lg:px-8 py-20 border-t border-white/5 bg-[#0B0E14]">
-          <div className="max-w-6xl mx-auto">
-            <h2 className="text-2xl font-light tracking-tight mb-12 text-center text-white">Core Features</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-
-              <FeatureCard
-                icon="📦"
-                title="Inventory Management"
-                description="Track all company devices and hardware. Link assets directly to support tickets for complete context."
-              />
-              <FeatureCard
-                icon="⚙️"
-                title="Smart Automation"
-                description="Auto-assign tickets based on priority and team expertise. SLA monitoring keeps everyone accountable."
-              />
-              <FeatureCard
-                icon="👥"
-                title="Team Collaboration"
-                description="Mention team members, assign tasks, and maintain internal notes. Real-time updates keep everyone synced."
-              />
-              <FeatureCard
-                icon="📚"
-                title="Knowledge Base"
-                description="Search public help articles directly from the platform. Self-service solutions reduce ticket volume."
-              />
-              <FeatureCard
-                icon="✨"
-                title="AI Suggestions"
-                description="Automatic priority detection and categorization. Intelligent tagging accelerates resolution time."
-              />
-              <FeatureCard
-                icon="📊"
-                title="Analytics & Reporting"
-                description="Real-time dashboards display performance metrics, team efficiency, and system health indicators."
-              />
-
+        {/* Request Access - Vercel Style: Minimal Form */}
+        <section id="request-access" className="py-32 px-4 border-t border-white/10 bg-black relative">
+          <div className="max-w-md mx-auto">
+            <div className="text-center mb-10">
+              <h2 className="text-2xl font-bold text-white mb-2">Request Access</h2>
+              <p className="text-gray-500 text-sm">Join the enterprise platform for modern support teams.</p>
             </div>
-          </div>
-        </section>
 
-        {/* How it works */}
-        <section className="px-4 sm:px-6 lg:px-8 py-20 border-t border-white/5">
-          <div className="max-w-6xl mx-auto">
-            <h2 className="text-2xl font-light tracking-tight mb-16 text-center text-white">How It Works</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-12 relative">
-              {/* Connecting Line (Desktop) */}
-              <div className="hidden md:block absolute top-12 left-[16%] right-[16%] h-px bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
-
-              <div className="text-center space-y-6 relative z-10">
-                <div className="w-24 h-24 rounded-full bg-[#141820] border border-white/10 flex items-center justify-center mx-auto shadow-2xl">
-                  <span className="text-3xl font-light text-white">1</span>
-                </div>
-                <div>
-                  <h3 className="font-semibold text-white text-lg mb-2">Submit Request</h3>
-                  <p className="text-sm text-gray-400 leading-relaxed max-w-xs mx-auto">Describe your issue in detail. Link company devices if applicable for immediate context.</p>
-                </div>
-              </div>
-
-              <div className="text-center space-y-6 relative z-10">
-                <div className="w-24 h-24 rounded-full bg-[#141820] border border-white/10 flex items-center justify-center mx-auto shadow-2xl">
-                  <span className="text-3xl font-light text-white">2</span>
-                </div>
-                <div>
-                  <h3 className="font-semibold text-white text-lg mb-2">Auto Assignment</h3>
-                  <p className="text-sm text-gray-400 leading-relaxed max-w-xs mx-auto">AI analyzes priority and assigns to the right team member based on expertise and availability.</p>
-                </div>
-              </div>
-
-              <div className="text-center space-y-6 relative z-10">
-                <div className="w-24 h-24 rounded-full bg-[#141820] border border-white/10 flex items-center justify-center mx-auto shadow-2xl">
-                  <span className="text-3xl font-light text-white">3</span>
-                </div>
-                <div>
-                  <h3 className="font-semibold text-white text-lg mb-2">Resolution & Feedback</h3>
-                  <p className="text-sm text-gray-400 leading-relaxed max-w-xs mx-auto">Receive regular updates and share feedback. Help us continuously improve the service.</p>
-                </div>
-              </div>
-
-            </div>
-          </div>
-        </section>
-
-        {/* Request Access */}
-        <section id="request-access" className="px-4 sm:px-6 lg:px-8 py-20 border-t border-white/5 bg-[#0B0E14]">
-          <div className="max-w-xl mx-auto">
-            <h2 className="text-3xl font-light tracking-tight mb-4 text-center text-white">Request Access</h2>
-            <p className="text-gray-400 text-center mb-10 max-w-md mx-auto">
-              This is an invite-only platform. Contact your system administrator or submit your information below.
-            </p>
-
-            <form onSubmit={handleRequestAccess} className="space-y-5 bg-[#141820] p-8 rounded-2xl border border-white/5 shadow-2xl">
-              <div className="space-y-2">
-                <label className="text-xs font-medium text-gray-400 uppercase tracking-wide">Full Name</label>
+            <form onSubmit={handleRequestAccess} className="space-y-4">
+              <div>
                 <input
                   required
                   type="text"
                   name="name"
-                  placeholder="John Doe"
+                  placeholder="Full Name"
                   value={formData.name}
                   onChange={handleFormChange}
-                  className="w-full bg-[#0B0E14] border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-gray-600 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/20 transition-colors"
+                  className="w-full bg-zinc-900/50 border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-gray-600 focus:border-white/30 focus:outline-none transition-colors text-sm"
                 />
               </div>
-
-              <div className="space-y-2">
-                <label className="text-xs font-medium text-gray-400 uppercase tracking-wide">Work Email</label>
+              <div>
                 <input
                   required
                   type="email"
                   name="email"
-                  placeholder="john@company.com"
+                  placeholder="Work Email"
                   value={formData.email}
                   onChange={handleFormChange}
-                  className="w-full bg-[#0B0E14] border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-gray-600 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/20 transition-colors"
+                  className="w-full bg-zinc-900/50 border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-gray-600 focus:border-white/30 focus:outline-none transition-colors text-sm"
                 />
               </div>
-
-              <div className="space-y-2">
-                <label className="text-xs font-medium text-gray-400 uppercase tracking-wide">Department</label>
+              <div>
                 <input
                   required
                   type="text"
                   name="department"
-                  placeholder="e.g., Engineering, Marketing"
+                  placeholder="Department"
                   value={formData.department}
                   onChange={handleFormChange}
-                  className="w-full bg-[#0B0E14] border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-gray-600 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/20 transition-colors"
+                  className="w-full bg-zinc-900/50 border border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-gray-600 focus:border-white/30 focus:outline-none transition-colors text-sm"
                 />
               </div>
 
               {requestStatus === 'success' && (
-                <div className="p-3 bg-green-500/10 border border-green-500/20 text-green-400 text-sm rounded-lg text-center animate-in fade-in slide-in-from-top-2">
-                  Request submitted successfully! We will contact you shortly.
-                </div>
+                <div className="text-green-400 text-xs text-center py-2">Request submitted successfully!</div>
               )}
-
               {requestStatus === 'error' && (
-                <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-400 text-sm rounded-lg text-center animate-in fade-in slide-in-from-top-2">
-                  {requestError || 'Something went wrong. Please try again.'}
-                </div>
+                <div className="text-red-400 text-xs text-center py-2">{requestError || 'Error submitting request'}</div>
               )}
 
               <button
                 type="submit"
                 disabled={requestStatus === 'loading' || requestStatus === 'success'}
-                className="w-full px-6 py-4 rounded-lg bg-white text-black font-bold text-sm hover:bg-gray-200 transition-all mt-4 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full py-3 bg-white text-black font-medium rounded-lg hover:bg-gray-100 transition-colors text-sm disabled:opacity-50"
               >
-                {requestStatus === 'loading' ? 'Submitting...' : 'Submit Request'}
+                {requestStatus === 'loading' ? 'Submitting...' : 'Join Waitlist'}
               </button>
             </form>
           </div>
         </section>
 
-        {/* Footer */}
-        <footer className="px-4 sm:px-6 lg:px-8 py-12 border-t border-white/5 bg-[#080a0f]">
-          <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-            <p className="text-sm text-gray-500">© 2026 Enterprise Support Hub. All rights reserved.</p>
-            <div className="flex gap-8 text-sm text-gray-500">
-              <a href="#" className="hover:text-white transition-colors">Status</a>
-              <a href="#" className="hover:text-white transition-colors">Documentation</a>
-              <a href="#" className="hover:text-white transition-colors">Contact</a>
+        <footer className="py-12 border-t border-white/10 bg-black relative overflow-hidden">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col gap-12 relative z-10">
+            {/* Top Bar */}
+            <div className="flex flex-col md:flex-row items-center justify-between gap-6 text-sm text-gray-500 font-mono">
+              <div className="flex flex-col md:flex-row items-center gap-4 md:gap-8">
+                <span>© 2026 Man&apos;s Support Desk.</span>
+                <div className="flex gap-6">
+                  <a href="#" className="hover:text-white transition-colors">Privacy</a>
+                  <a href="#" className="hover:text-white transition-colors">Terms</a>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-4">
+                <a href="#" className="p-2 rounded-lg border border-white/10 hover:bg-white/5 hover:text-white transition-colors">
+                  {/* LinkedIn Icon */}
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" /></svg>
+                </a>
+                <a href="#" className="p-2 rounded-lg border border-white/10 hover:bg-white/5 hover:text-white transition-colors">
+                  {/* X / Twitter Icon */}
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" /></svg>
+                </a>
+                <div className="h-4 w-px bg-white/10 mx-2"></div>
+                <button
+                  onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                  className="flex items-center gap-2 px-4 py-2 rounded-full border border-white/10 hover:bg-white/5 hover:text-white transition-colors group"
+                >
+                  <span>Top</span>
+                  <svg className="w-3 h-3 group-hover:-translate-y-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" /></svg>
+                </button>
+              </div>
+            </div>
+
+            {/* Huge Footer Text */}
+            <div className="w-full flex justify-center -z-10 pt-8 md:pt-16 pb-4">
+              <h1 className="text-[13vw] leading-[0.8] font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-[#ff4d4d] via-[#a259ff] to-[#7f00ff] text-center select-none -m-24">
+                MAN&apos;S SUPPORT
+              </h1>
             </div>
           </div>
         </footer>
 
       </main>
-    </div>
-  );
-}
-
-function FeatureCard({ icon, title, description }) {
-  return (
-    <div className="p-8 rounded-2xl bg-[#141820] border border-white/5 space-y-4 hover:bg-white/5 transition-all duration-300 hover:border-white/10 group">
-      <div className="text-3xl bg-white/5 w-14 h-14 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">{icon}</div>
-      <h3 className="font-semibold text-white text-lg group-hover:text-blue-400 transition-colors">{title}</h3>
-      <p className="text-sm text-gray-400 leading-relaxed">{description}</p>
     </div>
   );
 }

@@ -52,8 +52,8 @@ export default function DashboardSearch(props) {
                 type="text"
                 value={text}
                 onChange={(e) => setText(e.target.value)}
-                placeholder="Search tickets..."
-                className="w-full bg-white/5 border border-white/10 rounded-full py-2.5 pl-10 pr-4 text-sm text-white focus:outline-none focus:ring-1 focus:ring-white/20 transition-all placeholder:text-gray-500"
+                placeholder="Search..."
+                className="w-full bg-[#0A0A0A] border border-white/5 rounded-xl py-2 pl-10 pr-4 text-sm text-white placeholder:text-gray-700 focus:outline-none focus:border-white/20 focus:bg-white/[0.02] transition-all"
             />
         </div>
     );

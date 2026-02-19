@@ -36,33 +36,33 @@ export default function ForgotPasswordPage() {
     };
 
     return (
-        <div className="w-full">
-            <h1 className="text-2xl font-bold tracking-tight text-center mb-2">Forgot Password</h1>
-            <p className="text-sm text-[#666666] dark:text-[#888888] text-center mb-6">
-                Enter your email address to receive a reset link.
-            </p>
+        <div className="space-y-8">
+            <div className="text-center space-y-2">
+                <h1 className="text-2xl font-bold tracking-tight text-white">Reset Password</h1>
+                <p className="text-sm text-gray-500 font-medium">We'll send you a recovery link.</p>
+            </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-1.5">
-                    <label className="text-xs font-medium uppercase tracking-wider text-[#666666] dark:text-[#888888]">Email Address</label>
+            <form onSubmit={handleSubmit} className="space-y-5">
+                <div className="space-y-2">
+                    <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 ml-1">Email Address</label>
                     <input
                         type="email"
-                        placeholder="user@example.com"
-                        className="w-full px-3 py-2 bg-white dark:bg-black border border-[#eaeaea] dark:border-[#333333] rounded-md focus:outline-none focus:ring-1 focus:ring-black dark:focus:ring-white transition-all duration-200 text-sm"
+                        placeholder="user@enterprise.com"
+                        required
+                        className="w-full h-12 px-4 bg-black border border-white/10 rounded-xl text-sm text-white placeholder:text-gray-700 focus:outline-none focus:border-white/30 transition-all focus:bg-white/[0.02]"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        required
                     />
                 </div>
 
                 {message && (
-                    <div className="bg-[#f0f9ff] dark:bg-[#082f49] border border-[#0ea5e9] text-[#0369a1] dark:text-[#38bdf8] px-3 py-2 rounded-md text-xs">
+                    <div className="p-3 bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold rounded-xl text-center">
                         {message}
                     </div>
                 )}
 
                 {error && (
-                    <div className="bg-[#fee2e2] dark:bg-[#450a0a] border border-[#ef4444] text-[#b91c1c] dark:text-[#f87171] px-3 py-2 rounded-md text-xs">
+                    <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-bold rounded-xl text-center">
                         {error}
                     </div>
                 )}
@@ -70,15 +70,15 @@ export default function ForgotPasswordPage() {
                 <button
                     type="submit"
                     disabled={loading}
-                    className="w-full bg-black dark:bg-white text-white dark:text-black py-2 px-4 rounded-md font-medium text-sm hover:opacity-90 active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full h-12 bg-white text-black font-bold text-xs uppercase tracking-widest rounded-xl hover:bg-gray-200 transition-all active:scale-[0.98] disabled:opacity-50 mt-2 shadow-lg shadow-white/5"
                 >
-                    {loading ? 'Sending link...' : 'Send Reset Link'}
+                    {loading ? 'Sending...' : 'Send Recovery Link'}
                 </button>
             </form>
 
-            <div className="mt-8 pt-6 border-t border-[#eaeaea] dark:border-[#333333] text-center">
-                <Link href="/auth/login" className="text-sm font-medium text-black dark:text-white hover:underline underline-offset-4">
-                    Back to login
+            <div className="pt-6 border-t border-white/5 text-center">
+                <Link href="/auth/login" className="text-[10px] font-bold text-gray-400 uppercase tracking-widest hover:text-white transition-colors">
+                    Return to login
                 </Link>
             </div>
         </div>

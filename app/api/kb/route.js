@@ -11,12 +11,14 @@ export async function GET(request) {
 
         const { searchParams } = new URL(request.url);
         const categoryId = searchParams.get('categoryId');
+        const categoryName = searchParams.get('category'); // Added to support name-based filtering
         const published = searchParams.get('published') !== 'false'; // default true
         const search = searchParams.get('search');
 
         const where = {
             ...(published && { published: true }),
             ...(categoryId && { categoryId }),
+            ...(categoryName && { category: { name: categoryName } }), // Filter by name
             ...(search && {
                 OR: [
                     { title: { contains: search, mode: 'insensitive' } },

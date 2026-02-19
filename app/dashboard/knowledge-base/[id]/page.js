@@ -49,171 +49,146 @@ export default function ArticleDetailPage() {
     };
 
     const handleDelete = async () => {
-        if (!confirm('Are you sure you want to delete this article? This action cannot be undone.')) {
-            return;
-        }
-
+        if (!confirm('Are you sure?')) return;
         setIsDeleting(true);
         try {
-            const res = await fetch(`/api/kb/${params.id}`, {
-                method: 'DELETE',
-            });
-
-            if (res.ok) {
-                router.push('/dashboard/knowledge-base');
-                router.refresh();
-            } else {
-                const data = await res.json();
-                alert(data.error || 'Failed to delete article');
-            }
+            const res = await fetch(`/api/kb/${params.id}`, { method: 'DELETE' });
+            if (res.ok) router.push('/dashboard/knowledge-base');
         } catch (error) {
-            console.error('Failed to delete article:', error);
-            alert('An error occurred while deleting the article');
+            console.error('Delete failed:', error);
         } finally {
             setIsDeleting(false);
         }
     };
 
-    if (loading) {
-        return (
-            <div className="max-w-4xl mx-auto text-center py-20">
-                <div className="inline-block w-8 h-8 border-4 border-white/20 border-t-white/80 rounded-full animate-spin mb-4" />
-                <p className="text-gray-400">Loading article...</p>
+    if (loading) return (
+        <div className="space-y-8 animate-pulse">
+            <div className="h-4 w-48 bg-white/5 rounded" />
+            <div className="h-12 w-3/4 bg-white/5 rounded" />
+            <div className="h-6 w-1/2 bg-white/5 rounded" />
+            <div className="space-y-4 pt-8">
+                <div className="h-4 w-full bg-white/5 rounded" />
+                <div className="h-4 w-full bg-white/5 rounded" />
+                <div className="h-4 w-5/6 bg-white/5 rounded" />
             </div>
-        );
-    }
+        </div>
+    );
 
-    if (!article) {
-        return null;
-    }
+    if (!article) return null;
 
     return (
-        <div className="max-w-4xl mx-auto">
-            <div className="flex items-center justify-between mb-6">
-                <Link
-                    href="/dashboard/knowledge-base"
-                    className="text-sm text-gray-400 hover:text-white inline-flex items-center gap-2 transition-colors"
-                >
-                    <span>←</span> Back to Knowledge Base
-                </Link>
-
-                {user?.role === 'ADMIN' && (
-                    <button
-                        onClick={handleDelete}
-                        disabled={isDeleting}
-                        className="px-4 py-2 bg-red-500/10 text-red-500 border border-red-500/20 rounded-xl hover:bg-red-500/20 transition-colors flex items-center gap-2 text-sm font-bold disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                        {isDeleting ? (
-                            <>
-                                <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                                Deleting...
-                            </>
-                        ) : (
-                            <>
-                                🗑️ Delete Article
-                            </>
-                        )}
-                    </button>
-                )}
-            </div>
-
-            <article className="bg-white/5 border border-white/10 rounded-2xl p-8 md:p-12">
-                {/* Category Badge */}
-                {article.category && (
-                    <div className="mb-4">
-                        <span className="inline-flex items-center gap-1 px-3 py-1 rounded-md text-sm font-bold bg-blue-500/10 text-blue-500 border border-blue-500/20">
-                            {article.category.icon} {article.category.name}
-                        </span>
-                    </div>
-                )}
-
-                {/* Title */}
-                <h1 className="text-4xl font-bold text-white mb-4">
-                    {article.title}
-                </h1>
-
-                {/* Summary */}
-                {article.summary && (
-                    <p className="text-xl text-gray-400 mb-6 leading-relaxed">
-                        {article.summary}
-                    </p>
-                )}
-
-                {/* Tags */}
-                {article.tags && article.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mb-6">
-                        {article.tags.map(({ tag }) => (
-                            <span
-                                key={tag.id}
-                                className="px-2 py-1 rounded-md text-xs font-bold bg-white/5 text-gray-400 border border-white/10"
-                            >
-                                #{tag.name}
-                            </span>
-                        ))}
-                    </div>
-                )}
-
-                {/* Metadata */}
-                <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 pb-6 mb-8 border-b border-white/10">
-                    <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 font-bold text-xs">
-                            {article.createdBy?.username?.[0]?.toUpperCase() || 'A'}
-                        </div>
-                        <span>{article.createdBy?.username || article.createdBy?.email || 'Support Team'}</span>
-                    </div>
-                    <span>•</span>
-                    <span>{new Date(article.createdAt).toLocaleDateString()}</span>
-                    <span>•</span>
-                    <span>👁️ {article.views || 0} views</span>
+        <div className="flex gap-12 animate-in fade-in duration-500">
+            {/* Main Content */}
+            <article className="flex-1 max-w-3xl min-w-0">
+                {/* Breadcrumbs */}
+                <div className="flex items-center gap-2 text-xs font-medium text-gray-500 uppercase tracking-widest mb-8">
+                    <Link href="/dashboard/knowledge-base" className="hover:text-white transition-colors">KB</Link>
+                    <span>/</span>
+                    <span className="text-gray-400 truncate max-w-[150px]">{article.category?.name || 'General'}</span>
+                    <span>/</span>
+                    <span className="text-white truncate max-w-[200px]">{article.title}</span>
                 </div>
 
+                {/* Header */}
+                <header className="space-y-4 mb-12">
+                    <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-white leading-[1.1]">
+                        {article.title}
+                    </h1>
+                    <p className="text-xl text-gray-400 leading-relaxed font-medium">
+                        {article.summary}
+                    </p>
+
+                    <div className="flex items-center gap-4 pt-4">
+                        <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-[10px] font-bold text-white">
+                                {article.createdBy?.username?.[0]?.toUpperCase() || 'A'}
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="text-sm font-bold text-white">{article.createdBy?.username || 'Team'}</span>
+                                <span className="text-[10px] text-gray-500 uppercase tracking-widest">Article Author</span>
+                            </div>
+                        </div>
+                        <span className="text-gray-700">|</span>
+                        <div className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">
+                            Updated {new Date(article.createdAt).toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}
+                        </div>
+                    </div>
+                </header>
+
                 {/* Content */}
-                <div className="prose prose-invert prose-lg max-w-none">
+                <div className="prose prose-invert prose-blue max-w-none 
+                    prose-headings:text-white prose-headings:font-bold prose-headings:tracking-tight
+                    prose-p:text-gray-400 prose-p:leading-relaxed prose-p:text-lg
+                    prose-strong:text-white prose-strong:font-bold
+                    prose-pre:bg-[#0A0A0A] prose-pre:border prose-pre:border-white/5 prose-pre:rounded-xl
+                    prose-code:text-blue-400 prose-code:bg-blue-400/10 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm
+                    prose-li:text-gray-400 prose-li:text-lg
+                    prose-hr:border-white/5
+                    ">
                     <ReactMarkdown
                         remarkPlugins={[remarkGfm]}
                         components={{
-                            h1: ({ node, ...props }) => <h1 className="text-3xl font-bold text-white mt-8 mb-4 border-b border-white/10 pb-2" {...props} />,
-                            h2: ({ node, ...props }) => <h2 className="text-2xl font-bold text-white mt-8 mb-4" {...props} />,
-                            h3: ({ node, ...props }) => <h3 className="text-xl font-bold text-gray-200 mt-6 mb-3" {...props} />,
-                            p: ({ node, ...props }) => <p className="mb-4 leading-relaxed text-gray-300" {...props} />,
-                            ul: ({ node, ...props }) => <ul className="list-disc pl-6 mb-4 text-gray-300 space-y-2" {...props} />,
-                            ol: ({ node, ...props }) => <ol className="list-decimal pl-6 mb-4 text-gray-300 space-y-2" {...props} />,
-                            li: ({ node, ...props }) => <li className="pl-1" {...props} />,
-                            strong: ({ node, ...props }) => <strong className="font-bold text-white" {...props} />,
-                            blockquote: ({ node, ...props }) => <blockquote className="border-l-4 border-blue-500 pl-4 py-1 my-4 bg-white/5 italic text-gray-300" {...props} />,
-                            code: ({ node, ...props }) => <code className="bg-black/50 px-1.5 py-0.5 rounded text-sm font-mono text-purple-300" {...props} />,
+                            h1: ({ node, ...props }) => <h1 className="text-3xl mt-12 mb-6" {...props} />,
+                            h2: ({ node, ...props }) => <h2 className="text-2xl mt-10 mb-5" {...props} />,
+                            h3: ({ node, ...props }) => <h3 className="text-xl mt-8 mb-4" {...props} />,
                         }}
                     >
                         {article.content}
                     </ReactMarkdown>
                 </div>
 
-                {/* Footer */}
-                <div className="mt-12 pt-6 border-t border-white/10">
-                    <p className="text-sm text-gray-500">
-                        Was this article helpful? Let us know by{' '}
-                        <Link href="/dashboard/create" className="text-blue-400 hover:underline">
-                            creating a ticket
-                        </Link>
-                        {' '}if you need more assistance.
-                    </p>
-                </div>
+                {/* Footer Actions */}
+                <footer className="mt-20 pt-10 border-t border-white/5 flex items-center justify-between">
+                    <div className="flex items-center gap-6">
+                        {user?.role === 'ADMIN' && (
+                            <button
+                                onClick={handleDelete}
+                                className="text-xs font-bold uppercase tracking-widest text-red-500 hover:text-red-400 transition-colors"
+                                disabled={isDeleting}
+                            >
+                                {isDeleting ? 'Deleting...' : 'Delete Article'}
+                            </button>
+                        )}
+                    </div>
+                    <Link href="/dashboard/knowledge-base" className="text-xs font-bold uppercase tracking-widest text-gray-500 hover:text-white transition-colors flex items-center gap-2">
+                        <span>←</span> Back to Base
+                    </Link>
+                </footer>
             </article>
 
-            {/* Related Ticket (if applicable) */}
-            {article.sourceTicketId && (
-                <div className="mt-6 p-4 rounded-xl bg-purple-500/10 border border-purple-500/20">
-                    <p className="text-sm text-purple-400">
-                        💡 This article was generated from{' '}
-                        <Link
-                            href={`/dashboard/${article.sourceTicketId}`}
-                            className="font-bold hover:underline"
-                        >
-                            a resolved support ticket
-                        </Link>
-                    </p>
+            {/* Right Sidebar (Table of Contents / Info) */}
+            <aside className="w-64 flex-shrink-0 hidden xl:block sticky top-8 h-fit space-y-8">
+                <div>
+                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-4 px-2">On this page</h4>
+                    <nav className="space-y-1">
+                        {/* Placeholder for real TOC generation if needed */}
+                        <p className="text-xs text-gray-600 px-3 py-2 italic">Auto-generated based on heading patterns.</p>
+                    </nav>
                 </div>
-            )}
+
+                <div className="p-4 rounded-xl border border-white/5 bg-[#0A0A0A] space-y-4">
+                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Stats</h4>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="text-center p-2 rounded bg-white/[0.02]">
+                            <div className="text-lg font-bold text-white">{article.views || 0}</div>
+                            <div className="text-[8px] text-gray-600 uppercase font-black">Views</div>
+                        </div>
+                        <div className="text-center p-2 rounded bg-white/[0.02]">
+                            <div className="text-lg font-bold text-white">{article.upvotes || 0}</div>
+                            <div className="text-[8px] text-gray-600 uppercase font-black">Upvotes</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="pt-4 px-2">
+                    <p className="text-xs text-gray-500 leading-relaxed mb-4">
+                        Found a mistake? Help us improve our documentation.
+                    </p>
+                    <Link href={`/dashboard/tickets/create?topic=KB:${article.id}`} className="text-xs font-bold text-blue-400 hover:text-blue-300 transition-colors">
+                        Report an issue →
+                    </Link>
+                </div>
+            </aside>
         </div>
     );
 }

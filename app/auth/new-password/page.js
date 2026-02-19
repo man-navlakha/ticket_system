@@ -54,45 +54,48 @@ function ResetPasswordForm() {
 
     if (!token) {
         return (
-            <div className="bg-[#fee2e2] dark:bg-[#450a0a] border border-[#ef4444] text-[#b91c1c] dark:text-[#f87171] px-3 py-2 rounded-md text-xs text-center">
-                Invalid or missing reset token. Please request a new link.
+            <div className="p-4 bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-bold rounded-xl text-center leading-relaxed">
+                Invalid or missing reset token. <br />
+                Please request a new link.
             </div>
         )
     }
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-1.5">
-                <label className="text-xs font-medium uppercase tracking-wider text-[#666666] dark:text-[#888888]">New Password</label>
-                <input
-                    type="password"
-                    placeholder="••••••••"
-                    className="w-full px-3 py-2 bg-white dark:bg-black border border-[#eaeaea] dark:border-[#333333] rounded-md focus:outline-none focus:ring-1 focus:ring-black dark:focus:ring-white transition-all duration-200 text-sm"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    required
-                />
-            </div>
-            <div className="space-y-1.5">
-                <label className="text-xs font-medium uppercase tracking-wider text-[#666666] dark:text-[#888888]">Confirm Password</label>
-                <input
-                    type="password"
-                    placeholder="••••••••"
-                    className="w-full px-3 py-2 bg-white dark:bg-black border border-[#eaeaea] dark:border-[#333333] rounded-md focus:outline-none focus:ring-1 focus:ring-black dark:focus:ring-white transition-all duration-200 text-sm"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    required
-                />
+        <form onSubmit={handleSubmit} className="space-y-5">
+            <div className="space-y-4">
+                <div className="space-y-2">
+                    <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 ml-1">New Password</label>
+                    <input
+                        type="password"
+                        placeholder="••••••••"
+                        required
+                        className="w-full h-12 px-4 bg-black border border-white/10 rounded-xl text-sm text-white placeholder:text-gray-700 focus:outline-none focus:border-white/30 transition-all focus:bg-white/[0.02]"
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                    />
+                </div>
+                <div className="space-y-2">
+                    <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 ml-1">Confirm Identity</label>
+                    <input
+                        type="password"
+                        placeholder="••••••••"
+                        required
+                        className="w-full h-12 px-4 bg-black border border-white/10 rounded-xl text-sm text-white placeholder:text-gray-700 focus:outline-none focus:border-white/30 transition-all focus:bg-white/[0.02]"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                    />
+                </div>
             </div>
 
             {message && (
-                <div className="bg-[#f0f9ff] dark:bg-[#082f49] border border-[#0ea5e9] text-[#0369a1] dark:text-[#38bdf8] px-3 py-2 rounded-md text-xs">
+                <div className="p-3 bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold rounded-xl text-center">
                     {message}
                 </div>
             )}
 
             {error && (
-                <div className="bg-[#fee2e2] dark:bg-[#450a0a] border border-[#ef4444] text-[#b91c1c] dark:text-[#f87171] px-3 py-2 rounded-md text-xs">
+                <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-bold rounded-xl text-center">
                     {error}
                 </div>
             )}
@@ -100,9 +103,9 @@ function ResetPasswordForm() {
             <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-black dark:bg-white text-white dark:text-black py-2 px-4 rounded-md font-medium text-sm hover:opacity-90 active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full h-12 bg-white text-black font-bold text-xs uppercase tracking-widest rounded-xl hover:bg-gray-200 transition-all active:scale-[0.98] disabled:opacity-50 mt-2 shadow-lg shadow-white/5"
             >
-                {loading ? 'Resetting...' : 'Reset Password'}
+                {loading ? 'Updating...' : 'Set New Password'}
             </button>
         </form>
     );
@@ -110,14 +113,20 @@ function ResetPasswordForm() {
 
 export default function NewPasswordPage() {
     return (
-        <div className="w-full">
-            <h1 className="text-2xl font-bold tracking-tight text-center mb-6">Reset your password</h1>
-            <Suspense fallback={<div className="text-center text-sm text-[#666666]">Loading...</div>}>
+        <div className="space-y-8">
+            <div className="text-center space-y-2">
+                <h1 className="text-2xl font-bold tracking-tight text-white">Security Update</h1>
+                <p className="text-sm text-gray-500 font-medium">Choose a strong new password.</p>
+            </div>
+
+            <Suspense fallback={<div className="text-center py-6 animate-pulse">
+                <div className="w-8 h-8 bg-white/5 rounded-full mx-auto" />
+            </div>}>
                 <ResetPasswordForm />
             </Suspense>
 
-            <div className="mt-8 pt-6 border-t border-[#eaeaea] dark:border-[#333333] text-center">
-                <Link href="/auth/login" className="text-sm font-medium text-black dark:text-white hover:underline underline-offset-4">
+            <div className="pt-6 border-t border-white/5 text-center">
+                <Link href="/auth/login" className="text-[10px] font-bold text-gray-400 uppercase tracking-widest hover:text-white transition-colors">
                     Back to login
                 </Link>
             </div>
