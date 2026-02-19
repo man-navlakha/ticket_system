@@ -61,7 +61,11 @@ export async function POST(request) {
         const data = {
             pid: json.pid,
             type: json.type,
-            status: json.status, // Allow setting status on create
+            status: json.status,
+            condition: json.condition,
+            department: json.department,
+            location: json.location,
+            assignedUser: json.assignedUser,
             assignedDate: json.assignedDate ? new Date(json.assignedDate) : null,
             returnDate: json.returnDate ? new Date(json.returnDate) : null,
             maintenanceDate: json.maintenanceDate ? new Date(json.maintenanceDate) : null,
@@ -71,12 +75,21 @@ export async function POST(request) {
             brand: json.brand,
             model: json.model,
             serialNumber: json.serialNumber,
+            password: json.password,
+            os: json.os,
+            ram: json.ram,
+            storage: json.storage,
+            processor: json.processor,
+            graphicsCard: json.graphicsCard,
+            hasCharger: !!json.hasCharger,
+            hasMouse: !!json.hasMouse,
             oldTag: json.oldTag,
             oldUser: json.oldUser,
             price: json.price ? parseFloat(json.price) : null,
-            components: json.components || [],
+            vendorInvoice: json.vendorInvoice,
             warrantyType: json.warrantyType,
-            systemSpecs: json.systemSpecs || undefined
+            systemSpecs: json.systemSpecs || undefined,
+            note: json.note
         };
 
         if (userId) {

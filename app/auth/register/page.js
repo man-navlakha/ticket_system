@@ -88,7 +88,7 @@ export default function RegisterPage() {
                             name="name"
                             placeholder="John Doe"
                             required
-                            className="w-full h-11 px-4 bg-black border border-white/10 rounded-xl text-sm text-white placeholder:text-gray-700 focus:outline-none focus:border-white/30 transition-all focus:bg-white/[0.02]"
+                            className="w-full h-11 px-4 bg-black border border-white/10 rounded-xl text-sm text-white placeholder:text-gray-700 focus:outline-none focus:border-white/30 transition-all focus:bg-white/[0.02] [color-scheme:dark]"
                             value={formData.name}
                             onChange={handleFormChange}
                         />
@@ -100,7 +100,7 @@ export default function RegisterPage() {
                             name="email"
                             placeholder="john@enterprise.com"
                             required
-                            className="w-full h-11 px-4 bg-black border border-white/10 rounded-xl text-sm text-white placeholder:text-gray-700 focus:outline-none focus:border-white/30 transition-all focus:bg-white/[0.02]"
+                            className="w-full h-11 px-4 bg-black border border-white/10 rounded-xl text-sm text-white placeholder:text-gray-700 focus:outline-none focus:border-white/30 transition-all focus:bg-white/[0.02] [color-scheme:dark]"
                             value={formData.email}
                             onChange={handleFormChange}
                         />
@@ -110,7 +110,7 @@ export default function RegisterPage() {
                         <select
                             name="department"
                             required
-                            className="w-full h-11 px-4 bg-black border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-white/30 transition-all focus:bg-white/[0.02] appearance-none"
+                            className="w-full h-11 px-4 bg-black border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-white/30 transition-all focus:bg-white/[0.02] appearance-none [color-scheme:dark]"
                             value={formData.department}
                             onChange={handleFormChange}
                         >

@@ -17,7 +17,6 @@ export default function ProfileCompletion({ user }) {
     if (!user) return null;
 
     // Check if fields are missing
-    // Check if fields are missing
     const missingPhone = user ? !user.phoneNumber : false;
 
     useEffect(() => {
@@ -30,8 +29,6 @@ export default function ProfileCompletion({ user }) {
             if (res.ok) {
                 const data = await res.json();
                 if (Array.isArray(data)) {
-                    // Filter to check if the current user owns any item
-                    // (Admins fetch all items, so we must filter by user.id)
                     const userItems = data.filter(item => item.userId === user.id);
                     setHasInventory(userItems.length > 0);
                 } else {
@@ -43,12 +40,10 @@ export default function ProfileCompletion({ user }) {
         }
     };
 
-    // If still loading inventory check, wait
     if (hasInventory === null) return null;
 
     const missingInventory = !hasInventory;
 
-    // If nothing missing, don't show banner
     if (!missingPhone && !missingInventory) return null;
 
     const handleSubmit = async (e) => {
@@ -58,7 +53,6 @@ export default function ProfileCompletion({ user }) {
         setIsSubmitting(true);
 
         try {
-            // 1. Update Phone if missing and provided
             if (missingPhone && phoneNumber) {
                 const res = await fetch('/api/user/update', {
                     method: 'PUT',
@@ -68,7 +62,6 @@ export default function ProfileCompletion({ user }) {
                 if (!res.ok) throw new Error('Failed to update phone number');
             }
 
-            // 2. Claim Inventory if missing and provided
             if (missingInventory && pid) {
                 const res = await fetch('/api/inventory/claim', {
                     method: 'POST',
@@ -83,7 +76,6 @@ export default function ProfileCompletion({ user }) {
             setTimeout(() => {
                 setIsOpen(false);
                 router.refresh();
-                // Re-check inventory locally to update UI immediately
                 if (pid) setHasInventory(true);
             }, 1500);
 
@@ -97,7 +89,7 @@ export default function ProfileCompletion({ user }) {
     return (
         <>
             {/* Banner */}
-            <div className="bg-gradient-to-r from-blue-600/90 to-purple-600/90 backdrop-blur-md sticky top-16 z-40 border-b border-white/10">
+            <div className="bg-gradient-to-r from-blue-600/90 to-purple-600/90 backdrop-blur-md sticky top-0 z-[100] border-b border-white/10 shadow-2xl">
                 <div className="container mx-auto px-6 py-3 flex flex-col sm:flex-row items-center justify-between gap-4">
                     <div className="flex items-center gap-3 text-white">
                         <div className="p-2 bg-white/20 rounded-full">

@@ -1,37 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-
-// Sub-components
-const TabButton = ({ active, onClick, children }) => (
-    <button
-        onClick={onClick}
-        className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 ${active
-                ? 'border-white text-white'
-                : 'border-transparent text-gray-500 hover:text-white'
-            }`}
-    >
-        {children}
-    </button>
-);
-
-const Badge = ({ type, children }) => {
-    const styles = {
-        ADMIN: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
-        AGENT: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-        USER: 'bg-gray-500/10 text-gray-400 border-gray-500/20',
-        ACTIVE: 'bg-green-500/10 text-green-400 border-green-500/20',
-        INACTIVE: 'bg-red-500/10 text-red-400 border-red-500/20',
-        PENDING: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-        APPROVED: 'bg-green-500/10 text-green-400 border-green-500/20',
-        REJECTED: 'bg-red-500/10 text-red-400 border-red-500/20',
-    };
-    return (
-        <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium border uppercase tracking-wide ${styles[type] || styles.USER}`}>
-            {children}
-        </span>
-    );
-};
+import Link from 'next/link';
 
 export default function TeamClient({ user }) {
     const [activeTab, setActiveTab] = useState('members');
@@ -43,7 +13,6 @@ export default function TeamClient({ user }) {
     const [inviteRole, setInviteRole] = useState('USER');
     const [feedback, setFeedback] = useState({ type: '', msg: '' });
 
-    // Load Data
     useEffect(() => {
         if (activeTab === 'members') fetchUsers();
         if (activeTab === 'requests') fetchRequests();
@@ -54,8 +23,6 @@ export default function TeamClient({ user }) {
         try {
             const res = await fetch('/api/admin/users');
             if (res.ok) setUsers(await res.json());
-        } catch (e) {
-            console.error(e);
         } finally {
             setLoading(false);
         }
@@ -66,8 +33,6 @@ export default function TeamClient({ user }) {
         try {
             const res = await fetch('/api/access-requests');
             if (res.ok) setRequests(await res.json());
-        } catch (e) {
-            console.error(e);
         } finally {
             setLoading(false);
         }
@@ -79,7 +44,6 @@ export default function TeamClient({ user }) {
         setFeedback({ type: '', msg: '' });
 
         try {
-            // Support comma-separated emails for bulk
             const emails = inviteEmail.split(',').map(e => e.trim()).filter(Boolean);
             const endpoint = emails.length > 1 ? '/api/admin/bulk-invite' : '/api/admin/invite';
             const body = emails.length > 1 ? { emails, role: inviteRole } : { email: emails[0], role: inviteRole };
@@ -97,8 +61,6 @@ export default function TeamClient({ user }) {
             } else {
                 setFeedback({ type: 'error', msg: data.error || 'Failed to send invite.' });
             }
-        } catch (e) {
-            setFeedback({ type: 'error', msg: 'An unexpected error occurred.' });
         } finally {
             setLoading(false);
         }
@@ -122,12 +84,8 @@ export default function TeamClient({ user }) {
             if (res.ok) {
                 if (type === 'user-delete') setUsers(users.filter(u => u.id !== id));
                 if (type === 'request') fetchRequests();
-                setFeedback({ type: 'success', msg: 'Action completed successfully.' });
-            } else {
-                setFeedback({ type: 'error', msg: 'Action failed.' });
+                setFeedback({ type: 'success', msg: 'Operation executed.' });
             }
-        } catch (e) {
-            setFeedback({ type: 'error', msg: 'Network error.' });
         } finally {
             setLoading(false);
         }
@@ -138,191 +96,90 @@ export default function TeamClient({ user }) {
         u.email?.toLowerCase().includes(search.toLowerCase())
     );
 
-    if (user.role === 'USER') {
-        return (
-            <div className="flex h-[80vh] items-center justify-center p-6 text-center">
-                <div className="p-8 border border-red-500/20 bg-red-500/5 rounded-2xl">
-                    <h2 className="text-red-400 text-lg font-medium mb-2">Access Restricted</h2>
-                    <p className="text-gray-500 text-sm">You do not have permission to view team settings.</p>
-                </div>
-            </div>
-        );
-    }
-
     return (
-        <div className="min-h-screen bg-black text-white p-8 font-sans">
-            <div className="max-w-6xl mx-auto space-y-8">
+        <div className="space-y-12 animate-in fade-in duration-700">
+            {/* Header */}
+            <div className="space-y-6">
+                <div className="flex items-center gap-2 text-xs font-medium text-gray-500 uppercase tracking-widest">
+                    <Link href="/dashboard" className="hover:text-white transition-colors">Settings</Link>
+                    <span>/</span>
+                    <span className="text-white">Team Management</span>
+                </div>
 
-                {/* Header */}
-                <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-white/10">
-                    <div>
-                        <h1 className="text-3xl font-semibold tracking-tight text-white mb-2">Team Settings</h1>
-                        <p className="text-gray-400 text-sm">Manage your team members, permissions, and invitations.</p>
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-8 border-b border-white/5">
+                    <div className="space-y-1">
+                        <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-white">Team</h1>
+                        <p className="text-lg text-gray-400 max-w-2xl leading-relaxed"> Orchestrate enterprise access, roles, and administrative governance. </p>
                     </div>
                     {feedback.msg && (
-                        <div className={`px-4 py-2 rounded text-sm ${feedback.type === 'success' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
+                        <div className={`h-12 flex items-center px-6 rounded-full text-xs font-bold uppercase tracking-widest border transition-all animate-in slide-in-from-right-4 ${feedback.type === 'success' ? 'bg-green-500/10 text-green-500 border-green-500/20' : 'bg-red-500/10 text-red-500 border-red-500/20'}`}>
                             {feedback.msg}
                         </div>
                     )}
                 </div>
+            </div>
 
-                {/* Tabs */}
-                <div className="flex items-center gap-6 border-b border-white/10">
-                    <TabButton active={activeTab === 'members'} onClick={() => setActiveTab('members')}>Members</TabButton>
-                    <TabButton active={activeTab === 'invite'} onClick={() => setActiveTab('invite')}>Invite</TabButton>
-                    <TabButton active={activeTab === 'requests'} onClick={() => setActiveTab('requests')}>Access Requests</TabButton>
-                </div>
+            {/* Tabs */}
+            <div className="flex items-center gap-8 border-b border-white/5 h-12">
+                <TabLink active={activeTab === 'members'} onClick={() => setActiveTab('members')}>Fleet Members</TabLink>
+                <TabLink active={activeTab === 'invite'} onClick={() => setActiveTab('invite')}>Provision Access</TabLink>
+                <TabLink active={activeTab === 'requests'} onClick={() => setActiveTab('requests')}>
+                    Entrance Requests
+                    {requests.length > 0 && <span className="ml-2 px-1.5 py-0.5 rounded-full bg-blue-500 text-[8px] text-white animate-pulse">{requests.length}</span>}
+                </TabLink>
+            </div>
 
-                {/* Views */}
-                <div className="animate-in fade-in slide-in-from-bottom-2 duration-500">
-
-                    {/* MEMBERS VIEW */}
-                    {activeTab === 'members' && (
-                        <div className="space-y-4">
-                            <div className="flex justify-between items-center bg-[#0A0A0A] border border-white/10 p-2 rounded-lg">
-                                <span className="text-xs font-mono text-gray-500 ml-3">FILTER</span>
-                                <input
-                                    type="text"
-                                    placeholder="Search by name or email..."
-                                    className="bg-transparent border-none text-sm text-white placeholder:text-gray-600 focus:ring-0 w-64"
-                                    value={search}
-                                    onChange={(e) => setSearch(e.target.value)}
-                                />
-                            </div>
-
-                            <div className="border border-white/10 rounded-lg overflow-hidden bg-[#0A0A0A]">
-                                <table className="w-full text-sm text-left">
-                                    <thead className="bg-white/5 text-gray-400 font-medium">
-                                        <tr>
-                                            <th className="px-6 py-3 font-medium">User</th>
-                                            <th className="px-6 py-3 font-medium">Role</th>
-                                            <th className="px-6 py-3 font-medium">Status</th>
-                                            <th className="px-6 py-3 font-medium text-right">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-white/5">
-                                        {filteredUsers.length === 0 ? (
-                                            <tr><td colSpan="4" className="p-8 text-center text-gray-500">No members found.</td></tr>
-                                        ) : (
-                                            filteredUsers.map(u => (
-                                                <tr key={u.id} className="hover:bg-white/5 transition-colors group">
-                                                    <td className="px-6 py-4">
-                                                        <div className="flex items-center gap-3">
-                                                            <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-xs">
-                                                                {u.username?.[0]?.toUpperCase()}
-                                                            </div>
-                                                            <div>
-                                                                <p className="font-medium text-white">{u.username}</p>
-                                                                <p className="text-xs text-gray-500">{u.email}</p>
-                                                            </div>
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-6 py-4"><Badge type={u.role}>{u.role}</Badge></td>
-                                                    <td className="px-6 py-4"><Badge type={u.status}>{u.status}</Badge></td>
-                                                    <td className="px-6 py-4 text-right">
-                                                        <button
-                                                            onClick={() => handleAction(u.id, null, 'user-delete')}
-                                                            className="text-gray-500 hover:text-red-400 text-xs opacity-0 group-hover:opacity-100 transition-opacity"
-                                                        >
-                                                            Remove
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                            ))
-                                        )}
-                                    </tbody>
-                                </table>
-                            </div>
+            {/* Dynamic Views */}
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+                {activeTab === 'members' && (
+                    <div className="space-y-8">
+                        <div className="relative group max-w-md">
+                            <input
+                                type="text"
+                                placeholder="Filter by username or email sequence..."
+                                className="w-full h-11 bg-white/[0.03] border border-white/5 rounded-xl px-4 text-xs text-white placeholder:text-gray-700 focus:outline-none focus:border-white/20 transition-all font-medium [color-scheme:dark]"
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                            />
+                            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none opacity-20">🔍</div>
                         </div>
-                    )}
 
-                    {/* INVITE VIEW */}
-                    {activeTab === 'invite' && (
-                        <div className="max-w-2xl mx-auto space-y-6 pt-8">
-                            <div className="p-6 border border-white/10 rounded-xl bg-[#0A0A0A]">
-                                <h2 className="text-lg font-medium mb-6">Invite New Members</h2>
-                                <form onSubmit={handleInvite} className="space-y-6">
-                                    <div className="space-y-2">
-                                        <label className="text-xs uppercase text-gray-500 font-bold tracking-wider">Email Address(es)</label>
-                                        <input
-                                            type="text"
-                                            placeholder="colleague@example.com, another@example.com"
-                                            className="w-full bg-black border border-white/10 rounded-lg p-3 text-sm text-white placeholder:text-gray-600 focus:border-white/30 focus:ring-0"
-                                            value={inviteEmail}
-                                            onChange={(e) => setInviteEmail(e.target.value)}
-                                            required
-                                        />
-                                        <p className="text-xs text-gray-500">Separate multiple emails with commas.</p>
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <label className="text-xs uppercase text-gray-500 font-bold tracking-wider">Role</label>
-                                        <div className="flex gap-4">
-                                            {['USER', 'AGENT', 'ADMIN'].map(r => (
-                                                <label key={r} className={`flex-1 cursor-pointer border rounded-lg p-4 transition-all ${inviteRole === r ? 'border-white bg-white/5' : 'border-white/10 hover:border-white/30'}`}>
-                                                    <input type="radio" value={r} checked={inviteRole === r} onChange={(e) => setInviteRole(e.target.value)} className="hidden" />
-                                                    <div className="font-medium text-sm mb-1">{r}</div>
-                                                    <div className="text-[10px] text-gray-500">
-                                                        {r === 'ADMIN' ? 'Full access to all settings.' : r === 'AGENT' ? 'Can resolve tickets.' : 'Can create tickets.'}
-                                                    </div>
-                                                </label>
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                    <button
-                                        type="submit"
-                                        disabled={loading}
-                                        className="w-full bg-white text-black py-2.5 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors disabled:opacity-50"
-                                    >
-                                        {loading ? 'Sending...' : 'Send Invitations'}
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* REQUESTS VIEW */}
-                    {activeTab === 'requests' && (
-                        <div className="border border-white/10 rounded-lg overflow-hidden bg-[#0A0A0A]">
-                            <table className="w-full text-sm text-left">
-                                <thead className="bg-white/5 text-gray-400 font-medium">
-                                    <tr>
-                                        <th className="px-6 py-3 font-medium">Requester</th>
-                                        <th className="px-6 py-3 font-medium">Department</th>
-                                        <th className="px-6 py-3 font-medium">Status</th>
-                                        <th className="px-6 py-3 font-medium text-right">Actions</th>
+                        <div className="rounded-[2rem] border border-white/5 bg-white/[0.02] overflow-hidden">
+                            <table className="w-full text-left border-collapse">
+                                <thead>
+                                    <tr className="border-b border-white/5 bg-white/[0.02]">
+                                        <th className="px-8 py-4 text-[10px] font-black text-gray-600 uppercase tracking-widest">Operational Identity</th>
+                                        <th className="px-8 py-4 text-[10px] font-black text-gray-600 uppercase tracking-widest">Authority Role</th>
+                                        <th className="px-8 py-4 text-[10px] font-black text-gray-600 uppercase tracking-widest">Status</th>
+                                        <th className="px-8 py-4 text-[10px] font-black text-gray-600 uppercase tracking-widest text-right">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-white/5">
-                                    {requests.length === 0 ? (
-                                        <tr><td colSpan="4" className="p-8 text-center text-gray-500">No pending requests.</td></tr>
+                                    {filteredUsers.length === 0 ? (
+                                        <tr><td colSpan="4" className="p-12 text-center text-[10px] font-bold text-gray-700 uppercase tracking-widest italic">No matching records synchronization.</td></tr>
                                     ) : (
-                                        requests.map(req => (
-                                            <tr key={req.id} className="hover:bg-white/5 transition-colors">
-                                                <td className="px-6 py-4">
-                                                    <p className="font-medium text-white">{req.name}</p>
-                                                    <p className="text-xs text-gray-500">{req.email}</p>
-                                                </td>
-                                                <td className="px-6 py-4 text-gray-400">{req.department}</td>
-                                                <td className="px-6 py-4"><Badge type={req.status}>{req.status}</Badge></td>
-                                                <td className="px-6 py-4 text-right">
-                                                    {req.status === 'PENDING' && (
-                                                        <div className="flex justify-end gap-2">
-                                                            <button
-                                                                onClick={() => handleAction(req.id, 'APPROVE', 'request')}
-                                                                className="px-3 py-1 bg-green-500/10 text-green-400 text-xs rounded hover:bg-green-500/20 border border-green-500/20"
-                                                            >
-                                                                Approve
-                                                            </button>
-                                                            <button
-                                                                onClick={() => handleAction(req.id, 'REJECT', 'request')}
-                                                                className="px-3 py-1 bg-red-500/10 text-red-400 text-xs rounded hover:bg-red-500/20 border border-red-500/20"
-                                                            >
-                                                                Reject
-                                                            </button>
+                                        filteredUsers.map(u => (
+                                            <tr key={u.id} className="hover:bg-white/[0.02] transition-colors group">
+                                                <td className="px-8 py-6">
+                                                    <div className="flex items-center gap-4">
+                                                        <div className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-xs font-bold text-gray-500 transition-transform group-hover:scale-110">
+                                                            {u.username?.[0]?.toUpperCase()}
                                                         </div>
-                                                    )}
+                                                        <div>
+                                                            <p className="text-sm font-bold text-white tracking-tight">{u.username}</p>
+                                                            <p className="text-[10px] text-gray-600 font-mono">{u.email}</p>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td className="px-8 py-6"><RoleBadge role={u.role} /></td>
+                                                <td className="px-8 py-6"><StatusIndicator status={u.status} /></td>
+                                                <td className="px-8 py-6 text-right">
+                                                    <button
+                                                        onClick={() => handleAction(u.id, null, 'user-delete')}
+                                                        className="h-8 px-4 rounded-lg bg-red-500/10 text-red-500 text-[9px] font-black uppercase tracking-widest border border-red-500/10 opacity-0 group-hover:opacity-100 hover:bg-red-500 hover:text-white transition-all active:scale-95"
+                                                    >
+                                                        Revoke
+                                                    </button>
                                                 </td>
                                             </tr>
                                         ))
@@ -330,9 +187,149 @@ export default function TeamClient({ user }) {
                                 </tbody>
                             </table>
                         </div>
-                    )}
-                </div>
+                    </div>
+                )}
+
+                {activeTab === 'invite' && (
+                    <div className="max-w-2xl mx-auto py-12">
+                        <div className="rounded-[2.5rem] border border-white/5 bg-white/[0.02] p-10 space-y-10 shadow-3xl">
+                            <div className="space-y-1">
+                                <h2 className="text-2xl font-bold text-white tracking-tight">Provision Access</h2>
+                                <p className="text-sm text-gray-600 font-medium">Issue cryptographic invitations to new operational units.</p>
+                            </div>
+
+                            <form onSubmit={handleInvite} className="space-y-10">
+                                <div className="space-y-4">
+                                    <label className="text-[10px] font-black text-gray-600 uppercase tracking-[0.3em]">Communication Sequences (Email)</label>
+                                    <textarea
+                                        placeholder="unit-01@intel.com, unit-02@intel.com"
+                                        className="w-full bg-black border border-white/5 rounded-2xl p-4 text-sm text-white placeholder:text-gray-800 focus:outline-none focus:border-white/20 transition-all h-24 leading-relaxed font-mono [color-scheme:dark]"
+                                        value={inviteEmail}
+                                        onChange={(e) => setInviteEmail(e.target.value)}
+                                        required
+                                    />
+                                    <p className="text-[9px] font-bold text-gray-700 uppercase tracking-widest italic">Delimit multiple identifiers with a comma token.</p>
+                                </div>
+
+                                <div className="space-y-6">
+                                    <label className="text-[10px] font-black text-gray-600 uppercase tracking-[0.3em]">Authority Blueprint</label>
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        {[
+                                            { id: 'USER', label: 'OPERATIVE', desc: 'Standard read/write clearance.' },
+                                            { id: 'AGENT', label: 'RESOLVER', desc: 'Enhanced triage & execution.' },
+                                            { id: 'ADMIN', label: 'ARCHITECT', desc: 'Full infrastructure control.' }
+                                        ].map(r => (
+                                            <button
+                                                key={r.id} type="button"
+                                                onClick={() => setInviteRole(r.id)}
+                                                className={`p-5 text-left rounded-2xl border transition-all flex flex-col gap-2 ${inviteRole === r.id ? 'bg-white border-white text-black shadow-xl' : 'bg-white/5 border-white/5 text-gray-400 hover:border-white/20'}`}
+                                            >
+                                                <span className="font-black text-[10px] uppercase tracking-widest">{r.label}</span>
+                                                <span className={`text-[9px] font-medium leading-tight ${inviteRole === r.id ? 'text-gray-700' : 'text-gray-600'}`}>{r.desc}</span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <button
+                                    type="submit"
+                                    disabled={loading || !inviteEmail}
+                                    className="w-full h-14 bg-white text-black rounded-full text-xs font-black uppercase tracking-[0.3em] hover:bg-gray-200 transition-all flex items-center justify-center gap-3 active:scale-[0.98] shadow-2xl disabled:opacity-50"
+                                >
+                                    {loading ? 'TRANSMITTING...' : 'DISPATCH INVITATIONS'}
+                                    <span className="opacity-40">→</span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                )}
+
+                {activeTab === 'requests' && (
+                    <div className="rounded-[2rem] border border-white/5 bg-white/[0.02] overflow-hidden">
+                        <table className="w-full text-left">
+                            <thead className="border-b border-white/5 bg-white/[0.02]">
+                                <tr>
+                                    <th className="px-8 py-4 text-[10px] font-black text-gray-600 uppercase tracking-widest">Requester Core</th>
+                                    <th className="px-8 py-4 text-[10px] font-black text-gray-600 uppercase tracking-widest">Department Link</th>
+                                    <th className="px-8 py-4 text-[10px] font-black text-gray-600 uppercase tracking-widest">Current Status</th>
+                                    <th className="px-8 py-4 text-[10px] font-black text-gray-600 uppercase tracking-widest text-right">Administrative Action</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-white/5">
+                                {requests.length === 0 ? (
+                                    <tr><td colSpan="4" className="p-12 text-center text-[10px] font-bold text-gray-700 uppercase tracking-widest italic">No pending entrance requests detected.</td></tr>
+                                ) : (
+                                    requests.map(req => (
+                                        <tr key={req.id} className="hover:bg-white/[0.01] transition-colors">
+                                            <td className="px-8 py-6">
+                                                <p className="text-sm font-bold text-white tracking-tight">{req.name}</p>
+                                                <p className="text-[10px] text-gray-600 font-mono uppercase tracking-tighter">{req.email}</p>
+                                            </td>
+                                            <td className="px-8 py-6 text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em]">{req.department}</td>
+                                            <td className="px-8 py-6"><StatusIndicator status={req.status} /></td>
+                                            <td className="px-8 py-6 text-right">
+                                                {req.status === 'PENDING' && (
+                                                    <div className="flex justify-end gap-3">
+                                                        <ActionBtn label="GRANT" color="green" onClick={() => handleAction(req.id, 'APPROVE', 'request')} />
+                                                        <ActionBtn label="DENY" color="red" onClick={() => handleAction(req.id, 'REJECT', 'request')} />
+                                                    </div>
+                                                )}
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
             </div>
         </div>
+    );
+}
+
+function TabLink({ active, onClick, children }) {
+    return (
+        <button
+            onClick={onClick}
+            className={`h-full px-4 text-[10px] font-black uppercase tracking-[0.3em] transition-all relative group ${active ? 'text-white' : 'text-gray-700 hover:text-gray-400'}`}
+        >
+            {children}
+            {active && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-white shadow-[0_0_12px_rgba(255,255,255,0.8)]" />}
+        </button>
+    );
+}
+
+function RoleBadge({ role }) {
+    const styles = {
+        ADMIN: 'bg-white text-black border-white shadow-[0_0_10px_rgba(255,255,255,0.2)]',
+        AGENT: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
+        USER: 'bg-white/5 text-gray-500 border-white/10'
+    };
+    return (
+        <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest border ${styles[role] || styles.USER}`}>
+            {role}
+        </span>
+    );
+}
+
+function StatusIndicator({ status }) {
+    const active = status === 'ACTIVE' || status === 'APPROVED';
+    return (
+        <div className="flex items-center gap-2">
+            <div className={`w-1.5 h-1.5 rounded-full ${active ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]' : status === 'PENDING' ? 'bg-amber-500 animate-pulse' : 'bg-red-500'}`} />
+            <span className={`text-[10px] font-bold uppercase tracking-widest ${active ? 'text-green-500' : status === 'PENDING' ? 'text-amber-500' : 'text-red-500'}`}>{status}</span>
+        </div>
+    );
+}
+
+function ActionBtn({ label, color, onClick }) {
+    const colors = {
+        green: 'bg-green-500/10 text-green-500 hover:bg-green-500 border-green-500/20',
+        red: 'bg-red-500/10 text-red-500 hover:bg-red-500 border-red-500/20'
+    };
+    return (
+        <button onClick={onClick} className={`h-8 px-4 rounded-xl text-[9px] font-black uppercase tracking-widest border transition-all hover:text-white active:scale-95 ${colors[color]}`}>
+            {label}
+        </button>
     );
 }

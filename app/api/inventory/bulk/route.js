@@ -61,14 +61,14 @@ export async function POST(request) {
                 // if (existing) { ... }
 
                 // MAPPING ENUMS
-                // Handle "C" for Company, etc.
                 let ownershipRaw = getVal('Ownership');
                 if (ownershipRaw === 'C') ownershipRaw = 'COMPANY';
                 if (ownershipRaw === 'E') ownershipRaw = 'EMPLOYEE';
 
-                const type = mapEnum(getVal('Type'), ['COMPUTER', 'LAPTOP', 'OTHER'], 'OTHER');
+                const type = mapEnum(getVal('Type'), ['COMPUTER', 'LAPTOP', 'DESKTOP', 'MOBILE', 'TABLET', 'PERIPHERAL', 'OTHER'], 'OTHER');
                 const ownership = mapEnum(ownershipRaw, ['COMPANY', 'EMPLOYEE', 'RENTED'], 'COMPANY');
-                const status = mapEnum(getVal('Status'), ['ACTIVE', 'MAINTENANCE', 'RETIRED', 'LOST', 'IN_STORAGE'], 'ACTIVE');
+                const status = mapEnum(getVal('Status'), ['ACTIVE', 'MAINTENANCE', 'RETIRED', 'IN_STORAGE', 'SCRAP'], 'ACTIVE');
+                const condition = mapEnum(getVal('Condition'), ['NEW', 'EXCELLENT', 'GOOD', 'FAIR', 'POOR'], 'GOOD');
 
                 // DATES
                 const purchasedDate = parseExcelDate(getVal('Purchased Date') || getVal('Date of purchase'));
@@ -78,13 +78,11 @@ export async function POST(request) {
                 const maintenanceDate = parseExcelDate(getVal('Maintenance Date'));
 
                 // USER ASSIGNMENT
-                // Try 'Assigned To User Email', then 'Assigned User', then 'Email'
                 let userId = undefined;
                 const userIdentifier = getVal('Assigned To User Email') || getVal('Assigned User') || getVal('Email');
 
                 if (userIdentifier && String(userIdentifier).trim() !== '-' && String(userIdentifier).trim().length > 1) {
                     const identifier = String(userIdentifier).trim();
-                    // Try finding by email first, then username
                     const assignedUser = await prisma.user.findFirst({
                         where: {
                             OR: [
@@ -98,68 +96,58 @@ export async function POST(request) {
                     }
                 }
 
-                // If no system user found, or even if found, store the raw name for reference if needed
-                // But the user asked: "in Assigned user can we add just a name"
-                // So let's store it in `assignedUser` field if `userId` is NOT set, OR just always store the raw string?
-                // Best approach: If userId is matched, we link to user. If not, and we have a name, we store in assignedUser.
                 let assignedUserString = null;
                 const rawUserStr = String(userIdentifier || '').trim();
                 if (!userId && rawUserStr.length > 0 && rawUserStr !== '-') {
                     assignedUserString = rawUserStr;
                 }
 
-                // COMPONENTS & SPECS
-                let components = [];
-                const compsStr = getVal('Components');
-                if (compsStr) {
-                    components = String(compsStr).split(',').map(c => c.trim());
-                }
-
-                let systemSpecs = {};
-
-                // Auto-detect specific boolean columns from user file
-                if (getTruthy(getVal('CHARGER'))) systemSpecs.Charger = true;
-                if (getTruthy(getVal('MOUSE'))) systemSpecs.Mouse = true;
-                if (getTruthy(getVal('MOBILE'))) systemSpecs.Mobile = true;
-
-                // SPECS
+                // HARDWARE SPECS (Top-level fields)
                 const ram = getVal('RAM');
-                const proc = getVal('Processor');
+                const processor = getVal('Processor');
                 const os = getVal('OS');
                 const storage = getVal('Storage');
-                // Extra fields requested by user
+                const graphicsCard = getVal('Graphics') || getVal('GPU') || getVal('Graphics Card');
                 const password = getVal('password ') || getVal('password');
-                const vendorInvoice = getVal('vendor Invoice') || getVal('Vendor Invoice');
-                const note = getVal('Note');
+                const vendorInvoice = getVal('Vendor Invoice') || getVal('Invoice');
+                const note = getVal('Note') || getVal('Notes');
+                const department = getVal('Department') || getVal('Dept');
+                const location = getVal('Location');
+                const hasCharger = getTruthy(getVal('CHARGER')) || getTruthy(getVal('Charger'));
+                const hasMouse = getTruthy(getVal('MOUSE')) || getTruthy(getVal('Mouse'));
 
-                if (ram) systemSpecs.RAM = String(ram);
-                if (proc) systemSpecs.Processor = String(proc);
-                if (os) systemSpecs.OS = String(os);
-                if (storage) systemSpecs.Storage = String(storage);
-                if (password) systemSpecs.Password = String(password);
-                if (vendorInvoice) systemSpecs.VendorInvoice = String(vendorInvoice);
-                if (note) systemSpecs.Note = String(note);
-
-                // Additional metadata matching user file
+                // Additional metadata
                 const serial = getVal('serial number ') || getVal('Serial Number');
                 const oldTag = getVal('OLD TAG') || getVal('Old Tag');
-                const oldUserForField = getVal('Old User') || getVal('OLD USER'); // Assuming this column exists or user adds it? Or maybe it isn't in this specific file but user asked for it.
-
+                const oldUserForField = getVal('Old User') || getVal('OLD USER');
                 const modelVal = getVal('Model');
                 const brandVal = getVal('Brand');
                 const priceVal = getVal('PRICE') || getVal('Price');
 
-                // UPSERT ITEM (Create or Update)
+                // UPSERT ITEM
                 const itemData = {
                     type,
                     status,
+                    condition,
                     ownership,
+                    department: department ? String(department) : null,
+                    location: location ? String(location) : null,
                     brand: brandVal ? String(brandVal) : null,
                     model: modelVal ? String(modelVal) : null,
                     serialNumber: serial ? String(serial) : null,
+                    password: password ? String(password) : null,
+                    os: os ? String(os) : null,
+                    ram: ram ? String(ram) : null,
+                    storage: storage ? String(storage) : null,
+                    processor: processor ? String(processor) : null,
+                    graphicsCard: graphicsCard ? String(graphicsCard) : null,
+                    hasCharger,
+                    hasMouse,
                     oldTag: oldTag ? String(oldTag) : null,
                     oldUser: oldUserForField ? String(oldUserForField) : null,
                     price: priceVal ? parseFloat(priceVal) : null,
+                    vendorInvoice: vendorInvoice ? String(vendorInvoice) : null,
+                    note: note ? String(note) : null,
                     userId,
                     assignedDate,
                     returnDate,
@@ -167,8 +155,6 @@ export async function POST(request) {
                     purchasedDate,
                     warrantyDate,
                     assignedUser: assignedUserString,
-                    components,
-                    systemSpecs: Object.keys(systemSpecs).length > 0 ? systemSpecs : undefined,
                 };
 
                 await prisma.inventoryItem.upsert({

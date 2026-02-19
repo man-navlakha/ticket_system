@@ -112,7 +112,7 @@ export default function CreateArticlePage() {
                             required
                             value={formData.title}
                             onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                            className="w-full bg-[#111] border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder:text-gray-700 focus:border-white/30 transition-all outline-none"
+                            className="w-full bg-[#111] border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder:text-gray-700 focus:border-white/30 transition-all outline-none [color-scheme:dark]"
                             placeholder="e.g., VPN Setup Guide"
                         />
                     </div>
@@ -121,7 +121,7 @@ export default function CreateArticlePage() {
                         <select
                             value={formData.categoryName}
                             onChange={(e) => setFormData({ ...formData, categoryName: e.target.value })}
-                            className="w-full bg-[#111] border border-white/10 rounded-xl px-4 py-2.5 text-white focus:border-white/30 transition-all outline-none"
+                            className="w-full bg-[#111] border border-white/10 rounded-xl px-4 py-2.5 text-white focus:border-white/30 transition-all outline-none [color-scheme:dark]"
                         >
                             <option>Hardware</option>
                             <option>Software</option>
@@ -138,7 +138,7 @@ export default function CreateArticlePage() {
                         rows="2"
                         value={formData.summary}
                         onChange={(e) => setFormData({ ...formData, summary: e.target.value })}
-                        className="w-full bg-[#111] border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder:text-gray-700 focus:border-white/30 transition-all outline-none resize-none"
+                        className="w-full bg-[#111] border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder:text-gray-700 focus:border-white/30 transition-all outline-none resize-none [color-scheme:dark]"
                         placeholder="A short overview of the article..."
                     />
                 </div>
@@ -162,7 +162,7 @@ export default function CreateArticlePage() {
                             rows="15"
                             value={formData.content}
                             onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                            className="w-full bg-[#0A0A0A] border border-white/10 rounded-xl px-6 py-6 text-white placeholder:text-gray-800 focus:border-white/20 transition-all outline-none font-mono text-sm leading-relaxed no-scrollbar"
+                            className="w-full bg-[#0A0A0A] border border-white/10 rounded-xl px-6 py-6 text-white placeholder:text-gray-800 focus:border-white/20 transition-all outline-none font-mono text-sm leading-relaxed no-scrollbar [color-scheme:dark]"
                             placeholder="# Write your article here..."
                         />
                     </div>

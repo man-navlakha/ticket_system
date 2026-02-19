@@ -86,7 +86,6 @@ export default function Sidebar({ user }) {
                     ),
                     subItems: [
                         { label: 'All Assets', href: '/dashboard/inventory' },
-                        { label: 'My Devices', href: '/dashboard/inventory?filter=my-devices' },
                     ]
                 },
                 {
@@ -270,10 +269,10 @@ export default function Sidebar({ user }) {
                 <div className="p-4 border-t border-white/10 bg-black sticky bottom-0">
                     <div className="flex items-center gap-3 px-3 py-3 rounded-xl bg-white/5 border border-white/5 hover:border-white/10 transition-colors group cursor-pointer">
                         <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-blue-500 to-purple-500 flex items-center justify-center text-xs font-bold text-white shadow-lg">
-                            {user?.name?.[0] || 'U'}
+                            {user?.username?.[0] || 'U'}
                         </div>
                         <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-white truncate">{user?.name || 'User'}</p>
+                            <p className="text-sm font-medium text-white truncate">{user?.username || 'User'}</p>
                             <p className="text-[11px] text-gray-500 truncate font-mono">{user?.email}</p>
                         </div>
                         <div className="opacity-0 group-hover:opacity-100 transition-opacity">

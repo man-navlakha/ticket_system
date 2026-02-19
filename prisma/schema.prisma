@@ -113,41 +113,73 @@ model Comment {
 
 model InventoryItem {
   id              String    @id @default(uuid())
-  pid             String    @unique
-  type            ItemType
+  pid             String    @unique        // Public Identifier (e.g., EP-001)
+  type            ItemType  @default(LAPTOP)
   
-  userId          String?
+  // -- Assignment & Tracking --
+  userId          String?                  // Linked system user
   user            User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
-
+  assignedUser    String?                  // Name of person (if not in platform)
+  department      String?                  // e.g., "Engineering", "HR"
+  location        String?                  // e.g., "Building 4, Floor 2"
+  
+  // -- Lifecycle & Quality --
+  status          InventoryStatus @default(ACTIVE)
+  condition       Condition       @default(GOOD)
+  
+  // -- Hardware Details --
+  ownership       Ownership       @default(COMPANY)
+  brand           String?
+  model           String?
+  serialNumber    String?                  // Hardware serial
+  password        String?                  // System password if applicable
+  
+  // -- Hardware Specifications --
+  os              String?
+  ram             String?                  // e.g., "8GB"
+  storage         String?                  // e.g., "480GB"
+  processor       String?                  // e.g., "i3 10Gen"
+  graphicsCard    String?
+  
+  // -- Accessories --
+  hasCharger      Boolean   @default(true)
+  hasMouse        Boolean   @default(false)
+  
+  // -- Financials --
+  price           Float?                   // Purchase price
+  vendorInvoice   String?                  // Invoice reference
+  purchasedDate   DateTime?
+  warrantyDate    DateTime?
+  warrantyType    String?                  // e.g., "Warranty" or "Guarantee"
+  
+  // -- Metadata --
+  systemSpecs     Json?                    // Catch-all for extra technical data
+  note            String?                  @db.Text
+  
+  // -- Legacy Migration Data --
+  oldTag          String?
+  oldUser         String?
+  
+  // -- Operational History --
   assignedDate    DateTime?
   returnDate      DateTime?
   maintenanceDate DateTime?
-  purchasedDate   DateTime?
-  warrantyDate    DateTime?
-
-  ownership       Ownership
-  brand           String?
-  model           String?
-  serialNumber    String?
-  oldTag          String?
-  oldUser         String?
-  assignedUser    String?
-  price           Float?
-  components      String[] // e.g. ["Mouse", "Keyboard"]
-  
-  // System Specifications (stored as JSON)
-  // e.g. { "RAM": "16GB", "Processor": "i7", "OS": "Windows 11" }
-  systemSpecs     Json?
-
-  warrantyType    String? // e.g., "Warranty" or "Guarantee"
-  status          InventoryStatus @default(ACTIVE)
-
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
+
+  // Inverse Relations
   tickets         Ticket[]
   proposals       Proposal[]
   maintenanceRecords MaintenanceRecord[]
   auditLogs       AuditLog[]
+}
+
+enum Condition {
+  NEW
+  EXCELLENT
+  GOOD
+  FAIR
+  POOR
 }
 
 model MaintenanceRecord {
@@ -172,6 +204,7 @@ enum InventoryStatus {
   RETIRED
   LOST
   IN_STORAGE
+  SCRAP        // Added for broken/junk items
 }
 
 enum Role {
@@ -198,6 +231,10 @@ enum Priority {
 enum ItemType {
   COMPUTER
   LAPTOP
+  DESKTOP
+  MOBILE
+  TABLET
+  PERIPHERAL
   OTHER
 }
 

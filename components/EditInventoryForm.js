@@ -10,7 +10,6 @@ export default function EditInventoryForm({ item, users }) {
     const [error, setError] = useState('');
 
     const [components, setComponents] = useState(item.components || ['']);
-
     const addComponent = () => setComponents([...components, '']);
     const updateComponent = (index, value) => {
         const newComponents = [...components];
@@ -22,7 +21,6 @@ export default function EditInventoryForm({ item, users }) {
         setComponents(newComponents);
     };
 
-    // Initialize specs from item.systemSpecs (JSON) or defaults
     const [systemSpecs, setSystemSpecs] = useState(() => {
         if (item.systemSpecs && typeof item.systemSpecs === 'object') {
             return Object.entries(item.systemSpecs).map(([key, value]) => ({ key, value }));
@@ -36,13 +34,11 @@ export default function EditInventoryForm({ item, users }) {
     });
 
     const addSystemSpec = () => setSystemSpecs([...systemSpecs, { key: '', value: '' }]);
-
     const updateSystemSpec = (index, field, value) => {
         const newSpecs = [...systemSpecs];
         newSpecs[index][field] = value;
         setSystemSpecs(newSpecs);
     };
-
     const removeSystemSpec = (index) => {
         const newSpecs = systemSpecs.filter((_, i) => i !== index);
         setSystemSpecs(newSpecs);
@@ -54,19 +50,12 @@ export default function EditInventoryForm({ item, users }) {
     };
 
     async function onDelete() {
-        if (!confirm('Are you sure you want to delete this item? This action cannot be undone.')) return;
+        if (!confirm('Are you sure you want to delete this asset? This action is permanent.')) return;
 
         setLoading(true);
         try {
-            const res = await fetch(`/api/inventory/${item.id}`, {
-                method: 'DELETE',
-            });
-
-            if (!res.ok) {
-                const json = await res.json();
-                throw new Error(json.error || 'Failed to delete item');
-            }
-
+            const res = await fetch(`/api/inventory/${item.id}`, { method: 'DELETE' });
+            if (!res.ok) throw new Error('Failed to delete asset');
             router.push('/dashboard/inventory');
             router.refresh();
         } catch (err) {
@@ -83,11 +72,24 @@ export default function EditInventoryForm({ item, users }) {
         const formData = new FormData(e.currentTarget);
         const data = {
             pid: item.pid,
-            type: item.type,
-            ownership: item.ownership,
-            brand: item.brand,
-            model: item.model,
+            type: formData.get('type'),
+            ownership: formData.get('ownership'),
+            brand: formData.get('brand'),
+            model: formData.get('inventoryModel'),
+            condition: formData.get('condition'),
+            department: formData.get('department'),
+            location: formData.get('location'),
+            assignedUser: formData.get('assignedUser'),
+            password: formData.get('password'),
+            os: formData.get('os'),
+            ram: formData.get('ram'),
+            storage: formData.get('storage'),
+            processor: formData.get('processor'),
+            graphicsCard: formData.get('graphicsCard'),
+            hasCharger: formData.get('hasCharger') === 'on',
+            hasMouse: formData.get('hasMouse') === 'on',
             price: formData.get('price'),
+            vendorInvoice: formData.get('vendorInvoice'),
             status: formData.get('status'),
             assignedDate: formData.get('assignedDate'),
             returnDate: formData.get('returnDate'),
@@ -96,7 +98,9 @@ export default function EditInventoryForm({ item, users }) {
             warrantyDate: formData.get('warrantyDate'),
             warrantyType: formData.get('warrantyType'),
             userId: formData.get('userId') || null,
-            components: components.filter(c => c.trim() !== ''),
+            oldTag: formData.get('oldTag'),
+            oldUser: formData.get('oldUser'),
+            note: formData.get('note'),
             systemSpecs: systemSpecs.reduce((acc, spec) => {
                 if (spec.key.trim() && spec.value.trim()) {
                     acc[spec.key.trim()] = spec.value.trim();
@@ -111,12 +115,7 @@ export default function EditInventoryForm({ item, users }) {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data),
             });
-
-            if (!res.ok) {
-                const json = await res.json();
-                throw new Error(json.error || 'Failed to update item');
-            }
-
+            if (!res.ok) throw new Error('Failed to update asset');
             router.push(`/dashboard/inventory/${item.id}`);
             router.refresh();
         } catch (err) {
@@ -127,230 +126,202 @@ export default function EditInventoryForm({ item, users }) {
     }
 
     return (
-        <form onSubmit={onSubmit} className="space-y-8">
+        <form onSubmit={onSubmit} className="max-w-4xl space-y-16 pb-24">
             {error && (
-                <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+                <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm font-medium">
                     {error}
                 </div>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                    <label className="block text-sm font-medium text-gray-300">PID * (Read-Only)</label>
-                    <input
-                        name="pid"
-                        defaultValue={item.pid}
-                        readOnly
-                        disabled
-                        className="w-full rounded-lg bg-white/5 border border-white/10 px-4 py-3 text-gray-400 focus:ring-0 cursor-not-allowed opacity-60"
-                    />
+            {/* Section 1: Identity & Condition */}
+            <Section title="Asset Foundation" description="Core identification and quality settings.">
+                <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-6 mb-8">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                        <StaticInfo label="Asset ID" value={item.pid} isMono />
+                        <StaticInfo label="Legacy Tag" value={item.oldTag} />
+                        <StaticInfo label="Created" value={new Date(item.createdAt).toLocaleDateString()} />
+                        <StaticInfo label="Hardware" value={`${item.brand || ''} ${item.model || ''}`} />
+                    </div>
                 </div>
-
-                <div className="space-y-2">
-                    <label className="block text-sm font-medium text-gray-300">Status *</label>
-                    <select
-                        name="status"
-                        defaultValue={item.status}
-                        className="w-full rounded-lg bg-white/5 border border-white/10 px-4 py-3 text-white focus:ring-1 focus:ring-blue-500 transition outline-none appearance-none bg-gray-900"
-                    >
-                        <option value="ACTIVE">Active</option>
-                        <option value="MAINTENANCE">Maintenance</option>
-                        <option value="RETIRED">Retired</option>
-                        <option value="LOST">Lost</option>
-                        <option value="IN_STORAGE">In Storage</option>
-                    </select>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                    <InputField label="Asset Status" name="status" type="select" defaultValue={item.status}>
+                        <option value="ACTIVE" className="bg-black text-white">ACTIVE</option>
+                        <option value="MAINTENANCE" className="bg-black text-white">MAINTENANCE</option>
+                        <option value="RETIRED" className="bg-black text-white">RETIRED</option>
+                        <option value="IN_STORAGE" className="bg-black text-white">IN_STORAGE</option>
+                        <option value="SCRAP" className="bg-black text-white">SCRAP</option>
+                    </InputField>
+                    <InputField label="Asset Condition" name="condition" type="select" defaultValue={item.condition}>
+                        <option value="NEW" className="bg-black text-white">NEW</option>
+                        <option value="EXCELLENT" className="bg-black text-white">EXCELLENT</option>
+                        <option value="GOOD" className="bg-black text-white">GOOD</option>
+                        <option value="FAIR" className="bg-black text-white">FAIR</option>
+                        <option value="POOR" className="bg-black text-white">POOR</option>
+                    </InputField>
+                    <InputField label="Category" name="type" type="select" defaultValue={item.type}>
+                        <option value="LAPTOP" className="bg-black text-white">LAPTOP</option>
+                        <option value="DESKTOP" className="bg-black text-white">DESKTOP</option>
+                        <option value="COMPUTER" className="bg-black text-white">COMPUTER</option>
+                        <option value="MOBILE" className="bg-black text-white">MOBILE</option>
+                        <option value="OTHER" className="bg-black text-white">OTHER</option>
+                    </InputField>
+                    <InputField label="Ownership" name="ownership" type="select" defaultValue={item.ownership}>
+                        <option value="COMPANY" className="bg-black text-white">COMPANY OWNED</option>
+                        <option value="EMPLOYEE" className="bg-black text-white">EMPLOYEE OWNED</option>
+                        <option value="RENTED" className="bg-black text-white">RENTED</option>
+                    </InputField>
                 </div>
+            </Section>
 
-                <div className="space-y-2">
-                    <label className="block text-sm font-medium text-gray-300">Type * (Read-Only)</label>
-                    <select
-                        name="type"
-                        defaultValue={item.type}
-                        disabled
-                        className="w-full rounded-lg bg-white/5 border border-white/10 px-4 py-3 text-gray-400 focus:ring-0 cursor-not-allowed opacity-60 appearance-none bg-black/20"
-                    >
-                        <option value="COMPUTER">Computer</option>
-                        <option value="LAPTOP">Laptop</option>
-                        <option value="OTHER">Other</option>
-                    </select>
-                </div>
-
-                <div className="space-y-2">
-                    <label className="block text-sm font-medium text-gray-300">Ownership * (Read-Only)</label>
-                    <select
-                        name="ownership"
-                        defaultValue={item.ownership}
-                        disabled
-                        className="w-full rounded-lg bg-white/5 border border-white/10 px-4 py-3 text-gray-400 focus:ring-0 cursor-not-allowed opacity-60 appearance-none bg-black/20"
-                    >
-                        <option value="COMPANY">Company Owned</option>
-                        <option value="EMPLOYEE">Employee Owned</option>
-                        <option value="RENTED">Rented</option>
-                    </select>
-                </div>
-
-                <div className="space-y-2">
-                    <label className="block text-sm font-medium text-gray-300">Brand (Read-Only)</label>
-                    <input
-                        name="brand"
-                        defaultValue={item.brand}
-                        readOnly
-                        disabled
-                        className="w-full rounded-lg bg-white/5 border border-white/10 px-4 py-3 text-gray-400 focus:ring-0 cursor-not-allowed opacity-60"
-                    />
-                </div>
-
-                <div className="space-y-2">
-                    <label className="block text-sm font-medium text-gray-300">Model (Read-Only)</label>
-                    <input
-                        name="model"
-                        defaultValue={item.model}
-                        readOnly
-                        disabled
-                        className="w-full rounded-lg bg-white/5 border border-white/10 px-4 py-3 text-gray-400 focus:ring-0 cursor-not-allowed opacity-60"
-                    />
-                </div>
-
-                <div className="space-y-2">
-                    <label className="block text-sm font-medium text-gray-300">Assigned User</label>
-                    <select
-                        name="userId"
-                        defaultValue={item.userId || ''}
-                        className="w-full rounded-lg bg-white/5 border border-white/10 px-4 py-3 text-white focus:ring-1 focus:ring-blue-500 transition outline-none appearance-none bg-gray-900"
-                    >
-                        <option value="">-- Unassigned --</option>
+            {/* Section 2: Localization & Assignment */}
+            <Section title="Localization & Assignment" description="Mapping assets to people and places.">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                    <InputField label="Department" name="department" defaultValue={item.department} placeholder="e.g. Finance" />
+                    <InputField label="Physical Location" name="location" defaultValue={item.location} placeholder="e.g. HQ Floor 3" />
+                    <InputField label="System User" name="userId" type="select" defaultValue={item.userId || ''}>
+                        <option value="" className="bg-black text-white">-- UNLINKED --</option>
                         {users.map(u => (
-                            <option key={u.id} value={u.id}>{u.username} ({u.email})</option>
+                            <option key={u.id} value={u.id} className="bg-black text-white">{u.username} ({u.email.split('@')[0]})</option>
                         ))}
-                    </select>
+                    </InputField>
+                    <InputField label="External Assignee" name="assignedUser" defaultValue={item.assignedUser} placeholder="Manual name entry" />
                 </div>
+            </Section>
 
-                <div className="space-y-2">
-                    <label className="block text-sm font-medium text-gray-300">Approx Price</label>
-                    <input
-                        name="price"
-                        type="number"
-                        step="0.01"
-                        defaultValue={item.price}
-                        className="w-full rounded-lg bg-white/5 border border-white/10 px-4 py-3 text-white focus:ring-1 focus:ring-blue-500 transition outline-none"
-                    />
-                </div>
-            </div>
-
-            {/* Dates Section */}
-            <div className="border-t border-white/10 pt-6">
-                <h3 className="text-lg font-semibold mb-4">Important Dates</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                        <label className="block text-sm font-medium text-gray-300">Assigned Date</label>
-                        <input name="assignedDate" type="date" defaultValue={formatDate(item.assignedDate)} className="w-full rounded-lg bg-white/5 border border-white/10 px-4 py-3 text-white focus:ring-1 focus:ring-blue-500 transition outline-none [color-scheme:dark]" />
-                    </div>
-                    <div className="space-y-2">
-                        <label className="block text-sm font-medium text-gray-300">Return Date</label>
-                        <input name="returnDate" type="date" defaultValue={formatDate(item.returnDate)} className="w-full rounded-lg bg-white/5 border border-white/10 px-4 py-3 text-white focus:ring-1 focus:ring-blue-500 transition outline-none [color-scheme:dark]" />
-                    </div>
-                    <div className="space-y-2">
-                        <label className="block text-sm font-medium text-gray-300">Maintenance Date</label>
-                        <input name="maintenanceDate" type="date" defaultValue={formatDate(item.maintenanceDate)} className="w-full rounded-lg bg-white/5 border border-white/10 px-4 py-3 text-white focus:ring-1 focus:ring-blue-500 transition outline-none [color-scheme:dark]" />
-                    </div>
-                    <div className="space-y-2">
-                        <label className="block text-sm font-medium text-gray-300">Purchased Date</label>
-                        <input name="purchasedDate" type="date" defaultValue={formatDate(item.purchasedDate)} className="w-full rounded-lg bg-white/5 border border-white/10 px-4 py-3 text-white focus:ring-1 focus:ring-blue-500 transition outline-none [color-scheme:dark]" />
-                    </div>
-
-                    <div className="space-y-2">
-                        <label className="block text-sm font-medium text-gray-300">Warranty Expiry</label>
-                        <input name="warrantyDate" type="date" defaultValue={formatDate(item.warrantyDate)} className="w-full rounded-lg bg-white/5 border border-white/10 px-4 py-3 text-white focus:ring-1 focus:ring-blue-500 transition outline-none [color-scheme:dark]" />
-                    </div>
-
-                    <div className="space-y-2">
-                        <label className="block text-sm font-medium text-gray-300">Warranty Type</label>
-                        <select
-                            name="warrantyType"
-                            defaultValue={item.warrantyType || 'Warranty'}
-                            className="w-full rounded-lg bg-white/5 border border-white/10 px-4 py-3 text-white focus:ring-1 focus:ring-blue-500 transition outline-none appearance-none bg-gray-900"
-                        >
-                            <option value="Warranty">Warranty</option>
-                            <option value="Guarantee">Guarantee</option>
-                            <option value="None">None</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-
-            {/* Components Section */}
-            <div className="border-t border-white/10 pt-6">
-                <h3 className="text-lg font-semibold mb-4">Components / Accessories</h3>
-                <div className="space-y-3">
-                    {components.map((comp, idx) => (
-                        <div key={idx} className="flex gap-2">
-                            <input
-                                value={comp}
-                                onChange={(e) => updateComponent(idx, e.target.value)}
-                                className="flex-1 rounded-lg bg-white/5 border border-white/10 px-4 py-2 text-white placeholder-gray-500 focus:ring-1 focus:ring-blue-500 transition outline-none"
-                                placeholder={`Component ${idx + 1}`}
-                            />
-                            {components.length > 1 && (
-                                <button type="button" onClick={() => removeComponent(idx)} className="text-red-400 hover:text-red-300 px-2 font-bold">✕</button>
-                            )}
+            {/* Section 3: Hardware specs */}
+            <Section title="Hardware Profile" description="Technical specifications and credentials.">
+                <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-8 space-y-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                        <InputField label="Operating System" name="os" defaultValue={item.os} placeholder="e.g. macOS Sonoma" />
+                        <InputField label="Processor" name="processor" defaultValue={item.processor} placeholder="e.g. M2 Pro" />
+                        <InputField label="Memory (RAM)" name="ram" defaultValue={item.ram} placeholder="e.g. 16GB" />
+                        <InputField label="Storage" name="storage" defaultValue={item.storage} placeholder="e.g. 1TB" />
+                        <InputField label="Graphics" name="graphicsCard" defaultValue={item.graphicsCard} />
+                        <InputField label="Serial Number" name="serialNumber" defaultValue={item.serialNumber} />
+                        <InputField label="System Password" name="password" defaultValue={item.password} />
+                        <div className="flex gap-8 pt-4">
+                            <label className="flex items-center gap-3 cursor-pointer group">
+                                <input type="checkbox" name="hasCharger" defaultChecked={item.hasCharger} className="w-5 h-5 rounded border-white/10 bg-black checked:bg-white checked:border-transparent transition-all" />
+                                <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest group-hover:text-white transition-colors">Includes Charger</span>
+                            </label>
+                            <label className="flex items-center gap-3 cursor-pointer group">
+                                <input type="checkbox" name="hasMouse" defaultChecked={item.hasMouse} className="w-5 h-5 rounded border-white/10 bg-black checked:bg-white checked:border-transparent transition-all" />
+                                <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest group-hover:text-white transition-colors">Includes Mouse</span>
+                            </label>
                         </div>
-                    ))}
-                    <button type="button" onClick={addComponent} className="text-sm text-blue-400 hover:text-blue-300 font-medium">+ Add Component</button>
+                    </div>
                 </div>
-            </div>
+            </Section>
 
-            {/* System Information Section */}
-            <div className="border-t border-white/10 pt-6">
-                <h3 className="text-lg font-semibold mb-4">System Information</h3>
-                <p className="text-sm text-gray-400 mb-4">Add technical details (e.g., RAM, Processor, OS) to help AI triage issues.</p>
-
-                <div className="space-y-3">
-                    {systemSpecs.map((spec, idx) => (
-                        <div key={idx} className="flex gap-2">
-                            <input
-                                value={spec.key}
-                                onChange={(e) => updateSystemSpec(idx, 'key', e.target.value)}
-                                className="w-1/3 rounded-lg bg-white/5 border border-white/10 px-4 py-2 text-white placeholder-gray-500 focus:ring-1 focus:ring-blue-500 transition outline-none"
-                                placeholder="Field (e.g. RAM)"
-                            />
-                            <input
-                                value={spec.value}
-                                onChange={(e) => updateSystemSpec(idx, 'value', e.target.value)}
-                                className="flex-1 rounded-lg bg-white/5 border border-white/10 px-4 py-2 text-white placeholder-gray-500 focus:ring-1 focus:ring-blue-500 transition outline-none"
-                                placeholder="Value (e.g. 16GB)"
-                            />
-                            <button type="button" onClick={() => removeSystemSpec(idx)} className="text-red-400 hover:text-red-300 px-2 font-bold">✕</button>
-                        </div>
-                    ))}
-                    <button type="button" onClick={addSystemSpec} className="text-sm text-blue-400 hover:text-blue-300 font-medium">+ Add Field</button>
+            {/* Section 4: Timeline & Finance */}
+            <Section title="Operational Lifecycle" description="Procurement and financial records.">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                    <InputField label="Original Price ($)" name="price" type="number" defaultValue={item.price} />
+                    <InputField label="Vendor Invoice #" name="vendorInvoice" defaultValue={item.vendorInvoice} />
+                    <InputField label="Purchase Date" name="purchasedDate" type="date" defaultValue={formatDate(item.purchasedDate)} />
+                    <InputField label="Warranty Date" name="warrantyDate" type="date" defaultValue={formatDate(item.warrantyDate)} />
+                    <InputField label="Warranty Type" name="warrantyType" defaultValue={item.warrantyType} />
+                    <InputField label="Last Service" name="maintenanceDate" type="date" defaultValue={formatDate(item.maintenanceDate)} />
+                    <InputField label="Legacy Tag ID" name="oldTag" defaultValue={item.oldTag} />
+                    <InputField label="Legacy User Name" name="oldUser" defaultValue={item.oldUser} />
                 </div>
-            </div>
+            </Section>
 
-            <div className="flex justify-between pt-8">
+            <Section title="System Telemetry" description="Additional logs and administrative observations.">
+                <textarea
+                    name="note"
+                    rows={4}
+                    defaultValue={item.note}
+                    placeholder="Technical logs..."
+                    className="w-full bg-white/[0.03] border border-white/10 rounded-2xl p-6 text-sm text-white focus:outline-none focus:border-white/30 transition-all [color-scheme:dark]"
+                />
+                <div className="mt-8 space-y-4">
+                    <h4 className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Custom Metadata</h4>
+                    <div className="space-y-3">
+                        {systemSpecs.map((spec, idx) => (
+                            <div key={idx} className="flex gap-2 group">
+                                <input
+                                    value={spec.key}
+                                    onChange={(e) => updateSystemSpec(idx, 'key', e.target.value)}
+                                    className="w-1/3 h-10 rounded-lg bg-black border border-white/5 px-4 text-xs font-bold text-gray-400 focus:border-white/20 transition-all outline-none"
+                                />
+                                <input
+                                    value={spec.value}
+                                    onChange={(e) => updateSystemSpec(idx, 'value', e.target.value)}
+                                    className="flex-1 h-10 rounded-lg bg-black border border-white/5 px-4 text-xs text-white focus:border-white/20 transition-all outline-none"
+                                />
+                                <button type="button" onClick={() => removeSystemSpec(idx)} className="h-10 w-10 text-gray-700 hover:text-red-500 transition-colors">✕</button>
+                            </div>
+                        ))}
+                        <button type="button" onClick={addSystemSpec} className="text-[10px] font-bold text-blue-500 hover:text-blue-400 uppercase tracking-[0.2em] transition-colors">+ Append Dynamic Key</button>
+                    </div>
+                </div>
+            </Section>
+
+            {/* Form Actions */}
+            <div className="pt-12 border-t border-white/5 flex items-center justify-between">
                 <button
                     type="button"
                     onClick={onDelete}
                     disabled={loading}
-                    className="rounded-full bg-red-500/10 border border-red-500/20 px-8 py-3 text-sm font-bold text-red-500 hover:bg-red-500 hover:text-white transition-colors disabled:opacity-50"
+                    className="h-12 px-8 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-bold uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all"
                 >
-                    Delete Item
+                    Decommission Asset
                 </button>
                 <div className="flex gap-4">
-                    <Link
-                        href={`/dashboard/inventory/${item.id}`}
-                        className="inline-flex items-center justify-center rounded-full bg-white/10 px-8 py-3 text-sm font-bold text-white hover:bg-white/20 transition-colors"
-                    >
-                        Cancel
-                    </Link>
+                    <Link href={`/dashboard/inventory/${item.id}`} className="h-12 px-8 flex items-center text-sm font-bold text-gray-500 hover:text-white transition-colors uppercase tracking-widest">Discard</Link>
                     <button
                         type="submit"
                         disabled={loading}
-                        className="rounded-full bg-white px-8 py-3 text-sm font-bold text-black hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="h-12 px-10 bg-white text-black text-sm font-bold rounded-full hover:bg-gray-200 transition-all active:scale-95 disabled:opacity-50 shadow-xl shadow-white/5"
                     >
-                        {loading ? 'Saving...' : 'Save Changes'}
+                        {loading ? 'Committing...' : 'Confirm Changes'}
                     </button>
                 </div>
             </div>
         </form>
+    );
+}
+
+function Section({ title, description, children }) {
+    return (
+        <div className="space-y-6">
+            <div className="space-y-1">
+                <h3 className="text-xs font-bold text-gray-500 uppercase tracking-[0.3em]">{title}</h3>
+                <p className="text-sm text-gray-400">{description}</p>
+            </div>
+            {children}
+        </div>
+    );
+}
+
+function StaticInfo({ label, value, isMono = false }) {
+    return (
+        <div className="space-y-1">
+            <p className="text-[9px] font-bold text-gray-600 uppercase tracking-widest">{label}</p>
+            <p className={`text-sm font-medium text-white truncate ${isMono ? 'font-mono' : ''}`}>{value || 'N/A'}</p>
+        </div>
+    );
+}
+
+function InputField({ label, name, type = 'text', defaultValue, children }) {
+    const baseStyle = "w-full h-11 rounded-xl bg-white/[0.03] border border-white/10 px-4 text-sm text-white focus:outline-none focus:border-white/30 transition-all [color-scheme:dark]";
+
+    return (
+        <div className="space-y-2">
+            <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest">{label}</label>
+            {type === 'select' ? (
+                <div className="relative">
+                    <select name={name} defaultValue={defaultValue} className={`${baseStyle} appearance-none cursor-pointer bg-black`}>
+                        {children}
+                    </select>
+                    <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none text-gray-600">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                    </div>
+                </div>
+            ) : (
+                <input name={name} type={type} defaultValue={defaultValue} className={`${baseStyle} bg-black/40`} />
+            )}
+        </div>
     );
 }

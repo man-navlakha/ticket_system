@@ -41,6 +41,10 @@ export async function PUT(request, { params }) {
         if (json.pid !== undefined) data.pid = json.pid;
         if (json.type !== undefined) data.type = json.type;
         if (json.userId !== undefined) data.userId = json.userId || null;
+        if (json.condition !== undefined) data.condition = json.condition;
+        if (json.department !== undefined) data.department = json.department;
+        if (json.location !== undefined) data.location = json.location;
+        if (json.assignedUser !== undefined) data.assignedUser = json.assignedUser;
         if (json.assignedDate !== undefined) data.assignedDate = json.assignedDate ? new Date(json.assignedDate) : null;
         if (json.returnDate !== undefined) data.returnDate = json.returnDate ? new Date(json.returnDate) : null;
         if (json.maintenanceDate !== undefined) data.maintenanceDate = json.maintenanceDate ? new Date(json.maintenanceDate) : null;
@@ -49,11 +53,21 @@ export async function PUT(request, { params }) {
         if (json.ownership !== undefined) data.ownership = json.ownership;
         if (json.brand !== undefined) data.brand = json.brand;
         if (json.model !== undefined) data.model = json.model;
+        if (json.serialNumber !== undefined) data.serialNumber = json.serialNumber;
+        if (json.password !== undefined) data.password = json.password;
+        if (json.os !== undefined) data.os = json.os;
+        if (json.ram !== undefined) data.ram = json.ram;
+        if (json.storage !== undefined) data.storage = json.storage;
+        if (json.processor !== undefined) data.processor = json.processor;
+        if (json.graphicsCard !== undefined) data.graphicsCard = json.graphicsCard;
+        if (json.hasCharger !== undefined) data.hasCharger = !!json.hasCharger;
+        if (json.hasMouse !== undefined) data.hasMouse = !!json.hasMouse;
         if (json.price !== undefined) data.price = json.price ? parseFloat(json.price) : null;
-        if (json.components !== undefined) data.components = json.components;
+        if (json.vendorInvoice !== undefined) data.vendorInvoice = json.vendorInvoice;
         if (json.warrantyType !== undefined) data.warrantyType = json.warrantyType;
         if (json.status !== undefined) data.status = json.status;
         if (json.systemSpecs !== undefined) data.systemSpecs = json.systemSpecs;
+        if (json.note !== undefined) data.note = json.note;
 
         const updated = await prisma.inventoryItem.update({
             where: { id },
