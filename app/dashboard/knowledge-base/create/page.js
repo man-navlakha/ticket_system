@@ -82,76 +82,76 @@ export default function CreateArticlePage() {
         <div className="max-w-4xl space-y-8 animate-in fade-in duration-500">
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight text-white mb-2">Create Article</h1>
-                    <p className="text-gray-500 text-sm">Draft a new guide for the knowledge base.</p>
+                    <h1 className="text-3xl font-bold tracking-tight text-foreground mb-2">Create Article</h1>
+                    <p className="text-muted-foreground text-sm">Draft a new guide for the knowledge base.</p>
                 </div>
                 <div className="flex gap-3">
                     <button
                         onClick={() => setActiveTab('write')}
-                        className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${activeTab === 'write' ? 'bg-white text-black' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
+                        className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${activeTab === 'write' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}
                     >
                         Edit
                     </button>
                     <button
                         onClick={() => setActiveTab('preview')}
-                        className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${activeTab === 'preview' ? 'bg-white text-black' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
+                        className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${activeTab === 'preview' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}
                     >
                         Preview
                     </button>
                 </div>
             </div>
 
-            {error && <div className="p-4 bg-red-500/10 border border-red-500/20 text-red-500 rounded-xl text-sm">{error}</div>}
+            {error && <div className="p-4 bg-destructive/10 border border-destructive/20 text-destructive rounded-xl text-sm">{error}</div>}
 
             <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                        <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Title</label>
+                        <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Title</label>
                         <input
                             type="text"
                             required
                             value={formData.title}
                             onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                            className="w-full bg-[#111] border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder:text-gray-700 focus:border-white/30 transition-all outline-none [color-scheme:dark]"
+                            className="w-full bg-input/50 border border-input rounded-xl px-4 py-2.5 text-foreground placeholder:text-muted-foreground focus:border-ring transition-all outline-none"
                             placeholder="e.g., VPN Setup Guide"
                         />
                     </div>
                     <div className="space-y-2">
-                        <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Category</label>
+                        <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Category</label>
                         <select
                             value={formData.categoryName}
                             onChange={(e) => setFormData({ ...formData, categoryName: e.target.value })}
-                            className="w-full bg-[#111] border border-white/10 rounded-xl px-4 py-2.5 text-white focus:border-white/30 transition-all outline-none [color-scheme:dark]"
+                            className="w-full bg-input/50 border border-input rounded-xl px-4 py-2.5 text-foreground focus:border-ring transition-all outline-none"
                         >
-                            <option>Hardware</option>
-                            <option>Software</option>
-                            <option>Network</option>
-                            <option>Security</option>
-                            <option>Other</option>
+                            <option className="bg-background">Hardware</option>
+                            <option className="bg-background">Software</option>
+                            <option className="bg-background">Network</option>
+                            <option className="bg-background">Security</option>
+                            <option className="bg-background">Other</option>
                         </select>
                     </div>
                 </div>
 
                 <div className="space-y-2">
-                    <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Summary</label>
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Summary</label>
                     <textarea
                         rows="2"
                         value={formData.summary}
                         onChange={(e) => setFormData({ ...formData, summary: e.target.value })}
-                        className="w-full bg-[#111] border border-white/10 rounded-xl px-4 py-2.5 text-white placeholder:text-gray-700 focus:border-white/30 transition-all outline-none resize-none [color-scheme:dark]"
+                        className="w-full bg-input/50 border border-input rounded-xl px-4 py-2.5 text-foreground placeholder:text-muted-foreground focus:border-ring transition-all outline-none resize-none"
                         placeholder="A short overview of the article..."
                     />
                 </div>
 
                 {activeTab === 'write' ? (
                     <div className="space-y-4">
-                        <div className="flex flex-wrap gap-2 p-2 bg-[#0A0A0A] border border-white/5 rounded-xl">
-                            <button type="button" onClick={() => insertMarkdown('h1')} className="px-3 py-1 text-xs font-bold text-gray-500 hover:text-white transition-colors">H1</button>
-                            <button type="button" onClick={() => insertMarkdown('h2')} className="px-3 py-1 text-xs font-bold text-gray-500 hover:text-white transition-colors">H2</button>
-                            <button type="button" onClick={() => insertMarkdown('bold')} className="px-3 py-1 text-xs font-bold text-gray-500 hover:text-white transition-colors">B</button>
-                            <button type="button" onClick={() => insertMarkdown('code')} className="px-3 py-1 text-xs font-mono text-gray-500 hover:text-white transition-colors">{"</>"}</button>
+                        <div className="flex flex-wrap gap-2 p-2 bg-card border border-border rounded-xl">
+                            <button type="button" onClick={() => insertMarkdown('h1')} className="px-3 py-1 text-xs font-bold text-muted-foreground hover:text-foreground transition-colors">H1</button>
+                            <button type="button" onClick={() => insertMarkdown('h2')} className="px-3 py-1 text-xs font-bold text-muted-foreground hover:text-foreground transition-colors">H2</button>
+                            <button type="button" onClick={() => insertMarkdown('bold')} className="px-3 py-1 text-xs font-bold text-muted-foreground hover:text-foreground transition-colors">B</button>
+                            <button type="button" onClick={() => insertMarkdown('code')} className="px-3 py-1 text-xs font-mono text-muted-foreground hover:text-foreground transition-colors">{"</>"}</button>
                             <div className="flex-1" />
-                            <label className="px-3 py-1 text-[10px] font-bold uppercase tracking-tighter bg-white/5 text-gray-400 rounded-lg cursor-pointer hover:bg-white/10 transition-all">
+                            <label className="px-3 py-1 text-[10px] font-bold uppercase tracking-tighter bg-muted text-muted-foreground rounded-lg cursor-pointer hover:bg-muted/80 transition-all">
                                 <input type="file" className="hidden" onChange={handleImageUpload} disabled={uploadingImage} />
                                 {uploadingImage ? 'Uploading...' : 'Add Image'}
                             </label>
@@ -162,24 +162,24 @@ export default function CreateArticlePage() {
                             rows="15"
                             value={formData.content}
                             onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                            className="w-full bg-[#0A0A0A] border border-white/10 rounded-xl px-6 py-6 text-white placeholder:text-gray-800 focus:border-white/20 transition-all outline-none font-mono text-sm leading-relaxed no-scrollbar [color-scheme:dark]"
+                            className="w-full bg-card border border-border rounded-xl px-6 py-6 text-foreground placeholder:text-muted-foreground focus:border-ring transition-all outline-none font-mono text-sm leading-relaxed no-scrollbar"
                             placeholder="# Write your article here..."
                         />
                     </div>
                 ) : (
-                    <div className="w-full min-h-[400px] bg-[#0A0A0A] border border-white/10 rounded-xl p-8 prose prose-invert prose-blue max-w-none">
+                    <div className="w-full min-h-[400px] bg-card border border-border rounded-xl p-8 prose prose-neutral dark:prose-invert max-w-none">
                         <ReactMarkdown remarkPlugins={[remarkGfm]}>{formData.content}</ReactMarkdown>
                     </div>
                 )}
 
-                <div className="flex items-center justify-between pt-6 border-t border-white/5">
-                    <p className="text-xs text-gray-500">Markdown syntax is supported.</p>
+                <div className="flex items-center justify-between pt-6 border-t border-border">
+                    <p className="text-xs text-muted-foreground">Markdown syntax is supported.</p>
                     <div className="flex gap-4">
-                        <Link href="/dashboard/knowledge-base" className="px-6 py-2.5 text-sm font-bold text-gray-500 hover:text-white transition-colors">Cancel</Link>
+                        <Link href="/dashboard/knowledge-base" className="px-6 py-2.5 text-sm font-bold text-muted-foreground hover:text-foreground transition-colors">Cancel</Link>
                         <button
                             type="submit"
                             disabled={loading}
-                            className="px-8 py-2.5 bg-white text-black rounded-xl text-sm font-bold hover:bg-gray-200 transition-all active:scale-95 disabled:opacity-50 shadow-lg shadow-white/5"
+                            className="px-8 py-2.5 bg-primary text-primary-foreground rounded-xl text-sm font-bold hover:opacity-90 transition-all active:scale-95 disabled:opacity-50 shadow-lg"
                         >
                             {loading ? 'Creating...' : 'Create Article'}
                         </button>

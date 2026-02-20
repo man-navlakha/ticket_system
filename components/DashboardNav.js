@@ -4,6 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import LogoutButton from './LogoutButton';
+import { ThemeToggle } from './theme-toggle';
 
 export default function DashboardNav({ user }) {
     const pathname = usePathname();
@@ -40,14 +41,14 @@ export default function DashboardNav({ user }) {
     return (
         <>
             {/* Desktop Header */}
-            {/* Desktop Header */}
-            <header className="sticky top-4 z-50 hidden md:block px-4">
-                <div className="mx-auto w-full max-w-6xl rounded-2xl border border-white/10 bg-black/80 backdrop-blur-xl shadow-2xl">
+            <header className="sticky top-4 z-50 hidden md:block px-4 transition-colors duration-300">
+                <div className="mx-auto w-full max-w-6xl rounded-2xl border border-border bg-background/80 backdrop-blur-xl shadow-2xl">
                     <div className="flex h-16 items-center justify-end px-6">
 
                         {/* Actions */}
                         <div className="flex items-center gap-4">
-                            <div className="h-6 w-[1px] bg-white/10 hidden lg:block"></div>
+                            <ThemeToggle />
+                            <div className="h-6 w-[1px] bg-border hidden lg:block"></div>
                             <LogoutButton />
                         </div>
                     </div>
@@ -55,8 +56,8 @@ export default function DashboardNav({ user }) {
             </header>
 
             {/* Mobile Header (Logo Only) */}
-            <header className="sticky top-0 z-50 border-b border-white/10 bg-black/50 backdrop-blur-xl md:hidden">
-                <div className="flex h-14 items-center justify-center">
+            <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-xl md:hidden transition-colors duration-300">
+                <div className="flex h-14 items-center justify-between px-4">
                     <Link href="/dashboard" className="flex items-center gap-2 text-lg font-bold">
                         <Image
                             src="/logo_my.png"
@@ -65,8 +66,9 @@ export default function DashboardNav({ user }) {
                             height={24}
                             className="rounded-lg"
                         />
-                        <span>Man&apos;s <span className="text-gray-500">Desk</span></span>
+                        <span className="text-foreground">Man&apos;s <span className="text-muted-foreground">Desk</span></span>
                     </Link>
+                    <ThemeToggle />
                 </div>
             </header>
 

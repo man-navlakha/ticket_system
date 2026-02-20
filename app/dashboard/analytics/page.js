@@ -23,7 +23,7 @@ export default async function AnalyticsPage() {
     const stats = await getDashboardStats();
 
     return (
-        <div className="min-h-screen bg-black text-white px-6 md:px-12 py-12">
+        <div className="min-h-screen bg-background text-foreground px-6 md:px-12 py-12 transition-colors duration-300">
             <div className="max-w-7xl mx-auto">
                 <AnalyticsClient stats={stats} />
             </div>

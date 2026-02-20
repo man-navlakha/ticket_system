@@ -5,10 +5,10 @@ import {
     PieChart, Pie, Cell, Legend
 } from 'recharts';
 
-const COLORS = ['#FFFFFF', '#3b82f6', '#10b981', '#f59e0b', '#6366f1', '#ef4444', '#8b5cf6'];
+const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#6366f1', '#ef4444', '#8b5cf6', '#ec4899'];
 
 export default function AnalyticsClient({ stats }) {
-    if (!stats) return <div className="text-center py-20 text-gray-500">Failed to load analytics.</div>;
+    if (!stats) return <div className="text-center py-20 text-muted-foreground">Failed to load analytics.</div>;
 
     const { tickets, inventory, team, proposals } = stats;
 
@@ -16,8 +16,8 @@ export default function AnalyticsClient({ stats }) {
         <div className="space-y-12 animate-in fade-in duration-700 pb-20">
             {/* Header */}
             <div>
-                <h1 className="text-4xl font-bold tracking-tighter text-white mb-2">Analytics</h1>
-                <p className="text-gray-500 font-medium tracking-tight">Enterprise performance and asset distribution metrics.</p>
+                <h1 className="text-4xl font-bold tracking-tighter text-foreground mb-2">Analytics</h1>
+                <p className="text-muted-foreground font-medium tracking-tight">Enterprise performance and asset distribution metrics.</p>
             </div>
 
             {/* Grid for Charts */}
@@ -27,12 +27,13 @@ export default function AnalyticsClient({ stats }) {
                 <ChartCard title="Asset Brands" subtitle="Distribution of hardware brands across inventory.">
                     <ResponsiveContainer width="100%" height={300}>
                         <BarChart data={inventory.byBrand}>
-                            <XAxis dataKey="name" stroke="#666" fontSize={10} tickLine={false} axisLine={false} />
+                            <XAxis dataKey="name" stroke="#888888" fontSize={10} tickLine={false} axisLine={false} />
                             <Tooltip
-                                contentStyle={{ backgroundColor: '#0A0A0A', border: '1px solid #1A1A1A', borderRadius: '8px' }}
-                                itemStyle={{ color: '#FFF' }}
+                                contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px', color: 'hsl(var(--foreground))' }}
+                                itemStyle={{ color: 'hsl(var(--foreground))' }}
+                                cursor={{ fill: 'hsl(var(--muted))' }}
                             />
-                            <Bar dataKey="value" fill="#FFF" radius={[4, 4, 0, 0]} barSize={40} />
+                            <Bar dataKey="value" fill="#3b82f6" radius={[4, 4, 0, 0]} barSize={40} />
                         </BarChart>
                     </ResponsiveContainer>
                 </ChartCard>
@@ -55,9 +56,10 @@ export default function AnalyticsClient({ stats }) {
                                 ))}
                             </Pie>
                             <Tooltip
-                                contentStyle={{ backgroundColor: '#0A0A0A', border: '1px solid #1A1A1A', borderRadius: '8px' }}
+                                contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px', color: 'hsl(var(--foreground))' }}
+                                itemStyle={{ color: 'hsl(var(--foreground))' }}
                             />
-                            <Legend verticalAlign="bottom" height={36} />
+                            <Legend verticalAlign="bottom" height={36} formatter={(value) => <span style={{ color: 'hsl(var(--foreground))' }}>{value}</span>} />
                         </PieChart>
                     </ResponsiveContainer>
                 </ChartCard>
@@ -66,11 +68,13 @@ export default function AnalyticsClient({ stats }) {
                 <ChartCard title="Ticket Status" subtitle="Overview of ticket lifecycle distribution.">
                     <ResponsiveContainer width="100%" height={300}>
                         <BarChart data={tickets.byStatus} layout="vertical">
-                            <CartesianGrid strokeDasharray="3 3" stroke="#1A1A1A" horizontal={true} vertical={false} />
+                            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" horizontal={true} vertical={false} />
                             <XAxis type="number" hide />
-                            <YAxis dataKey="name" type="category" stroke="#666" fontSize={10} width={80} tickLine={false} axisLine={false} />
+                            <YAxis dataKey="name" type="category" stroke="#888888" fontSize={10} width={80} tickLine={false} axisLine={false} />
                             <Tooltip
-                                contentStyle={{ backgroundColor: '#0A0A0A', border: '1px solid #1A1A1A', borderRadius: '8px' }}
+                                contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px', color: 'hsl(var(--foreground))' }}
+                                itemStyle={{ color: 'hsl(var(--foreground))' }}
+                                cursor={{ fill: 'hsl(var(--muted))' }}
                             />
                             <Bar dataKey="value" fill="#3b82f6" radius={[0, 4, 4, 0]} barSize={20} />
                         </BarChart>
@@ -94,7 +98,8 @@ export default function AnalyticsClient({ stats }) {
                                 ))}
                             </Pie>
                             <Tooltip
-                                contentStyle={{ backgroundColor: '#0A0A0A', border: '1px solid #1A1A1A', borderRadius: '8px' }}
+                                contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px', color: 'hsl(var(--foreground))' }}
+                                itemStyle={{ color: 'hsl(var(--foreground))' }}
                             />
                         </PieChart>
                     </ResponsiveContainer>
@@ -104,9 +109,11 @@ export default function AnalyticsClient({ stats }) {
                 <ChartCard title="Proposal Flow" subtitle="Status of hardware and access requests.">
                     <ResponsiveContainer width="100%" height={300}>
                         <BarChart data={proposals.byStatus}>
-                            <XAxis dataKey="name" stroke="#666" fontSize={10} tickLine={false} axisLine={false} />
+                            <XAxis dataKey="name" stroke="#888888" fontSize={10} tickLine={false} axisLine={false} />
                             <Tooltip
-                                contentStyle={{ backgroundColor: '#0A0A0A', border: '1px solid #1A1A1A', borderRadius: '8px' }}
+                                contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px', color: 'hsl(var(--foreground))' }}
+                                itemStyle={{ color: 'hsl(var(--foreground))' }}
+                                cursor={{ fill: 'hsl(var(--muted))' }}
                             />
                             <Bar dataKey="value" fill="#10b981" radius={[4, 4, 0, 0]} barSize={60} />
                         </BarChart>
@@ -119,10 +126,10 @@ export default function AnalyticsClient({ stats }) {
 
 function ChartCard({ title, subtitle, children }) {
     return (
-        <div className="p-8 rounded-2xl bg-[#0A0A0A] border border-white/5 space-y-6 hover:border-white/10 transition-colors group">
+        <div className="p-8 rounded-2xl bg-card border border-border space-y-6 hover:border-sidebar-primary/20 transition-colors group shadow-sm">
             <div className="space-y-1">
-                <h3 className="text-xl font-bold tracking-tight text-white group-hover:text-blue-400 transition-colors">{title}</h3>
-                <p className="text-xs text-gray-500 font-medium uppercase tracking-widest">{subtitle}</p>
+                <h3 className="text-xl font-bold tracking-tight text-foreground group-hover:text-primary transition-colors">{title}</h3>
+                <p className="text-xs text-muted-foreground font-medium uppercase tracking-widest">{subtitle}</p>
             </div>
             <div className="pt-4 h-[300px]">
                 {children}

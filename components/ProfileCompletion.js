@@ -117,28 +117,28 @@ export default function ProfileCompletion({ user }) {
 
             {/* Modal */}
             {isOpen && (
-                <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-                    <div className="bg-[#0a0a0a] border border-white/10 w-full max-w-md rounded-2xl p-6 shadow-2xl relative animate-in zoom-in-95 duration-200">
+                <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm">
+                    <div className="bg-card border border-border w-full max-w-md rounded-2xl p-6 shadow-2xl relative animate-in zoom-in-95 duration-200 text-card-foreground">
                         <button
                             onClick={() => setIsOpen(false)}
-                            className="absolute top-4 right-4 text-gray-500 hover:text-white"
+                            className="absolute top-4 right-4 text-muted-foreground hover:text-foreground"
                         >
                             ✕
                         </button>
 
-                        <h2 className="text-xl font-bold mb-1">Complete Your Profile</h2>
-                        <p className="text-gray-400 text-sm mb-6">Fill in the missing details to fully activate your account.</p>
+                        <h2 className="text-xl font-bold mb-1 text-foreground">Complete Your Profile</h2>
+                        <p className="text-muted-foreground text-sm mb-6">Fill in the missing details to fully activate your account.</p>
 
                         <form onSubmit={handleSubmit} className="space-y-6">
                             {missingPhone && (
                                 <div className="space-y-2">
-                                    <label className="text-xs font-bold uppercase tracking-widest text-gray-500">Phone Number</label>
+                                    <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Phone Number</label>
                                     <input
                                         type="tel"
                                         placeholder="+1 (555) 000-0000"
                                         value={phoneNumber}
                                         onChange={(e) => setPhoneNumber(e.target.value)}
-                                        className="w-full bg-black border border-white/20 rounded-lg px-4 py-3 text-white focus:border-white focus:outline-none focus:ring-1 focus:ring-white transition-colors"
+                                        className="w-full bg-background border border-input rounded-lg px-4 py-3 text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
                                         required
                                     />
                                 </div>
@@ -146,27 +146,27 @@ export default function ProfileCompletion({ user }) {
 
                             {missingInventory && (
                                 <div className="space-y-2">
-                                    <label className="text-xs font-bold uppercase tracking-widest text-gray-500">Device PID</label>
+                                    <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Device PID</label>
                                     <input
                                         type="text"
                                         placeholder="Enter PID (e.g. LAP-001)"
                                         value={pid}
                                         onChange={(e) => setPid(e.target.value)}
-                                        className="w-full bg-black border border-white/20 rounded-lg px-4 py-3 text-white focus:border-white focus:outline-none focus:ring-1 focus:ring-white transition-colors"
+                                        className="w-full bg-background border border-input rounded-lg px-4 py-3 text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
                                         required
                                     />
-                                    <p className="text-[10px] text-gray-500">You can find this on the sticker on your device.</p>
+                                    <p className="text-[10px] text-muted-foreground">You can find this on the sticker on your device.</p>
                                 </div>
                             )}
 
                             {error && (
-                                <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm text-center">
+                                <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm text-center">
                                     {error}
                                 </div>
                             )}
 
                             {message && (
-                                <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/20 text-green-400 text-sm text-center">
+                                <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/20 text-green-500 text-sm text-center">
                                     {message}
                                 </div>
                             )}
@@ -174,7 +174,7 @@ export default function ProfileCompletion({ user }) {
                             <button
                                 type="submit"
                                 disabled={isSubmitting}
-                                className="w-full bg-white text-black font-bold rounded-xl py-3 hover:bg-gray-200 transition-colors disabled:opacity-50"
+                                className="w-full bg-primary text-primary-foreground font-bold rounded-xl py-3 hover:opacity-90 transition-opacity disabled:opacity-50"
                             >
                                 {isSubmitting ? 'Saving...' : 'Save & Continue'}
                             </button>

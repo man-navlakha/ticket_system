@@ -66,21 +66,21 @@ export default function HelpClient({ supportStaff }) {
     );
 
     return (
-        <div className="min-h-screen bg-black text-white font-sans p-8">
+        <div className="min-h-screen bg-background text-foreground font-sans p-8">
             <div className="max-w-5xl mx-auto space-y-12">
 
                 {/* Header */}
                 <div className="text-center space-y-4 py-10">
-                    <h1 className="text-4xl md:text-5xl font-semibold tracking-tight">How can we help?</h1>
+                    <h1 className="text-4xl md:text-5xl font-semibold tracking-tight text-foreground">How can we help?</h1>
                     <div className="max-w-xl mx-auto relative">
                         <input
                             type="text"
                             placeholder="Search for answers..."
-                            className="w-full bg-[#111] border border-white/10 rounded-full py-4 px-6 pl-12 text-white placeholder:text-gray-500 focus:border-white/30 focus:ring-0 transition-all font-medium"
+                            className="w-full bg-input/50 border border-input rounded-full py-4 px-6 pl-12 text-foreground placeholder:text-muted-foreground focus:border-ring focus:ring-0 transition-all font-medium"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                         />
-                        <svg className="w-5 h-5 text-gray-500 absolute left-4 top-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg className="w-5 h-5 text-muted-foreground absolute left-4 top-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                         </svg>
                     </div>
@@ -90,12 +90,12 @@ export default function HelpClient({ supportStaff }) {
                 {!search && (
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         {quickLinks.map((link, i) => (
-                            <Link key={i} href={link.href} className="group p-6 rounded-2xl border border-white/10 bg-[#0A0A0A] hover:bg-[#111] hover:border-white/20 transition-all">
-                                <div className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white mb-4 group-hover:scale-110 transition-transform">
+                            <Link key={i} href={link.href} className="group p-6 rounded-2xl border border-border bg-card hover:bg-muted/30 hover:border-border/80 transition-all">
+                                <div className="w-12 h-12 rounded-xl bg-muted border border-border flex items-center justify-center text-foreground mb-4 group-hover:scale-110 transition-transform">
                                     {link.icon}
                                 </div>
-                                <h3 className="font-semibold text-lg mb-2">{link.title}</h3>
-                                <p className="text-sm text-gray-500">{link.description}</p>
+                                <h3 className="font-semibold text-lg mb-2 text-foreground">{link.title}</h3>
+                                <p className="text-sm text-muted-foreground">{link.description}</p>
                             </Link>
                         ))}
                     </div>
@@ -104,19 +104,19 @@ export default function HelpClient({ supportStaff }) {
                 {/* FAQs */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
                     <div className="lg:col-span-2 space-y-8">
-                        <h2 className="text-2xl font-semibold">Frequently Asked Questions</h2>
+                        <h2 className="text-2xl font-semibold text-foreground">Frequently Asked Questions</h2>
                         <div className="space-y-4">
                             {filteredFaqs.length === 0 ? (
-                                <p className="text-gray-500">No results found for "{search}".</p>
+                                <p className="text-muted-foreground">No results found for "{search}".</p>
                             ) : (
                                 filteredFaqs.map((faq, i) => (
-                                    <div key={i} className="border border-white/10 rounded-xl bg-[#0A0A0A] overflow-hidden">
+                                    <div key={i} className="border border-border rounded-xl bg-card overflow-hidden">
                                         <button
                                             onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                                            className="w-full flex items-center justify-between p-6 text-left hover:bg-white/5 transition-colors"
+                                            className="w-full flex items-center justify-between p-6 text-left hover:bg-muted/30 transition-colors"
                                         >
-                                            <span className="font-medium text-lg">{faq.question}</span>
-                                            <svg className={`w-5 h-5 text-gray-500 transition-transform duration-300 ${openFaq === i ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <span className="font-medium text-lg text-foreground">{faq.question}</span>
+                                            <svg className={`w-5 h-5 text-muted-foreground transition-transform duration-300 ${openFaq === i ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 9l-7 7-7-7" />
                                             </svg>
                                         </button>
@@ -128,7 +128,7 @@ export default function HelpClient({ supportStaff }) {
                                                     exit={{ height: 0, opacity: 0 }}
                                                     className="overflow-hidden"
                                                 >
-                                                    <div className="p-6 pt-0 text-gray-400 leading-relaxed border-t border-white/5">
+                                                    <div className="p-6 pt-0 text-muted-foreground leading-relaxed border-t border-border">
                                                         {faq.answer}
                                                     </div>
                                                 </motion.div>
@@ -142,22 +142,22 @@ export default function HelpClient({ supportStaff }) {
 
                     {/* Support Staff Side Panel */}
                     <div className="space-y-6">
-                        <div className="p-6 border border-white/10 rounded-2xl bg-[#0A0A0A]">
-                            <h3 className="text-sm font-bold uppercase tracking-widest text-gray-500 mb-6">Support Team</h3>
+                        <div className="p-6 border border-border rounded-2xl bg-card">
+                            <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground mb-6">Support Team</h3>
                             <div className="space-y-4 max-h-[400px] overflow-y-auto custom-scrollbar pr-2">
                                 {supportStaff.length === 0 ? (
-                                    <p className="text-sm text-gray-500">No active support staff.</p>
+                                    <p className="text-sm text-muted-foreground">No active support staff.</p>
                                 ) : (
                                     supportStaff.map((staff, i) => (
-                                        <div key={i} className="flex items-center gap-3 p-3 rounded-lg hover:bg-white/5 transition-colors group">
-                                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-white/10 to-transparent border border-white/10 flex items-center justify-center text-xs font-bold font-mono">
+                                        <div key={i} className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted/30 transition-colors group">
+                                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-muted/50 to-transparent border border-border flex items-center justify-center text-xs font-bold font-mono text-foreground">
                                                 {staff.username?.[0]?.toUpperCase()}
                                             </div>
                                             <div className="flex-1 min-w-0">
-                                                <p className="font-medium text-sm truncate">{staff.username}</p>
-                                                <p className="text-xs text-gray-500 truncate">{staff.email}</p>
+                                                <p className="font-medium text-sm truncate text-foreground">{staff.username}</p>
+                                                <p className="text-xs text-muted-foreground truncate">{staff.email}</p>
                                             </div>
-                                            <a href={`mailto:${staff.email}`} className="opacity-0 group-hover:opacity-100 p-2 text-gray-400 hover:text-white transition-all" title="Email">
+                                            <a href={`mailto:${staff.email}`} className="opacity-0 group-hover:opacity-100 p-2 text-muted-foreground hover:text-foreground transition-all" title="Email">
                                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                                 </svg>
@@ -166,20 +166,20 @@ export default function HelpClient({ supportStaff }) {
                                     ))
                                 )}
                             </div>
-                            <div className="mt-6 pt-6 border-t border-white/10">
+                            <div className="mt-6 pt-6 border-t border-border">
                                 <a
                                     href="mailto:support@example.com"
-                                    className="block w-full text-center py-2.5 rounded-lg bg-white text-black font-semibold text-sm hover:bg-gray-200 transition-colors"
+                                    className="block w-full text-center py-2.5 rounded-lg bg-primary text-primary-foreground font-semibold text-sm hover:opacity-90 transition-colors shadow-lg"
                                 >
                                     Contact General Support
                                 </a>
                             </div>
                         </div>
 
-                        <div className="p-6 border border-white/10 rounded-2xl bg-gradient-to-br from-blue-500/10 to-transparent border-t-0">
-                            <h4 className="text-blue-400 font-medium mb-2">Need immediate assistance?</h4>
-                            <p className="text-sm text-blue-400/80 mb-4">For system outages or critical blockers, contact the emergency hotline.</p>
-                            <a href="tel:5551234567" className="text-sm font-bold text-blue-400 hover:underline">
+                        <div className="p-6 border border-blue-500/20 rounded-2xl bg-gradient-to-br from-blue-500/10 to-transparent">
+                            <h4 className="text-blue-500 font-medium mb-2">Need immediate assistance?</h4>
+                            <p className="text-sm text-blue-500/80 mb-4">For system outages or critical blockers, contact the emergency hotline.</p>
+                            <a href="tel:5551234567" className="text-sm font-bold text-blue-500 hover:underline">
                                 Call +1 (555) 123-4567
                             </a>
                         </div>

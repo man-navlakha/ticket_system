@@ -48,14 +48,14 @@ export default function RegisterPage() {
                     </svg>
                 </div>
                 <div className="space-y-2">
-                    <h2 className="text-xl font-bold text-white tracking-tight">Request Received</h2>
-                    <p className="text-sm text-gray-500 leading-relaxed max-w-[280px] mx-auto">
+                    <h2 className="text-xl font-bold text-foreground tracking-tight">Request Received</h2>
+                    <p className="text-sm text-muted-foreground leading-relaxed max-w-[280px] mx-auto">
                         Your request for access has been submitted. Our administrators will review it shortly.
                     </p>
                 </div>
                 <Link
                     href="/auth/login"
-                    className="flex items-center justify-center w-full h-12 bg-white text-black text-[10px] font-bold uppercase tracking-widest rounded-xl hover:bg-gray-200 transition-all active:scale-[0.98]"
+                    className="flex items-center justify-center w-full h-12 bg-primary text-primary-foreground text-[10px] font-bold uppercase tracking-widest rounded-xl hover:opacity-90 transition-all active:scale-[0.98]"
                 >
                     Back to Login
                 </Link>
@@ -66,14 +66,14 @@ export default function RegisterPage() {
     return (
         <div className="space-y-8 py-2 animate-in fade-in duration-700">
             <div className="text-center space-y-4">
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-[1.5rem] bg-blue-500/5 border border-blue-500/10 text-blue-500 mb-2">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-[1.5rem] bg-blue-500/10 border border-blue-500/20 text-blue-500 mb-2">
                     <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
                     </svg>
                 </div>
                 <div className="space-y-2">
-                    <h1 className="text-2xl font-bold tracking-tight text-white uppercase tracking-wider">Request Access</h1>
-                    <p className="text-sm text-gray-500 font-medium leading-relaxed">
+                    <h1 className="text-2xl font-bold tracking-tight text-foreground uppercase tracking-wider">Request Access</h1>
+                    <p className="text-sm text-muted-foreground font-medium leading-relaxed">
                         Authorized personnel only. Request a workspace invite.
                     </p>
                 </div>
@@ -82,39 +82,39 @@ export default function RegisterPage() {
             <form onSubmit={handleRequestAccess} className="space-y-4">
                 <div className="space-y-4">
                     <div className="space-y-1.5">
-                        <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 ml-1">Full Name</label>
+                        <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground ml-1">Full Name</label>
                         <input
                             type="text"
                             name="name"
                             placeholder="John Doe"
                             required
-                            className="w-full h-11 px-4 bg-black border border-white/10 rounded-xl text-sm text-white placeholder:text-gray-700 focus:outline-none focus:border-white/30 transition-all focus:bg-white/[0.02] [color-scheme:dark]"
+                            className="w-full h-11 px-4 bg-input/50 border border-border rounded-xl text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 transition-all focus:bg-background"
                             value={formData.name}
                             onChange={handleFormChange}
                         />
                     </div>
                     <div className="space-y-1.5">
-                        <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 ml-1">Work Email</label>
+                        <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground ml-1">Work Email</label>
                         <input
                             type="email"
                             name="email"
                             placeholder="john@enterprise.com"
                             required
-                            className="w-full h-11 px-4 bg-black border border-white/10 rounded-xl text-sm text-white placeholder:text-gray-700 focus:outline-none focus:border-white/30 transition-all focus:bg-white/[0.02] [color-scheme:dark]"
+                            className="w-full h-11 px-4 bg-input/50 border border-border rounded-xl text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 transition-all focus:bg-background"
                             value={formData.email}
                             onChange={handleFormChange}
                         />
                     </div>
                     <div className="space-y-1.5">
-                        <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 ml-1">Department</label>
+                        <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground ml-1">Department</label>
                         <select
                             name="department"
                             required
-                            className="w-full h-11 px-4 bg-black border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-white/30 transition-all focus:bg-white/[0.02] appearance-none [color-scheme:dark]"
+                            className="w-full h-11 px-4 bg-input/50 border border-border rounded-xl text-sm text-foreground focus:outline-none focus:border-primary/50 transition-all focus:bg-background appearance-none"
                             value={formData.department}
                             onChange={handleFormChange}
                         >
-                            <option value="" disabled className="text-gray-700">Select Department</option>
+                            <option value="" disabled className="text-muted-foreground">Select Department</option>
                             <option value="IT">Information Technology</option>
                             <option value="HR">Human Resources</option>
                             <option value="Finance">Finance</option>
@@ -125,7 +125,7 @@ export default function RegisterPage() {
                 </div>
 
                 {error && (
-                    <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-500 text-[11px] font-bold rounded-xl text-center">
+                    <div className="p-3 bg-destructive/10 border border-destructive/20 text-destructive text-[11px] font-bold rounded-xl text-center">
                         {error}
                     </div>
                 )}
@@ -133,14 +133,14 @@ export default function RegisterPage() {
                 <button
                     type="submit"
                     disabled={status === 'loading'}
-                    className="w-full h-12 bg-white text-black text-[10px] font-bold uppercase tracking-widest rounded-xl hover:bg-gray-200 transition-all active:scale-[0.98] disabled:opacity-50 shadow-lg shadow-white/5"
+                    className="w-full h-12 bg-primary text-primary-foreground text-[10px] font-bold uppercase tracking-widest rounded-xl hover:opacity-90 transition-all active:scale-[0.98] disabled:opacity-50 shadow-lg shadow-black/5"
                 >
                     {status === 'loading' ? 'Submitting...' : 'Send Request'}
                 </button>
             </form>
 
-            <div className="pt-6 border-t border-white/5 text-center">
-                <Link href="/auth/login" className="text-[10px] font-bold text-gray-500 uppercase tracking-widest hover:text-white transition-colors">
+            <div className="pt-6 border-t border-border text-center">
+                <Link href="/auth/login" className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest hover:text-foreground transition-colors">
                     Back to Login
                 </Link>
             </div>

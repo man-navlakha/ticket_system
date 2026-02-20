@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import LogoutButton from './LogoutButton';
+import { ThemeToggle } from './theme-toggle';
 
 export default function Sidebar({ user }) {
     const pathname = usePathname();
@@ -170,14 +171,16 @@ export default function Sidebar({ user }) {
 
     const fullSidebar = [...sidebarStructure, configSection];
 
+
+
     return (
         <>
             {/* Desktop Sidebar */}
-            <aside className="hidden md:flex flex-col w-[280px] min-h-screen bg-black border-r border-white/10 sticky top-0 h-screen overflow-y-auto z-50 no-scrollbar">
+            <aside className="hidden md:flex flex-col w-[280px] min-h-screen bg-background border-r border-border sticky top-0 h-screen overflow-y-auto z-50 no-scrollbar transition-colors duration-300">
                 {/* Brand Header */}
-                <div className="flex items-center gap-3 px-6 h-16 border-b border-white/10 shrink-0 bg-black/50 backdrop-blur-md sticky top-0 z-10">
+                <div className="flex items-center gap-3 px-6 h-16 border-b border-border shrink-0 bg-background/50 backdrop-blur-md sticky top-0 z-10">
                     <Link href="/dashboard" className="flex items-center gap-3 group">
-                        <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center group-hover:bg-white/10 transition-colors">
+                        <div className="w-8 h-8 rounded-lg bg-muted border border-border flex items-center justify-center group-hover:bg-muted/80 transition-colors">
                             <Image
                                 src="/logo_my.png"
                                 alt="Logo"
@@ -187,8 +190,8 @@ export default function Sidebar({ user }) {
                             />
                         </div>
                         <div className="flex flex-col">
-                            <span className="font-semibold text-sm text-white tracking-tight">Man&apos;s Support</span>
-                            <span className="text-[10px] text-gray-500 font-mono">Enterprise</span>
+                            <span className="font-semibold text-sm text-foreground tracking-tight">Man&apos;s Support</span>
+                            <span className="text-[10px] text-muted-foreground font-mono">Enterprise</span>
                         </div>
                     </Link>
                 </div>
@@ -198,7 +201,7 @@ export default function Sidebar({ user }) {
                     {fullSidebar.map((section, idx) => (
                         <div key={idx} className="space-y-2">
                             {section.title && (
-                                <h3 className="px-3 text-[11px] font-medium text-gray-500 uppercase tracking-wider mb-2">
+                                <h3 className="px-3 text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-2">
                                     {section.title}
                                 </h3>
                             )}
@@ -210,16 +213,16 @@ export default function Sidebar({ user }) {
                                                 <button
                                                     onClick={() => toggleSubMenu(item.id)}
                                                     className={`w-full flex items-center justify-between px-3 py-2 text-sm rounded-md transition-all duration-200 group ${isActive(item.href || '') || openSubMenu[item.id]
-                                                        ? 'text-white'
-                                                        : 'text-gray-400 hover:text-white hover:bg-white/5'
+                                                        ? 'text-foreground'
+                                                        : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
                                                         }`}
                                                 >
                                                     <div className="flex items-center gap-3">
-                                                        <span className={openSubMenu[item.id] ? 'text-white' : 'text-gray-500 group-hover:text-white'}>{item.icon}</span>
+                                                        <span className={openSubMenu[item.id] ? 'text-foreground' : 'text-muted-foreground group-hover:text-foreground'}>{item.icon}</span>
                                                         <span className="font-medium">{item.label}</span>
                                                     </div>
                                                     <svg
-                                                        className={`w-3.5 h-3.5 transition-transform duration-200 text-gray-600 group-hover:text-gray-400 ${openSubMenu[item.id] ? 'rotate-90 text-gray-400' : ''}`}
+                                                        className={`w-3.5 h-3.5 transition-transform duration-200 text-muted-foreground group-hover:text-foreground ${openSubMenu[item.id] ? 'rotate-90 text-foreground' : ''}`}
                                                         fill="none"
                                                         viewBox="0 0 24 24"
                                                         stroke="currentColor"
@@ -230,14 +233,14 @@ export default function Sidebar({ user }) {
 
                                                 {openSubMenu[item.id] && (
                                                     <div className="relative pl-6 mt-1 space-y-0.5">
-                                                        <div className="absolute left-[21px] top-0 bottom-0 w-px bg-white/10" />
+                                                        <div className="absolute left-[21px] top-0 bottom-0 w-px bg-border" />
                                                         {item.subItems.map((subItem) => (
                                                             <Link
                                                                 key={subItem.href}
                                                                 href={subItem.href}
                                                                 className={`block pl-6 pr-3 py-1.5 text-[13px] rounded-r-md border-l-2 border-transparent transition-colors ${isSubActive(subItem.href)
-                                                                    ? 'text-white border-white bg-white/5 font-medium'
-                                                                    : 'text-gray-500 hover:text-white hover:border-white/20'
+                                                                    ? 'text-foreground border-foreground bg-muted/50 font-medium'
+                                                                    : 'text-muted-foreground hover:text-foreground hover:border-foreground/20'
                                                                     }`}
                                                             >
                                                                 {subItem.label}
@@ -250,11 +253,11 @@ export default function Sidebar({ user }) {
                                             <Link
                                                 href={item.href}
                                                 className={`flex items-center gap-3 px-3 py-2 text-sm rounded-md transition-all duration-200 group ${isActive(item.href)
-                                                    ? 'text-white bg-white/5 font-medium'
-                                                    : 'text-gray-400 hover:text-white hover:bg-white/5'
+                                                    ? 'text-foreground bg-muted/50 font-medium'
+                                                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
                                                     }`}
                                             >
-                                                <span className={isActive(item.href) ? 'text-white' : 'text-gray-500 group-hover:text-white'}>{item.icon}</span>
+                                                <span className={isActive(item.href) ? 'text-foreground' : 'text-muted-foreground group-hover:text-foreground'}>{item.icon}</span>
                                                 {item.label}
                                             </Link>
                                         )}
@@ -266,14 +269,18 @@ export default function Sidebar({ user }) {
                 </nav>
 
                 {/* User Profile */}
-                <div className="p-4 border-t border-white/10 bg-black sticky bottom-0">
-                    <div className="flex items-center gap-3 px-3 py-3 rounded-xl bg-white/5 border border-white/5 hover:border-white/10 transition-colors group cursor-pointer">
+                <div className="p-4 border-t border-border bg-background sticky bottom-0 space-y-3">
+                    <div className="flex items-center justify-between px-1">
+                        <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">Theme</span>
+                        <ThemeToggle />
+                    </div>
+                    <div className="flex items-center gap-3 px-3 py-3 rounded-xl bg-muted/30 border border-border hover:border-foreground/10 transition-colors group cursor-pointer">
                         <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-blue-500 to-purple-500 flex items-center justify-center text-xs font-bold text-white shadow-lg">
                             {user?.username?.[0] || 'U'}
                         </div>
                         <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-white truncate">{user?.username || 'User'}</p>
-                            <p className="text-[11px] text-gray-500 truncate font-mono">{user?.email}</p>
+                            <p className="text-sm font-medium text-foreground truncate">{user?.username || 'User'}</p>
+                            <p className="text-[11px] text-muted-foreground truncate font-mono">{user?.email}</p>
                         </div>
                         <div className="opacity-0 group-hover:opacity-100 transition-opacity">
                             <LogoutButton />
@@ -283,11 +290,11 @@ export default function Sidebar({ user }) {
             </aside>
 
             {/* Mobile Bottom Bar - Simplified for cleaner look */}
-            <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-[#0B0E14]/95 backdrop-blur-xl border-t border-white/10 z-50 px-2 pb-safe shadow-[0_-4px_20px_rgba(0,0,0,0.4)]">
+            <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-xl border-t border-border z-50 px-2 pb-safe shadow-[0_-4px_20px_rgba(0,0,0,0.4)] transition-colors duration-300">
                 <div className="flex items-center justify-around h-16">
                     <Link
                         href="/dashboard"
-                        className={`flex flex-col items-center justify-center p-2 rounded-xl transition-all w-16 group ${isActive('/dashboard') ? 'text-white' : 'text-gray-500'}`}
+                        className={`flex flex-col items-center justify-center p-2 rounded-xl transition-all w-16 group ${isActive('/dashboard') ? 'text-foreground' : 'text-muted-foreground'}`}
                     >
                         <svg className="w-6 h-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
@@ -297,7 +304,7 @@ export default function Sidebar({ user }) {
 
                     <Link
                         href="/dashboard/inventory"
-                        className={`flex flex-col items-center justify-center p-2 rounded-xl transition-all w-16 group ${isActive('/dashboard/inventory') ? 'text-white' : 'text-gray-500'}`}
+                        className={`flex flex-col items-center justify-center p-2 rounded-xl transition-all w-16 group ${isActive('/dashboard/inventory') ? 'text-foreground' : 'text-muted-foreground'}`}
                     >
                         <svg className="w-6 h-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
@@ -307,7 +314,7 @@ export default function Sidebar({ user }) {
 
                     <Link
                         href="/dashboard/create"
-                        className="flex items-center justify-center w-12 h-12 rounded-full bg-white text-black shadow-lg shadow-white/10 transform -translate-y-4 border-4 border-black active:scale-95 transition-all"
+                        className="flex items-center justify-center w-12 h-12 rounded-full bg-foreground text-background shadow-lg shadow-foreground/10 transform -translate-y-4 border-4 border-background active:scale-95 transition-all"
                     >
                         <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -316,7 +323,7 @@ export default function Sidebar({ user }) {
 
                     <Link
                         href="/dashboard/knowledge-base"
-                        className={`flex flex-col items-center justify-center p-2 rounded-xl transition-all w-16 group ${isActive('/dashboard/knowledge-base') ? 'text-white' : 'text-gray-500'}`}
+                        className={`flex flex-col items-center justify-center p-2 rounded-xl transition-all w-16 group ${isActive('/dashboard/knowledge-base') ? 'text-foreground' : 'text-muted-foreground'}`}
                     >
                         <svg className="w-6 h-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
@@ -326,7 +333,7 @@ export default function Sidebar({ user }) {
 
                     <Link
                         href="/dashboard/profile"
-                        className={`flex flex-col items-center justify-center p-2 rounded-xl transition-all w-16 group ${isActive('/dashboard/profile') ? 'text-white' : 'text-gray-500'}`}
+                        className={`flex flex-col items-center justify-center p-2 rounded-xl transition-all w-16 group ${isActive('/dashboard/profile') ? 'text-foreground' : 'text-muted-foreground'}`}
                     >
                         <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-blue-500 to-purple-500 flex items-center justify-center text-[10px] font-bold text-white mb-1">
                             {user?.name?.[0] || 'U'}

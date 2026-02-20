@@ -1,5 +1,5 @@
 import ProfileCompletion from '@/components/ProfileCompletion';
-import DashboardNav from '@/components/DashboardNav';
+
 import Sidebar from '@/components/Sidebar';
 import { getCurrentUser } from '@/lib/session';
 
@@ -7,7 +7,7 @@ export default async function DashboardLayout({ children }) {
     const user = await getCurrentUser();
 
     return (
-        <div className="min-h-screen bg-black text-white selection:bg-gray-800">
+        <div className="min-h-screen bg-background text-foreground selection:bg-primary/20 transition-colors duration-300">
             <ProfileCompletion user={user} />
             <div className="flex">
                 <Sidebar user={user} />

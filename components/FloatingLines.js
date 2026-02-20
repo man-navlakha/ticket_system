@@ -1,11 +1,20 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { useTheme } from 'next-themes';
 
 export default function FloatingLines() {
     const canvasRef = useRef(null);
+    const { resolvedTheme } = useTheme();
+    const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    useEffect(() => {
+        if (!mounted) return;
+
         const canvas = canvasRef.current;
         if (!canvas) return;
 
@@ -22,13 +31,22 @@ export default function FloatingLines() {
         const lineSpacing = 30; // Base vertical spacing
         const amplitude = 50; // Wave height
 
+        // Determine base color based on theme
+        // Dark Mode: White lines (255, 255, 255)
+        // Light Mode: Black lines (0, 0, 0)
+        const isDark = resolvedTheme === 'dark';
+        const baseColor = isDark ? '255, 255, 255' : '0, 0, 0';
+        const baseOpacity = isDark ? 0.03 : 0.05; // Slightly more visible in light mode
+
         class Line {
             constructor(y, index) {
                 this.baseY = y;
                 this.index = index;
                 this.points = [];
                 this.offset = Math.random() * 100;
-                this.color = `rgba(255, 255, 255, ${0.03 + (index / lineCount) * 0.1})`; // Gradient opacity
+                // Fixed logic to calculate opacity correctly
+                const opacity = baseOpacity + (index / lineCount) * 0.1;
+                this.color = `rgba(${baseColor}, ${opacity})`;
             }
 
             init(w) {
@@ -69,6 +87,7 @@ export default function FloatingLines() {
             draw(ctx) {
                 ctx.beginPath();
                 ctx.strokeStyle = this.color;
+                ctx.lineWidth = 1;
 
                 // Smooth curve through points
                 if (this.points.length > 0) {
@@ -89,23 +108,24 @@ export default function FloatingLines() {
             }
         }
 
-        const init = () => {
+        const initLines = () => {
             width = canvas.width = window.innerWidth;
             height = canvas.height = window.innerHeight;
 
             lines.length = 0;
-            // Spread lines across the screen, mostly in the middle/bottom half for the "floor" effect or just general background
-            // The user wants "Floating Lines", usually horizontal waves.
             const startY = height * 0.2; // Start 20% down
             const totalHeight = height * 0.8; // Cover 80%
 
             for (let i = 0; i < lineCount; i++) {
-                lines.push(new Line(startY + (i * (totalHeight / lineCount)), i));
-                lines[i].init(width);
+                const yPos = startY + (i * (totalHeight / lineCount));
+                const line = new Line(yPos, i);
+                line.init(width);
+                lines.push(line);
             }
         };
 
         const render = (time) => {
+            if (!ctx) return;
             ctx.clearRect(0, 0, width, height);
 
             lines.forEach(line => {
@@ -117,7 +137,7 @@ export default function FloatingLines() {
         };
 
         const handleResize = () => {
-            init();
+            initLines();
         };
 
         const handleMouseMove = (e) => {
@@ -129,7 +149,7 @@ export default function FloatingLines() {
         window.addEventListener('resize', handleResize);
         window.addEventListener('mousemove', handleMouseMove);
 
-        init();
+        initLines();
         render(0);
 
         return () => {
@@ -137,7 +157,9 @@ export default function FloatingLines() {
             window.removeEventListener('mousemove', handleMouseMove);
             cancelAnimationFrame(animationFrameId);
         };
-    }, []);
+    }, [resolvedTheme, mounted]); // Re-run when theme changes
+
+    if (!mounted) return null;
 
     return (
         <canvas

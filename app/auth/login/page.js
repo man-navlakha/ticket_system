@@ -51,33 +51,33 @@ export default function LoginPage() {
     return (
         <div className="space-y-8">
             <div className="text-center space-y-2">
-                <h1 className="text-2xl font-bold tracking-tight text-white">Welcome back</h1>
-                <p className="text-sm text-gray-500 font-medium">Log in to your enterprise workspace.</p>
+                <h1 className="text-2xl font-bold tracking-tight text-foreground">Welcome back</h1>
+                <p className="text-sm text-muted-foreground font-medium">Log in to your enterprise workspace.</p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-5">
                 <div className="space-y-4">
                     <div className="space-y-2">
-                        <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 ml-1">Identity</label>
+                        <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground ml-1">Identity</label>
                         <input
                             type="text"
                             placeholder="Email or Username"
                             required
-                            className="w-full h-12 px-4 bg-black border border-white/10 rounded-xl text-sm text-white placeholder:text-gray-700 focus:outline-none focus:border-white/30 transition-all focus:bg-white/[0.02] [color-scheme:dark]"
+                            className="w-full h-12 px-4 bg-input/50 border border-border rounded-xl text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 transition-all focus:bg-background"
                             value={identifier}
                             onChange={(e) => setIdentifier(e.target.value)}
                         />
                     </div>
                     <div className="space-y-2">
                         <div className="flex justify-between items-center ml-1">
-                            <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500">Password</label>
-                            <Link href="/auth/forgot-password" size="sm" className="text-[10px] font-bold text-gray-600 hover:text-white transition-colors">Forgot?</Link>
+                            <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Password</label>
+                            <Link href="/auth/forgot-password" size="sm" className="text-[10px] font-bold text-muted-foreground hover:text-foreground transition-colors">Forgot?</Link>
                         </div>
                         <input
                             type="password"
                             placeholder="••••••••"
                             required
-                            className="w-full h-12 px-4 bg-black border border-white/10 rounded-xl text-sm text-white placeholder:text-gray-700 focus:outline-none focus:border-white/30 transition-all focus:bg-white/[0.02] [color-scheme:dark]"
+                            className="w-full h-12 px-4 bg-input/50 border border-border rounded-xl text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 transition-all focus:bg-background"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                         />
@@ -85,7 +85,7 @@ export default function LoginPage() {
                 </div>
 
                 {error && (
-                    <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-bold rounded-xl text-center">
+                    <div className="p-3 bg-destructive/10 border border-destructive/20 text-destructive text-xs font-bold rounded-xl text-center">
                         {error}
                     </div>
                 )}
@@ -93,16 +93,16 @@ export default function LoginPage() {
                 <button
                     type="submit"
                     disabled={loading}
-                    className="w-full h-12 bg-white text-black font-bold text-xs uppercase tracking-widest rounded-xl hover:bg-gray-200 transition-all active:scale-[0.98] disabled:opacity-50 mt-2 shadow-lg shadow-white/5"
+                    className="w-full h-12 bg-primary text-primary-foreground font-bold text-xs uppercase tracking-widest rounded-xl hover:opacity-90 transition-all active:scale-[0.98] disabled:opacity-50 mt-2 shadow-lg shadow-black/5"
                 >
                     {loading ? 'Authenticating...' : 'Sign In'}
                 </button>
             </form>
 
-            <div className="pt-6 border-t border-white/5 text-center">
-                <p className="text-xs text-gray-500 font-medium">
+            <div className="pt-6 border-t border-border text-center">
+                <p className="text-xs text-muted-foreground font-medium">
                     Don't have an account? {' '}
-                    <Link href="/auth/register" className="text-white font-bold hover:underline underline-offset-4">Request Access</Link>
+                    <Link href="/auth/register" className="text-foreground font-bold hover:underline underline-offset-4">Request Access</Link>
                 </p>
             </div>
         </div>

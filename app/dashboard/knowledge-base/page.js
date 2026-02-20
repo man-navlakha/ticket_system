@@ -73,28 +73,28 @@ function KBContent() {
         <div className="space-y-12 animate-in fade-in duration-500">
             {/* Minimal Header */}
             <div className="space-y-4">
-                <div className="flex items-center gap-2 text-xs font-medium text-gray-500 uppercase tracking-widest">
-                    <Link href="/dashboard" className="hover:text-white">Dashboard</Link>
+                <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-widest">
+                    <Link href="/dashboard" className="hover:text-foreground">Dashboard</Link>
                     <span>/</span>
-                    <span className="text-white">Knowledge Base</span>
+                    <span className="text-foreground">Knowledge Base</span>
                     {categoryFilter !== 'all' && (
                         <>
                             <span>/</span>
-                            <span className="text-blue-400">{categoryFilter}</span>
+                            <span className="text-blue-500">{categoryFilter}</span>
                         </>
                     )}
                 </div>
-                <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-white">
+                <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground">
                     {categoryFilter === 'all' ? 'Documentation' : categoryFilter}
                 </h1>
-                <p className="text-lg text-gray-400 max-w-2xl leading-relaxed">
+                <p className="text-lg text-muted-foreground max-w-2xl leading-relaxed">
                     Guides, troubleshooting tips, and references to help you resolve issues and manage your assets effectively.
                 </p>
             </div>
 
             {/* Tight Search */}
             <form onSubmit={handleSearch} className="relative group max-w-2xl">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-500">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-muted-foreground">
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
@@ -104,11 +104,11 @@ function KBContent() {
                     placeholder="Search documentation..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full bg-[#111] border border-white/10 rounded-xl py-3 pl-11 pr-4 text-white placeholder:text-gray-600 focus:border-white/30 focus:ring-0 transition-all font-medium"
+                    className="w-full bg-input/50 border border-input rounded-xl py-3 pl-11 pr-4 text-foreground placeholder:text-muted-foreground focus:border-ring focus:ring-0 transition-all font-medium"
                 />
                 {isAiSearching && (
                     <div className="absolute right-4 top-3.5">
-                        <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                        <div className="w-4 h-4 border-2 border-muted-foreground/20 border-t-muted-foreground rounded-full animate-spin" />
                     </div>
                 )}
             </form>
@@ -116,9 +116,9 @@ function KBContent() {
             {/* AI Message */}
             {aiMessage && (
                 <div className="bg-blue-500/5 border border-blue-500/20 rounded-xl p-6 flex items-start gap-4">
-                    <div className="text-blue-400 text-xl shrink-0">✨</div>
-                    <div className="text-sm text-gray-400 leading-relaxed font-medium">
-                        <span className="text-blue-400 block mb-1 uppercase text-[10px] font-bold tracking-tighter">AI Summary</span>
+                    <div className="text-blue-500 text-xl shrink-0">✨</div>
+                    <div className="text-sm text-foreground leading-relaxed font-medium">
+                        <span className="text-blue-500 block mb-1 uppercase text-[10px] font-bold tracking-tighter">AI Summary</span>
                         {aiMessage}
                     </div>
                 </div>
@@ -129,12 +129,12 @@ function KBContent() {
                 {loading ? (
                     <div className="space-y-4">
                         {[1, 2, 3].map(i => (
-                            <div key={i} className="h-24 bg-white/5 rounded-xl animate-pulse" />
+                            <div key={i} className="h-24 bg-muted/20 rounded-xl animate-pulse" />
                         ))}
                     </div>
                 ) : articles.length === 0 ? (
-                    <div className="text-center py-20 border border-white/5 rounded-2xl bg-white/[0.02]">
-                        <p className="text-gray-500 font-medium">No results found for your query.</p>
+                    <div className="text-center py-20 border border-border rounded-2xl bg-card">
+                        <p className="text-muted-foreground font-medium">No results found for your query.</p>
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -142,21 +142,21 @@ function KBContent() {
                             <Link
                                 key={article.id}
                                 href={`/dashboard/knowledge-base/${article.id}`}
-                                className="group p-5 rounded-xl border border-white/5 bg-[#0A0A0A] hover:bg-[#111] hover:border-white/20 transition-all flex flex-col justify-between"
+                                className="group p-5 rounded-xl border border-border bg-card hover:bg-muted/30 hover:border-border/80 transition-all flex flex-col justify-between"
                             >
                                 <div>
-                                    <h3 className="text-lg font-semibold text-white group-hover:text-blue-400 transition-colors mb-2">
+                                    <h3 className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors mb-2">
                                         {article.title}
                                     </h3>
-                                    <p className="text-sm text-gray-500 line-clamp-2 leading-relaxed mb-4">
+                                    <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed mb-4">
                                         {article.summary || article.content?.substring(0, 120) + '...'}
                                     </p>
                                 </div>
                                 <div className="flex items-center gap-3 mt-auto">
-                                    <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-white/5 text-gray-500 border border-white/5">
+                                    <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-muted text-muted-foreground border border-border">
                                         {article.category?.name || 'General'}
                                     </span>
-                                    <span className="text-[10px] text-gray-600 font-mono">
+                                    <span className="text-[10px] text-muted-foreground font-mono">
                                         {new Date(article.createdAt).toLocaleDateString()}
                                     </span>
                                 </div>
@@ -167,13 +167,13 @@ function KBContent() {
             </div>
 
             {/* Footer / Create */}
-            <div className="pt-12 border-t border-white/5">
+            <div className="pt-12 border-t border-border">
                 <div className="flex flex-col md:flex-row items-center justify-between gap-6 p-8 rounded-2xl bg-gradient-to-r from-blue-500/10 to-transparent border border-blue-500/20">
                     <div>
-                        <h4 className="text-white font-bold text-lg mb-1">Didn't find what you need?</h4>
-                        <p className="text-sm text-gray-400">Collaborate with our community or request a new article.</p>
+                        <h4 className="text-foreground font-bold text-lg mb-1">Didn't find what you need?</h4>
+                        <p className="text-sm text-muted-foreground">Collaborate with our community or request a new article.</p>
                     </div>
-                    <Link href="/dashboard/knowledge-base/create" className="px-6 py-2.5 bg-white text-black rounded-lg text-sm font-bold shadow-lg hover:bg-gray-200 transition-colors whitespace-nowrap">
+                    <Link href="/dashboard/knowledge-base/create" className="px-6 py-2.5 bg-foreground text-background rounded-lg text-sm font-bold shadow-lg hover:bg-foreground/90 transition-colors whitespace-nowrap">
                         New Article
                     </Link>
                 </div>
