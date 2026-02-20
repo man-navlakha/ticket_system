@@ -5,10 +5,9 @@ import { createAuditLog } from '@/lib/audit';
 
 export async function GET(request, { params }) {
     try {
-        const user = await getCurrentUser();
-        if (!user) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        }
+        // Allow public access
+        // const user = await getCurrentUser(); // Not strictly needed for public read
+
 
         const { id } = await params;
 
@@ -32,6 +31,14 @@ export async function GET(request, { params }) {
         });
 
         if (!article) {
+            return NextResponse.json({ error: 'Article not found' }, { status: 404 });
+        }
+
+        // Security: Check if article is published or if user has access
+        const isPublic = article.published;
+        const hasAccess = user && (user.role === 'ADMIN' || user.role === 'AGENT');
+
+        if (!isPublic && !hasAccess) {
             return NextResponse.json({ error: 'Article not found' }, { status: 404 });
         }
 

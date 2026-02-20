@@ -4,21 +4,43 @@ import { getCurrentUser } from '@/lib/session';
 
 export async function GET(request) {
     try {
-        const user = await getCurrentUser();
-        if (!user) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        }
+        // Allow public access
+        const user = await getCurrentUser(); // Keep retrieving user if needed for personalization later, but don't block
 
+
+        // ...
         const { searchParams } = new URL(request.url);
         const categoryId = searchParams.get('categoryId');
-        const categoryName = searchParams.get('category'); // Added to support name-based filtering
-        const published = searchParams.get('published') !== 'false'; // default true
+        const categoryName = searchParams.get('category');
         const search = searchParams.get('search');
 
+        // Security: Only allow viewing drafts (published=false) if user is ADMIN/AGENT
+        let publishedFilter = true;
+        const requestedPublished = searchParams.get('published');
+
+        if (user && (user.role === 'ADMIN' || user.role === 'AGENT')) {
+            if (requestedPublished === 'false') publishedFilter = false;
+            // If they request 'true', we filter by true. If they don't specify, likely we want all? 
+            // The original code was: const published = searchParams.get('published') !== 'false'; (default true)
+            // So by default it showed published only? 
+            // Let's stick to: if param is 'false', we show drafts too (or only drafts? logic was weird)
+
+            // Original logic:
+            // const published = searchParams.get('published') !== 'false'; // true unless 'false'
+            // ... (published && { published: true }),
+
+            // If published is true (default), we add { published: true } to where. 
+            // If published is false (param='false'), we DON'T add { published: true } -> so we get ALL.
+
+            if (requestedPublished === 'false') {
+                publishedFilter = false; // Don't filter by published
+            }
+        }
+
         const where = {
-            ...(published && { published: true }),
+            ...(publishedFilter && { published: true }),
             ...(categoryId && { categoryId }),
-            ...(categoryName && { category: { name: categoryName } }), // Filter by name
+            ...(categoryName && { category: { name: categoryName } }),
             ...(search && {
                 OR: [
                     { title: { contains: search, mode: 'insensitive' } },
