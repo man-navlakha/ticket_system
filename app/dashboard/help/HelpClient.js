@@ -20,6 +20,14 @@ const faqs = [
     {
         question: "Who should I contact for urgent issues?",
         answer: "For urgent matters, please contact your department head or the IT admin directly via email or phone."
+    },
+    {
+        question: "Where can I find the system rules and policies?",
+        answer: "You can view the specific rules for each section of our system (Tickets, Inventory, etc.) by visiting the Terms & Conditions page via the system footer."
+    },
+    {
+        question: "Are there different rules for different pages?",
+        answer: "Yes, each module in our system has different rules. The 'Policies' and 'Terms' sections detail the specific guidelines you must follow when using them."
     }
 ];
 

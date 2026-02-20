@@ -366,8 +366,8 @@ export default function Home() {
               <div className="flex flex-col md:flex-row items-center gap-4 md:gap-8">
                 <span>© 2026 Man&apos;s Support Desk.</span>
                 <div className="flex gap-6">
-                  <a href="#" className="hover:text-foreground transition-colors">Privacy</a>
-                  <a href="#" className="hover:text-foreground transition-colors">Terms</a>
+                  <Link href="/policies" className="hover:text-foreground transition-colors">Policies</Link>
+                  <Link href="/terms" className="hover:text-foreground transition-colors">Terms</Link>
                 </div>
               </div>
 
