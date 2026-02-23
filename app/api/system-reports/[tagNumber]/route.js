@@ -4,9 +4,6 @@ import { getCurrentUser } from '@/lib/session';
 
 // GET /api/system-reports/[tagNumber]
 export async function GET(request, { params }) {
-    const user = await getCurrentUser();
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
     const { tagNumber } = await params;
 
     try {
@@ -27,11 +24,6 @@ export async function GET(request, { params }) {
 
 // POST or PUT (Upsert) /api/system-reports/[tagNumber]
 export async function POST(request, { params }) {
-    const user = await getCurrentUser();
-    if (!user || (user.role !== 'ADMIN' && user.role !== 'AGENT')) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
-    }
-
     const { tagNumber } = await params;
     const json = await request.json();
 

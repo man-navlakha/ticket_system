@@ -4,9 +4,6 @@ import { getCurrentUser } from '@/lib/session';
 
 // GET /api/system-reports - Fetches all system reports
 export async function GET() {
-    const user = await getCurrentUser();
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
     try {
         const reports = await prisma.systemReport.findMany({
             include: {
@@ -33,11 +30,6 @@ export async function GET() {
 
 // POST /api/system-reports - Creates a new system report
 export async function POST(request) {
-    const user = await getCurrentUser();
-    if (!user || (user.role !== 'ADMIN' && user.role !== 'AGENT')) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
-    }
-
     const json = await request.json();
     const { tagNumber } = json;
 

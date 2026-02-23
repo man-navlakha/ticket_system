@@ -87,6 +87,7 @@ export default function Sidebar({ user }) {
                     ),
                     subItems: [
                         { label: 'All Assets', href: '/dashboard/inventory' },
+                        { label: 'System Reports', href: '/dashboard/system-reports' },
                     ]
                 },
                 {
