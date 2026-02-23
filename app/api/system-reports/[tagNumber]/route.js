@@ -82,3 +82,26 @@ export async function PUT(request, { params }) {
     // You can also alias PUT to the same upsert POST logic
     return POST(request, { params });
 }
+
+export async function DELETE(request, { params }) {
+    const { tagNumber } = await params;
+
+    try {
+        const report = await prisma.systemReport.findFirst({
+            where: { tagNumber }
+        });
+
+        if (!report) {
+            return NextResponse.json({ error: 'Report not found' }, { status: 404 });
+        }
+
+        await prisma.systemReport.delete({
+            where: { id: report.id }
+        });
+
+        return NextResponse.json({ success: true, message: 'System report deleted' });
+    } catch (error) {
+        console.error('Error deleting system report:', error);
+        return NextResponse.json({ error: 'Failed to delete system report' }, { status: 500 });
+    }
+}

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import FloatingLines from '@/components/FloatingLines';
+import LandingNav from '@/components/LandingNav';
 
 export default function Home() {
   const router = useRouter();
@@ -115,6 +116,7 @@ export default function Home() {
 
       {/* Announcement Banner */}
 
+      <LandingNav />
 
       <main className="pt-24">
         {/* Hero Section */}

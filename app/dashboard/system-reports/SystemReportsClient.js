@@ -42,6 +42,28 @@ export default function SystemReportsClient({ user }) {
         setSelectedReport(report);
     };
 
+    const handleDelete = async (tagNumber) => {
+        if (!confirm(`Are you sure you want to delete the system report for ${tagNumber}?`)) return;
+
+        try {
+            const res = await fetch(`/api/system-reports/${tagNumber}`, {
+                method: 'DELETE',
+            });
+            if (!res.ok) throw new Error('Failed to delete report');
+
+            // Remove from state
+            setReports(prev => prev.filter(r => r.tagNumber !== tagNumber));
+
+            // If the deleted report was open in modal, close it
+            if (selectedReport?.tagNumber === tagNumber) {
+                setSelectedReport(null);
+            }
+        } catch (error) {
+            console.error('Error deleting report:', error);
+            alert('Failed to delete report');
+        }
+    };
+
     return (
         <div className="space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -130,12 +152,20 @@ export default function SystemReportsClient({ user }) {
                                             {report.reportDate || new Date(report.createdAt).toLocaleDateString()}
                                         </td>
                                         <td className="px-4 py-3 text-right">
-                                            <button
-                                                onClick={() => handleView(report)}
-                                                className="text-xs font-medium text-primary hover:text-primary/80 transition-colors bg-primary/10 hover:bg-primary/20 px-3 py-1.5 rounded-md"
-                                            >
-                                                View Details
-                                            </button>
+                                            <div className="flex justify-end gap-2">
+                                                <button
+                                                    onClick={() => handleView(report)}
+                                                    className="text-xs font-medium text-primary hover:text-primary/80 transition-colors bg-primary/10 hover:bg-primary/20 px-3 py-1.5 rounded-md"
+                                                >
+                                                    View Details
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDelete(report.tagNumber)}
+                                                    className="text-xs font-medium text-red-500 hover:text-red-600 transition-colors bg-red-500/10 hover:bg-red-500/20 px-3 py-1.5 rounded-md"
+                                                >
+                                                    Delete
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))
