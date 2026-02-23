@@ -172,6 +172,7 @@ model InventoryItem {
   proposals       Proposal[]
   maintenanceRecords MaintenanceRecord[]
   auditLogs       AuditLog[]
+  systemReport    SystemReport?
 }
 
 enum Condition {
@@ -196,6 +197,35 @@ model MaintenanceRecord {
   
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
+}
+
+model SystemReport {
+  id              String   @id @default(uuid())
+  inventoryItemId String   @unique
+  inventoryItem   InventoryItem @relation(fields: [inventoryItemId], references: [id], onDelete: Cascade)
+  
+  tagNumber       String   // e.g. EP-019
+  userName        String?
+  reportDate      String?
+  
+  // System Summary
+  systemName      String?
+  manufacturer    String?
+  model           String?
+  serialNumber    String?
+  windowsEdition  String?
+  windowsVersion  String?
+  buildNumber     String?
+  processor       String?
+  totalRamGB      Float?
+
+  // Details as JSON to store arrays of objects
+  ramDetails      Json?    // e.g. [{ BankLabel, Manufacturer, Speed, Capacity }]
+  gpuDetails      Json?    // e.g. [{ Name, DriverVersion, Memory }]
+  diskDetails     Json?    // e.g. [{ Model, InterfaceType, Size }]
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }
 
 enum InventoryStatus {
