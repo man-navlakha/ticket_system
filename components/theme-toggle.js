@@ -18,12 +18,13 @@ export function ThemeToggle() {
     }
 
     return (
-        <div className="flex items-center gap-2 p-1 bg-gray-100 dark:bg-zinc-800 rounded-full border border-gray-200 dark:border-zinc-700 shadow-sm transition-colors duration-300">
+        <div className="flex items-center gap-2 p-1 bg-background text-foreground rounded-full border border-gray-200 dark:border-zinc-700 shadow-sm transition-colors duration-300">
+
             <button
                 onClick={() => setTheme("light")}
                 className={`p-2 rounded-full transition-all duration-300 hover:bg-white dark:hover:bg-zinc-700 ${theme === "light"
-                        ? "bg-white text-yellow-500 shadow-sm scale-110"
-                        : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
+                    ? "bg-white text-yellow-500 shadow-sm scale-110"
+                    : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
                     }`}
                 aria-label="Light Mode"
             >
@@ -32,8 +33,8 @@ export function ThemeToggle() {
             <button
                 onClick={() => setTheme("system")}
                 className={`p-2 rounded-full transition-all duration-300 hover:bg-white dark:hover:bg-zinc-700 ${theme === "system"
-                        ? "bg-white dark:bg-zinc-600 text-blue-500 shadow-sm scale-110"
-                        : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
+                    ? "bg-white dark:bg-zinc-600 text-blue-500 shadow-sm scale-110"
+                    : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
                     }`}
                 aria-label="System Mode"
             >
@@ -42,8 +43,8 @@ export function ThemeToggle() {
             <button
                 onClick={() => setTheme("dark")}
                 className={`p-2 rounded-full transition-all duration-300 hover:bg-white dark:hover:bg-zinc-700 ${theme === "dark"
-                        ? "bg-zinc-700 text-purple-400 shadow-sm scale-110"
-                        : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
+                    ? "bg-zinc-700 text-purple-400 shadow-sm scale-110"
+                    : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
                     }`}
                 aria-label="Dark Mode"
             >

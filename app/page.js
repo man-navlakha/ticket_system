@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import FloatingLines from '@/components/FloatingLines';
 import LandingNav from '@/components/LandingNav';
+import { Brain, WandSparkles, Users, ShelvingUnit } from 'lucide-react';
 
 export default function Home() {
   const router = useRouter();
@@ -118,7 +119,7 @@ export default function Home() {
 
       <LandingNav />
 
-      <main className="pt-24">
+      <main className="pt-2 md:pt-24 lg:pt-0">
         {/* Hero Section */}
         <section className="relative px-4 sm:px-6 lg:px-8 py-20 sm:py-32 overflow-hidden">
           {/* Background Gradient Spot */}
@@ -135,7 +136,7 @@ export default function Home() {
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400/50 opacity-75" />
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
                 </span>
-                System Operational
+                Powered by <span className="text-[#ffd700]">MAN NAVLAKHA</span>
               </div>
 
               {/* Heading */}
@@ -143,6 +144,9 @@ export default function Home() {
                 <h1 className="text-5xl sm:text-6xl lg:text-7xl font-light tracking-tight text-foreground drop-shadow-sm">
                   Enterprise Support Hub
                 </h1>
+                <span className="text-lg sm:text-xl text-muted-foreground font-light max-w-3xl mx-auto leading-relaxed">
+
+                </span>
                 <p className="text-lg sm:text-xl text-muted-foreground font-light max-w-3xl mx-auto leading-relaxed">
                   Unified ticket management, inventory tracking, and team collaboration built for enterprise-grade support.
                 </p>
@@ -152,7 +156,7 @@ export default function Home() {
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
                 <Link
                   href="/dashboard"
-                  className="px-8 py-3 rounded-full bg-primary text-primary-foreground font-semibold text-sm hover:opacity-90 transition-colors shadow-lg shadow-black/5"
+                  className="px-8 py-3 rounded-full bg-[#ffd700] text-[#000] font-semibold text-sm hover:opacity-90 transition-colors shadow-lg shadow-black/5"
                 >
                   Access Dashboard
                 </Link>
@@ -246,15 +250,17 @@ export default function Home() {
         <section className="py-32 px-4 sm:px-6 lg:px-8 bg-background">
           <div className="max-w-7xl mx-auto">
             <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-center mb-20 text-foreground">
-              Everything you need to <br /> scale support.
+              Everything you need to <br /> <span className="text-[#ffd700]"> scale support.</span>
             </h2>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3">
               {/* Large Card 1 */}
-              <div className="md:col-span-2 p-8 rounded-3xl border border-border bg-card hover:border-foreground/20 transition-colors relative overflow-hidden group">
+              <div className="md:col-span-2 p-8 rounded-tl-3xl border-t border-l border-border bg-card hover:border-foreground/20 transition-colors relative overflow-hidden group">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/10 blur-[80px] rounded-full group-hover:bg-purple-500/20 transition-all duration-500"></div>
                 <div className="relative z-10">
-                  <div className="w-12 h-12 rounded-lg bg-muted border border-border flex items-center justify-center mb-6 text-2xl">⚡</div>
+                  <div className="w-12 h-12 rounded-lg bg-muted/80 backdrop-blur-sm  border border-border flex items-center text-[#ffd700] justify-center mb-6 text-3xl [text-shadow:0_2px_10px_rgba(0,0,0,0.2)]">
+                    <Brain />
+                  </div>
                   <h3 className="text-xl font-semibold text-foreground mb-3">Smart Automation</h3>
                   <p className="text-muted-foreground leading-relaxed max-w-md">
                     Auto-assign tickets based on priority and team expertise. SLA monitoring keeps everyone accountable with automated escalations.
@@ -263,11 +269,11 @@ export default function Home() {
               </div>
 
               {/* Card 2 */}
-              <div className="p-8 rounded-3xl border border-border bg-card hover:border-foreground/20 transition-colors relative overflow-hidden group">
+              <div className="p-8 rounded-tr-3xl border-t border-r border-border bg-card hover:border-foreground/20 transition-colors relative overflow-hidden group">
                 <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-blue-500/10 to-transparent opacity-50 group-hover:opacity-100 transition-opacity"></div>
                 <div className="relative z-10">
-                  <div className="w-12 h-12 rounded-lg bg-muted border border-border flex items-center justify-center mb-6 text-2xl">📦</div>
-                  <h3 className="text-xl font-semibold text-foreground mb-3">Inventory Sync</h3>
+                  <div className="w-12 h-12 rounded-lg bg-muted border border-border flex items-center justify-center mb-6 text-2xl"><ShelvingUnit /></div>
+                  <h3 className="text-xl font-semibold text-[#ffd700] mb-3">Inventory Sync</h3>
                   <p className="text-muted-foreground text-sm leading-relaxed">
                     Link assets directly to support tickets for complete context.
                   </p>
@@ -275,10 +281,11 @@ export default function Home() {
               </div>
 
               {/* Card 3 */}
-              <div className="p-8 rounded-3xl border border-border bg-card hover:border-foreground/20 transition-colors relative overflow-hidden group">
+              <div className="p-8 rounded-bl-3xl border-b border-l border-border bg-card hover:border-foreground/20 transition-colors relative overflow-hidden group">
+                <div className="absolute top-0 -right-3 w-64 h-64 bg-pink-800/10 blur-[80px] rounded-full group-hover:bg-pink-500/20 transition-all duration-500"></div>
                 <div className="relative z-10">
-                  <div className="w-12 h-12 rounded-lg bg-muted border border-border flex items-center justify-center mb-6 text-2xl">👥</div>
-                  <h3 className="text-xl font-semibold text-foreground mb-3">Collaboration</h3>
+                  <div className="w-12 h-12 rounded-lg bg-muted border border-border flex items-center justify-center mb-6 text-2xl"><Users /></div>
+                  <h3 className="text-xl font-semibold text-[#ffd700] mb-3">Collaboration</h3>
                   <p className="text-muted-foreground text-sm leading-relaxed">
                     Mention team members and maintain internal notes in real-time.
                   </p>
@@ -286,10 +293,11 @@ export default function Home() {
               </div>
 
               {/* Large Card 2 */}
-              <div className="md:col-span-2 p-8 rounded-3xl border border-border bg-card hover:border-foreground/20 transition-colors relative overflow-hidden group">
-                <div className="absolute top-0 left-0 w-64 h-64 bg-pink-500/10 blur-[80px] rounded-full group-hover:bg-pink-500/20 transition-all duration-500"></div>
+              <div className="md:col-span-2 p-8 rounded-br-3xl border-b border-r border-border bg-card hover:border-foreground/20 hover:border-b hover:border-r transition-colors relative overflow-hidden group">
+                <div className="absolute top-0 left-0 w-64 h-64 bg-pink-800/10 blur-[80px] rounded-full group-hover:bg-pink-500/20 transition-all duration-500"></div>
                 <div className="relative z-10">
-                  <div className="w-12 h-12 rounded-lg bg-muted border border-border flex items-center justify-center mb-6 text-2xl">✨</div>
+                  <div className="w-12 h-12 rounded-lg bg-muted border border-border flex items-center text-[#ffd700] justify-center mb-6 text-3xl [text-shadow:0_2px_10px_rgba(0,0,0,0.2)]">
+                    <WandSparkles /></div>
                   <h3 className="text-xl font-semibold text-foreground mb-3">AI Suggestions</h3>
                   <p className="text-muted-foreground leading-relaxed max-w-md">
                     Automatic priority detection and categorization. Intelligent tagging accelerates resolution time by learning from past tickets.
@@ -394,7 +402,7 @@ export default function Home() {
             </div>
 
             {/* Huge Footer Text */}
-            <div className="w-full flex justify-center -z-10 pt-8 md:pt-16 pb-4">
+            <div className="w-full flex justify-center -z-10 pt-16 md:pt-16 pb-0 md:pb-0">
               <h1 className="text-[13vw] leading-[0.8] font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-[#ff4d4d] via-[#a259ff] to-[#7f00ff] text-center select-none -m-24 opacity-80">
                 MAN&apos;S SUPPORT
               </h1>
