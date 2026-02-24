@@ -18,7 +18,7 @@ export function ThemeToggle() {
     }
 
     return (
-        <div className="flex items-center gap-2 p-1 bg-background text-foreground rounded-full border border-gray-200 dark:border-zinc-700 shadow-sm transition-colors duration-300">
+        <div className="w-full max-w-fit flex items-center gap-2 p-1 bg-background text-foreground rounded-full border border-gray-200 dark:border-zinc-700 shadow-sm transition-colors duration-300">
 
             <button
                 onClick={() => setTheme("light")}

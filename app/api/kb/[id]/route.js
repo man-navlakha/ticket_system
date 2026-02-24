@@ -5,9 +5,8 @@ import { createAuditLog } from '@/lib/audit';
 
 export async function GET(request, { params }) {
     try {
-        // Allow public access
-        // const user = await getCurrentUser(); // Not strictly needed for public read
-
+        // Fetch user optionally — public articles are accessible without login
+        const user = await getCurrentUser().catch(() => null);
 
         const { id } = await params;
 
@@ -34,7 +33,7 @@ export async function GET(request, { params }) {
             return NextResponse.json({ error: 'Article not found' }, { status: 404 });
         }
 
-        // Security: Check if article is published or if user has access
+        // Allow access if published (public) OR if the user is ADMIN/AGENT (can see drafts)
         const isPublic = article.published;
         const hasAccess = user && (user.role === 'ADMIN' || user.role === 'AGENT');
 

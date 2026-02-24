@@ -27,7 +27,7 @@ export default function LandingNav() {
                             className="rounded-lg"
                         />
                         <div className="text-lg md:text-xl font-bold tracking-tight text-foreground">
-                            Man&apos;s <span className="text-muted-foreground hidden sm:inline">Support Desk</span>
+                            MAN&apos;S SUPPORT DESK
                         </div>
                     </Link>
 
@@ -47,7 +47,7 @@ export default function LandingNav() {
 
                     {/* Mobile Menu Toggle button */}
                     <div className="flex md:hidden items-center gap-2 sm:gap-4">
-                        <ThemeToggle />
+
                         <button
                             onClick={toggleMobileMenu}
                             className="p-2 text-muted-foreground hover:text-foreground transition-colors focus:outline-none"
@@ -63,6 +63,7 @@ export default function LandingNav() {
             {isMobileMenuOpen && (
                 <div className="md:hidden border-t border-border bg-background px-4 py-4 shadow-lg transition-all animate-in fade-in slide-in-from-top-3">
                     <div className="flex flex-col gap-4">
+
                         <Link
                             href="/kb"
                             onClick={() => setIsMobileMenuOpen(false)}
@@ -70,13 +71,16 @@ export default function LandingNav() {
                         >
                             Knowledge Base
                         </Link>
-                        <Link
-                            href="/auth/login"
-                            onClick={() => setIsMobileMenuOpen(false)}
-                            className="rounded-full bg-primary text-primary-foreground px-6 py-2.5 text-center text-sm font-medium transition-all hover:opacity-90 border border-border shadow-sm w-full mt-2"
-                        >
-                            Log In
-                        </Link>
+                        <span className='flex justify-center gap-2 '>
+                            <ThemeToggle />
+                            <Link
+                                href="/auth/login"
+                                onClick={() => setIsMobileMenuOpen(false)}
+                                className="rounded-full bg-primary text-primary-foreground px-2 py-3 text-center text-sm font-medium transition-all hover:opacity-90 border border-border shadow-sm w-full "
+                            >
+                                Log In
+                            </Link>
+                        </span>
                     </div>
                 </div>
             )}
