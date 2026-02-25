@@ -127,7 +127,7 @@ export default function DashboardClient({ user, tickets, stats }) {
                                 <div className="p-6 rounded-2xl bg-muted/30 border border-border space-y-6">
                                     <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Quick Actions</h3>
                                     <div className="grid grid-cols-2 gap-3">
-                                        <ActionLink href="/dashboard/profile" label="Settings" icon="⚙️" />
+                                        <ActionLink href="/dashboard/profile" label="Profile" icon="👤" />
                                         <ActionLink href="/dashboard/help" label="Help" icon="❔" />
                                         <ActionLink href="/dashboard/inventory" label="Inventory" icon="📦" />
                                         <ActionLink href="/dashboard/knowledge-base" label="Wiki" icon="📚" />

@@ -52,9 +52,7 @@ export default function ProfileClient({ user }) {
                 </div>
 
                 <div className="flex items-center gap-4">
-                    <button className="h-11 px-8 bg-foreground text-background text-sm font-bold rounded-full hover:opacity-90 transition-all flex items-center gap-2">
-                        Settings
-                    </button>
+
                     <LogoutButton className="h-11 px-6 bg-muted border border-border text-foreground text-sm font-bold rounded-full hover:bg-muted/80 transition-all flex items-center justify-center" />
                 </div>
             </div>
