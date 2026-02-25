@@ -56,8 +56,11 @@ export default async function DashboardPage({ searchParams }) {
         resolved: 0
     };
 
+    let analyticsStats = null;
+
     if (user.role === 'ADMIN' || user.role === 'AGENT') {
         const statsData = await getDashboardStats();
+        analyticsStats = statsData;
         if (statsData?.tickets?.byStatus) {
             stats.total = statsData.tickets.byStatus.reduce((acc, curr) => acc + curr.value, 0);
             stats.inProgress = statsData.tickets.byStatus.find(s => s.name === 'IN_PROGRESS')?.value || 0;
@@ -69,5 +72,5 @@ export default async function DashboardPage({ searchParams }) {
         stats.resolved = tickets.filter(t => t.status === 'RESOLVED' || t.status === 'CLOSED').length;
     }
 
-    return <DashboardClient user={user} tickets={tickets} stats={stats} />;
+    return <DashboardClient user={user} tickets={tickets} stats={stats} analyticsStats={analyticsStats} />;
 }

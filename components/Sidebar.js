@@ -42,16 +42,7 @@ export default function Sidebar({ user }) {
                         </svg>
                     )
                 },
-                // Placeholder for future analytics route
-                {
-                    label: 'Analytics',
-                    href: '/dashboard/analytics',
-                    icon: (
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 002 2h2a2 2 0 002-2z" />
-                        </svg>
-                    )
-                }
+
             ]
         },
         {
@@ -110,15 +101,7 @@ export default function Sidebar({ user }) {
     const configSection = {
         title: 'Configuration',
         items: [
-            {
-                label: 'Platform Status',
-                href: '/dashboard/status',
-                icon: (
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                )
-            },
+
             {
                 label: 'Help & Support',
                 href: '/dashboard/help',

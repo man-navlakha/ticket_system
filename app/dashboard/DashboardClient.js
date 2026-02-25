@@ -3,8 +3,9 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import DashboardSearch from '@/components/DashboardSearch';
+import AnalyticsClient from './analytics/AnalyticsClient';
 
-export default function DashboardClient({ user, tickets, stats }) {
+export default function DashboardClient({ user, tickets, stats, analyticsStats }) {
     const [activeTab, setActiveTab] = useState('overview');
 
     const statusStyles = {
@@ -54,7 +55,7 @@ export default function DashboardClient({ user, tickets, stats }) {
 
                 {/* Tabs / Navigation */}
                 <div className="flex items-center gap-8 border-b border-border pb-px">
-                    {['overview', 'activity', 'analytics'].map((tab) => (
+                    {(['overview', ...(user?.role === 'ADMIN' || user?.role === 'AGENT' ? ['analytics'] : [])]).map((tab) => (
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
@@ -146,10 +147,10 @@ export default function DashboardClient({ user, tickets, stats }) {
                     </div>
                 )}
 
-                {activeTab !== 'overview' && (
-                    <div className="py-20 text-center animate-in fade-in duration-500">
-                        <p className="text-muted-foreground font-medium">This section is currently under development.</p>
-                        <button onClick={() => setActiveTab('overview')} className="mt-4 text-sm text-foreground font-bold hover:underline">Back to Overview</button>
+
+                {activeTab === 'analytics' && (
+                    <div className="animate-in fade-in duration-500">
+                        <AnalyticsClient stats={analyticsStats} />
                     </div>
                 )}
             </div>
