@@ -76,7 +76,7 @@ export default function DashboardClient({ user, tickets, stats, analyticsStats }
                             <StatCard label="Total Tickets" value={stats.total} trend={`${stats.total} this month`} />
                             <StatCard label="In Progress" value={stats.inProgress} color="text-amber-500" />
                             <StatCard label="Resolved" value={stats.resolved} color="text-green-500" />
-                            <StatCard label="Average Response" value="1.8h" trend="Improved" />
+                            <StatCard label="Avg Response" value={stats.avgResponse || '0h'} trend={stats.avgResponseTrend} />
                         </div>
 
                         {/* Content Grid */}

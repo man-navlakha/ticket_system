@@ -104,7 +104,7 @@ export default async function InventoryPage() {
             {user.role === 'USER' && <UserInventoryLink />}
 
             {/* Table Container */}
-            <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
+            <div className="bg-card border border-border rounded-[2rem] overflow-hidden shadow-sm">
                 <InventorySearch
                     items={serializedItems}
                     users={users}
