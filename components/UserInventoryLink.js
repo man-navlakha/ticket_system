@@ -41,7 +41,7 @@ export default function UserInventoryLink() {
         <div className="bg-white/5 border border-white/10 rounded-2xl p-6 mb-8 animate-in fade-in slide-in-from-top-4 duration-500">
             <div className="flex flex-col md:flex-row items-center justify-between gap-6">
                 <div className="space-y-1">
-                    <h2 className="text-xl font-bold text-white">Link New Device</h2>
+                    <h2 className="text-xl font-bold text-foreground">Link New Device</h2>
                     <p className="text-sm text-gray-400">Found a new piece of hardware? Enter the PID to add it to your profile.</p>
                 </div>
 
