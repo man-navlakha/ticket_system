@@ -18,8 +18,6 @@ function CreateTicketForm() {
     const [selectedComponent, setSelectedComponent] = useState('');
     const [customProduct, setCustomProduct] = useState('');
 
-    const [aiSuggestions, setAiSuggestions] = useState(null);
-    const [aiLoading, setAiLoading] = useState(false);
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
 
@@ -53,34 +51,6 @@ function CreateTicketForm() {
         }
     }
 
-    useEffect(() => {
-        if (!title || !description || description.length < 10) {
-            setAiSuggestions(null);
-            return;
-        }
-
-        const timer = setTimeout(async () => {
-            setAiLoading(true);
-            try {
-                const res = await fetch('/api/ai/triage', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ title, description }),
-                });
-
-                if (res.ok) {
-                    const data = await res.json();
-                    setAiSuggestions(data);
-                }
-            } catch (error) {
-                console.error('AI triage failed:', error);
-            } finally {
-                setAiLoading(false);
-            }
-        }, 1000);
-
-        return () => clearTimeout(timer);
-    }, [title, description]);
 
     async function onSubmit(e) {
         e.preventDefault();
@@ -153,7 +123,7 @@ function CreateTicketForm() {
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-8 border-b border-border">
                     <div className="space-y-1">
                         <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground">Create Ticket</h1>
-                        <p className="text-lg text-muted-foreground max-w-2xl leading-relaxed"> Submit a support claim. AI will triage your request for faster resolution. </p>
+                        <p className="text-lg text-muted-foreground max-w-2xl leading-relaxed">Submit a support request. Our team will get back to you as soon as possible.</p>
                     </div>
                 </div>
             </div>
@@ -258,39 +228,14 @@ function CreateTicketForm() {
                                 />
                             </div>
                             <InputField label="Operational Priority" name="priority" type="select"
-                                defaultValue={aiSuggestions?.priority || "MEDIUM"}
-                                key={aiSuggestions?.priority}
+                                defaultValue="MEDIUM"
                             >
                                 <option value="LOW" className="bg-background text-foreground">LOW — NON-CRITICAL</option>
                                 <option value="MEDIUM" className="bg-background text-foreground">MEDIUM — STANDARD</option>
                                 <option value="HIGH" className="bg-background text-foreground">HIGH — URGENT</option>
-                                <option value="URGENT" className="bg-background text-foreground">URGENT — BLOCKING</option>
                             </InputField>
                         </div>
 
-                        {/* Smart AI Indicator */}
-                        {(aiLoading || aiSuggestions) && (
-                            <div className={`p-4 rounded-xl border transition-all duration-500 flex items-center gap-4 ${aiLoading ? 'bg-muted/30 border-border' : 'bg-blue-500/5 border-blue-500/20'}`}>
-                                <div className="relative">
-                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${aiLoading ? 'bg-muted text-muted-foreground animate-pulse' : 'bg-blue-500/20 text-blue-400'}`}>
-                                        {aiLoading ? '⌛' : '✨'}
-                                    </div>
-                                    {!aiLoading && <div className="absolute inset-0 bg-blue-500 rounded-full blur-lg opacity-40 animate-pulse" />}
-                                </div>
-                                <div className="flex-1 space-y-1">
-                                    <p className="text-[10px] font-bold text-blue-400 uppercase tracking-widest">
-                                        {aiLoading ? 'AI ANALYZING FLUID TELEMETRY...' : 'PREDICTIVE TRIAGE ACTIVE'}
-                                    </p>
-                                    {!aiLoading && aiSuggestions && (
-                                        <div className="flex gap-2 text-[9px] font-bold uppercase tracking-tight text-blue-400/60">
-                                            <span>CLASS: {aiSuggestions.categoryName || 'GENERAL'}</span>
-                                            <span>•</span>
-                                            <span>TAGS: {aiSuggestions.tagNames?.join(', ') || 'NONE'}</span>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        )}
 
                         <div className="space-y-2">
                             <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-widest">In-Depth Description</label>
@@ -325,16 +270,16 @@ function CreateTicketForm() {
                 {/* Submittal */}
                 <div className="pt-12 border-t border-border flex items-center justify-between">
                     <p className="text-[11px] text-muted-foreground max-w-sm font-medium italic">
-                        Claims are prioritized by impact and AI categorization. Standard response time is 4-6 business hours.
+                        Standard response time is 4-6 business hours.
                     </p>
                     <div className="flex items-center gap-4">
-                        <Link href="/dashboard" className="h-12 px-8 flex items-center text-sm font-bold text-muted-foreground hover:text-foreground transition-colors uppercase tracking-widest">Abandon</Link>
+                        <Link href="/dashboard" className="h-12 px-8 flex items-center text-sm font-bold text-muted-foreground hover:text-foreground transition-colors uppercase tracking-widest">Cancel</Link>
                         <button
                             type="submit"
                             disabled={loading || !title || !description}
                             className="h-12 px-10 bg-primary text-primary-foreground text-sm font-bold rounded-full hover:opacity-90 transition-all active:scale-95 disabled:opacity-50 shadow-2xl"
                         >
-                            {loading ? 'Transmitting...' : 'Initialize Resolution'}
+                            {loading ? 'Transmitting...' : 'Send request'}
                         </button>
                     </div>
                 </div>

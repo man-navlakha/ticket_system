@@ -257,9 +257,9 @@ export default function TeamClient({ user }) {
                                     <label className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.3em]">Authority Blueprint</label>
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                         {[
-                                            { id: 'USER', label: 'OPERATIVE', desc: 'Standard read/write clearance.' },
-                                            { id: 'AGENT', label: 'RESOLVER', desc: 'Enhanced triage & execution.' },
-                                            { id: 'ADMIN', label: 'ARCHITECT', desc: 'Full infrastructure control.' }
+                                            { id: 'USER', label: 'USER', desc: 'Standard read/write clearance.' },
+                                            { id: 'AGENT', label: 'IT DEPARTMENT', desc: 'Enhanced triage & execution.' },
+                                            { id: 'ADMIN', label: 'ADMIN', desc: 'Full infrastructure control.' }
                                         ].map(r => (
                                             <button
                                                 key={r.id} type="button"

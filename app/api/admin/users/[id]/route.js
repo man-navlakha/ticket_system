@@ -23,21 +23,41 @@ export async function DELETE(request, { params }) {
         }
 
         // Check if user exists
-        const targetUser = await prisma.user.findUnique({
-            where: { id }
-        });
+        const targetUser = await prisma.user.findUnique({ where: { id } });
 
         if (!targetUser) {
             return NextResponse.json({ error: 'User not found' }, { status: 404 });
         }
 
-        // Optional: specific rules (e.g., Agents cannot delete Admins)
+        // Agents cannot delete Admins
         if (user.role === 'AGENT' && targetUser.role === 'ADMIN') {
             return NextResponse.json({ error: 'Agents cannot delete Admins' }, { status: 403 });
         }
 
-        await prisma.user.delete({
-            where: { id: id }
+        // Delete all related records in dependency order, then the user
+        await prisma.$transaction(async (tx) => {
+            // 1. Comments (depend on tickets — delete before tickets)
+            await tx.comment.deleteMany({ where: { userId: id } });
+
+            // 2. Audit logs referencing the user
+            await tx.auditLog.updateMany({
+                where: { userId: id },
+                data: { userId: null }
+            });
+
+            // 3. KB articles authored by the user
+            await tx.knowledgeBaseArticle.deleteMany({ where: { createdById: id } });
+
+            // 4. Proposals created by or assigned to the user
+            await tx.proposal.deleteMany({
+                where: { OR: [{ createdById: id }, { approverId: id }] }
+            });
+
+            // 5. Tickets owned by the user (comments on these are already gone)
+            await tx.ticket.deleteMany({ where: { userId: id } });
+
+            // 6. Finally delete the user
+            await tx.user.delete({ where: { id } });
         });
 
         return NextResponse.json({ message: 'User deleted successfully' });
@@ -46,3 +66,4 @@ export async function DELETE(request, { params }) {
         return NextResponse.json({ error: 'Failed to delete user' }, { status: 500 });
     }
 }
+
