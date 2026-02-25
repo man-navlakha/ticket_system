@@ -73,7 +73,7 @@ export default function DashboardClient({ user, tickets, stats, analyticsStats }
                     <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
                         {/* Stats Grid */}
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                            <StatCard label="Total Tickets" value={stats.total} trend={`${stats.total - 5}+ this month`} />
+                            <StatCard label="Total Tickets" value={stats.total} trend={`${stats.total} this month`} />
                             <StatCard label="In Progress" value={stats.inProgress} color="text-amber-500" />
                             <StatCard label="Resolved" value={stats.resolved} color="text-green-500" />
                             <StatCard label="Average Response" value="1.8h" trend="Improved" />
