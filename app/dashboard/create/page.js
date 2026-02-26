@@ -60,6 +60,7 @@ function CreateTicketForm() {
         const formData = new FormData(e.currentTarget);
         let attachmentUrls = [];
         const files = formData.getAll('attachment').filter(f => f.size > 0);
+        const notifyAgents = formData.get('notifyAgents') === 'on';
 
         if (files.length > 0) {
             try {
@@ -91,6 +92,7 @@ function CreateTicketForm() {
             productName: issueType === 'inventory' ? `${selectedItem?.brand} ${selectedItem?.model} (${selectedItem?.pid})` : (issueType === 'email' ? 'Email Service' : customProduct),
             componentName: issueType === 'inventory' ? selectedComponent : null,
             attachmentUrls,
+            notifyAgents,
         };
 
         try {
@@ -263,6 +265,24 @@ function CreateTicketForm() {
                                     MAX 5MB / PDF, JPG, PNG
                                 </div>
                             </div>
+                        </div>
+
+                        {/* Options */}
+                        <div className="space-y-2 pt-2">
+                            <label className="flex items-center gap-3 cursor-pointer group w-max">
+                                <div className="relative flex items-center justify-center">
+                                    <input
+                                        type="checkbox"
+                                        name="notifyAgents"
+                                        defaultChecked={true}
+                                        className="peer sr-only"
+                                    />
+                                    <div className="w-5 h-5 rounded border-2 border-border peer-checked:bg-primary peer-checked:border-primary transition-all flex items-center justify-center">
+                                        <svg className="w-3 h-3 text-primary-foreground opacity-0 peer-checked:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
+                                    </div>
+                                </div>
+                                <span className="text-sm font-medium text-foreground/80 group-hover:text-foreground transition-colors">Notify all agents via email</span>
+                            </label>
                         </div>
                     </div>
                 </div>

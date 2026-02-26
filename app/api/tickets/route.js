@@ -51,7 +51,8 @@ export async function POST(request) {
             attachmentUrls,
             categoryId,
             tagIds,
-            useAITriage = true
+            useAITriage = true,
+            notifyAgents = true
         } = json;
 
         if (!title || !description) {
@@ -153,35 +154,37 @@ export async function POST(request) {
             }
         });
 
-        // 🚨 Notify Agents & Admins (Asynchronously)
-        (async () => {
-            try {
-                const staff = await prisma.user.findMany({
-                    where: {
-                        role: { in: ['AGENT', 'ADMIN'] },
-                        status: 'ACTIVE'
-                    },
-                    select: { email: true }
-                });
+        if (notifyAgents) {
+            // 🚨 Notify Agents & Admins (Asynchronously)
+            (async () => {
+                try {
+                    const staff = await prisma.user.findMany({
+                        where: {
+                            role: { in: ['AGENT', 'ADMIN'] },
+                            status: 'ACTIVE'
+                        },
+                        select: { email: true }
+                    });
 
-                if (staff.length > 0) {
-                    const notificationData = {
-                        id: ticket.id,
-                        title: ticket.title,
-                        description: ticket.description,
-                        priority: ticket.priority,
-                        userEmail: user.email,
-                        userName: user.username || user.email
-                    };
+                    if (staff.length > 0) {
+                        const notificationData = {
+                            id: ticket.id,
+                            title: ticket.title,
+                            description: ticket.description,
+                            priority: ticket.priority,
+                            userEmail: user.email,
+                            userName: user.username || user.email
+                        };
 
-                    for (const person of staff) {
-                        await sendNewTicketNotification(person.email, notificationData);
+                        for (const person of staff) {
+                            await sendNewTicketNotification(person.email, notificationData);
+                        }
                     }
+                } catch (notifyError) {
+                    console.error('Notification background error:', notifyError);
                 }
-            } catch (notifyError) {
-                console.error('Notification background error:', notifyError);
-            }
-        })();
+            })();
+        }
 
         return NextResponse.json(ticket);
     } catch (error) {
