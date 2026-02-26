@@ -33,7 +33,7 @@ export default function CreateArticlePage() {
             const res = await fetch('/api/upload', { method: 'POST', body: uploadFormData });
             if (res.ok) {
                 const data = await res.json();
-                const markdownImage = imageSize === 'full' ? `![Image](${data.url})` : `<img src="${data.url}" width="${imageSize}px" />`;
+                const markdownImage = imageSize === 'full' ? `![Image](${data.url})` : `![Image](${data.url})`;
                 setFormData(prev => ({ ...prev, content: prev.content + '\n' + markdownImage + '\n' }));
             }
         } catch (error) {
