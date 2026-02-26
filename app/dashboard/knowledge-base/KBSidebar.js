@@ -39,7 +39,7 @@ export default function KBSidebar() {
     const isCatActive = (name) => currentCategory === name;
 
     return (
-        <aside className="w-64 flex-shrink-0 hidden lg:block border-r border-border h-[calc(100vh-64px)] overflow-y-auto no-scrollbar py-8 px-6">
+        <aside className="w-56 flex-shrink-0 hidden lg:block border-r border-border h-[calc(100vh-64px)] overflow-y-auto no-scrollbar py-8 px-2">
             <div className="space-y-8">
                 <div>
                     <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4 px-2">Introduction</h3>
