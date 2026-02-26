@@ -146,21 +146,21 @@ function CreateTicketForm() {
                             active={issueType === 'inventory'}
                             onClick={() => setIssueType('inventory')}
                             disabled={inventory.length === 0}
-                            title="Hardware Fleet"
+                            title="Laptop & Desktop"
                             icon="💻"
                             description="Issues with laptops, monitors, or peripherals."
                         />
                         <TypeCard
                             active={issueType === 'email'}
                             onClick={() => setIssueType('email')}
-                            title="Cloud & SaaS"
+                            title="Email & Drive"
                             icon="☁️"
-                            description="Email, VPN, or software access issues."
+                            description="Email, Drive, or software access issues."
                         />
                         <TypeCard
                             active={issueType === 'personal'}
                             onClick={() => setIssueType('personal')}
-                            title="Infrastructure"
+                            title="Other"
                             icon="🔌"
                             description="Networking, physical access, or custom needs."
                         />
