@@ -392,3 +392,24 @@ model AccessRequest {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
+
+model Vendor {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  category    String?  // e.g., "Hardware", "Software", "Services"
+  contactName String?
+  email       String?
+  phone       String?
+  website     String?
+  address     String?
+  gstin       String?  // GST/Tax ID
+  note        String?  @db.Text
+  status      VendorStatus @default(ACTIVE)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+enum VendorStatus {
+  ACTIVE
+  INACTIVE
+}
