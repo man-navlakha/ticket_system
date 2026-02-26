@@ -287,8 +287,8 @@ export default function ChatbotClient({ user }) {
     };
 
     return (
-        <div className="min-h-[calc(100vh-4rem)] flex flex-col rounded-xl bg-background font-sans">
-            <div className="flex-1 flex flex-col max-w-5xl mx-auto  w-full border-x border-border bg-card shadow-sm relative">
+        <div className="min-h-[calc(100vh-4rem)] flex flex-col font-sans">
+            <div className="flex-1 flex flex-col max-w-5xl mx-auto  w-full relative">
 
                 {/* Header */}
                 <div className="flex flex-wrap items-center justify-between px-6 py-4 bg-card border-b border-border sticky top-0 z-10">
@@ -365,9 +365,9 @@ export default function ChatbotClient({ user }) {
                                                                             <td className="px-4 py-3 align-middle font-mono text-xs text-muted-foreground">{item.pid}</td>
                                                                             <td className="px-4 py-3 align-middle">
                                                                                 <span className={`px-2 py-1 text-[9px] uppercase font-bold tracking-widest rounded-full ${item.status === 'ACTIVE' ? 'bg-emerald-500/10 text-emerald-500' :
-                                                                                        item.status === 'IN_STORAGE' ? 'bg-blue-500/10 text-blue-500' :
-                                                                                            item.status === 'MAINTENANCE' ? 'bg-amber-500/10 text-amber-500' :
-                                                                                                'bg-muted text-muted-foreground'
+                                                                                    item.status === 'IN_STORAGE' ? 'bg-blue-500/10 text-blue-500' :
+                                                                                        item.status === 'MAINTENANCE' ? 'bg-amber-500/10 text-amber-500' :
+                                                                                            'bg-muted text-muted-foreground'
                                                                                     }`}>
                                                                                     {item.status}
                                                                                 </span>
@@ -403,16 +403,16 @@ export default function ChatbotClient({ user }) {
                                                                     <div className="flex items-start justify-between gap-4 mb-2">
                                                                         <h5 className="font-bold text-sm leading-tight text-foreground group-hover:text-primary transition-colors m-0">{ticket.title}</h5>
                                                                         <span className={`shrink-0 px-2 py-1 text-[9px] uppercase font-bold tracking-widest rounded-full leading-none mt-1 ${ticket.status === 'OPEN' ? 'bg-emerald-500/10 text-emerald-500' :
-                                                                                ticket.status === 'IN_PROGRESS' ? 'bg-blue-500/10 text-blue-500' :
-                                                                                    ticket.status === 'RESOLVED' ? 'bg-purple-500/10 text-purple-500' :
-                                                                                        'bg-muted text-muted-foreground'
+                                                                            ticket.status === 'IN_PROGRESS' ? 'bg-blue-500/10 text-blue-500' :
+                                                                                ticket.status === 'RESOLVED' ? 'bg-purple-500/10 text-purple-500' :
+                                                                                    'bg-muted text-muted-foreground'
                                                                             }`}>
                                                                             {ticket.status}
                                                                         </span>
                                                                     </div>
                                                                     <div className="flex items-center gap-3 text-xs text-muted-foreground font-medium m-0">
                                                                         <span className={`px-2 py-0.5 rounded text-[10px] uppercase tracking-wider ${ticket.priority === 'HIGH' ? 'bg-destructive/10 text-destructive' :
-                                                                                ticket.priority === 'MEDIUM' ? 'bg-amber-500/10 text-amber-500' : 'bg-muted text-foreground'
+                                                                            ticket.priority === 'MEDIUM' ? 'bg-amber-500/10 text-amber-500' : 'bg-muted text-foreground'
                                                                             }`}>
                                                                             {ticket.priority}
                                                                         </span>
