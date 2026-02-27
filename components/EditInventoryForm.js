@@ -128,14 +128,14 @@ export default function EditInventoryForm({ item, users }) {
     return (
         <form onSubmit={onSubmit} className="max-w-4xl space-y-16 pb-24">
             {error && (
-                <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm font-medium">
+                <div className="p-4 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-sm font-medium">
                     {error}
                 </div>
             )}
 
             {/* Section 1: Identity & Condition */}
             <Section title="Asset Foundation" description="Core identification and quality settings.">
-                <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-6 mb-8">
+                <div className="bg-card border border-border rounded-2xl p-6 mb-8 shadow-sm">
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                         <StaticInfo label="Asset ID" value={item.pid} isMono />
                         <StaticInfo label="Legacy Tag" value={item.oldTag} />
@@ -145,30 +145,31 @@ export default function EditInventoryForm({ item, users }) {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
                     <InputField label="Asset Status" name="status" type="select" defaultValue={item.status}>
-                        <option value="ACTIVE" className="bg-black text-white">ACTIVE</option>
-                        <option value="MAINTENANCE" className="bg-black text-white">MAINTENANCE</option>
-                        <option value="RETIRED" className="bg-black text-white">RETIRED</option>
-                        <option value="IN_STORAGE" className="bg-black text-white">IN_STORAGE</option>
-                        <option value="SCRAP" className="bg-black text-white">SCRAP</option>
+                        <option value="ACTIVE" className="bg-background text-foreground">ACTIVE</option>
+                        <option value="MAINTENANCE" className="bg-background text-foreground">MAINTENANCE</option>
+                        <option value="RETIRED" className="bg-background text-foreground">RETIRED</option>
+                        <option value="IN_STORAGE" className="bg-background text-foreground">IN_STORAGE</option>
+                        <option value="SCRAP" className="bg-background text-foreground">SCRAP</option>
                     </InputField>
                     <InputField label="Asset Condition" name="condition" type="select" defaultValue={item.condition}>
-                        <option value="NEW" className="bg-black text-white">NEW</option>
-                        <option value="EXCELLENT" className="bg-black text-white">EXCELLENT</option>
-                        <option value="GOOD" className="bg-black text-white">GOOD</option>
-                        <option value="FAIR" className="bg-black text-white">FAIR</option>
-                        <option value="POOR" className="bg-black text-white">POOR</option>
+                        <option value="NEW" className="bg-background text-foreground">NEW</option>
+                        <option value="EXCELLENT" className="bg-background text-foreground">EXCELLENT</option>
+                        <option value="GOOD" className="bg-background text-foreground">GOOD</option>
+                        <option value="FAIR" className="bg-background text-foreground">FAIR</option>
+                        <option value="POOR" className="bg-background text-foreground">POOR</option>
                     </InputField>
                     <InputField label="Category" name="type" type="select" defaultValue={item.type}>
-                        <option value="LAPTOP" className="bg-black text-white">LAPTOP</option>
-                        <option value="DESKTOP" className="bg-black text-white">DESKTOP</option>
-                        <option value="COMPUTER" className="bg-black text-white">COMPUTER</option>
-                        <option value="MOBILE" className="bg-black text-white">MOBILE</option>
-                        <option value="OTHER" className="bg-black text-white">OTHER</option>
+                        <option value="LAPTOP" className="bg-background text-foreground">LAPTOP</option>
+                        <option value="DESKTOP" className="bg-background text-foreground">DESKTOP</option>
+                        <option value="COMPUTER" className="bg-background text-foreground">COMPUTER</option>
+                        <option value="MOBILE" className="bg-background text-foreground">MOBILE</option>
+                        <option value="PRINTER" className="bg-background text-foreground">PRINTER</option>
+                        <option value="OTHER" className="bg-background text-foreground">OTHER</option>
                     </InputField>
                     <InputField label="Ownership" name="ownership" type="select" defaultValue={item.ownership}>
-                        <option value="COMPANY" className="bg-black text-white">COMPANY OWNED</option>
-                        <option value="EMPLOYEE" className="bg-black text-white">EMPLOYEE OWNED</option>
-                        <option value="RENTED" className="bg-black text-white">RENTED</option>
+                        <option value="COMPANY" className="bg-background text-foreground">COMPANY OWNED</option>
+                        <option value="EMPLOYEE" className="bg-background text-foreground">EMPLOYEE OWNED</option>
+                        <option value="RENTED" className="bg-background text-foreground">RENTED</option>
                     </InputField>
                 </div>
             </Section>
@@ -179,9 +180,9 @@ export default function EditInventoryForm({ item, users }) {
                     <InputField label="Department" name="department" defaultValue={item.department} placeholder="e.g. Finance" />
                     <InputField label="Physical Location" name="location" defaultValue={item.location} placeholder="e.g. HQ Floor 3" />
                     <InputField label="System User" name="userId" type="select" defaultValue={item.userId || ''}>
-                        <option value="" className="bg-black text-white">-- UNLINKED --</option>
+                        <option value="" className="bg-background text-foreground">-- UNLINKED --</option>
                         {users.map(u => (
-                            <option key={u.id} value={u.id} className="bg-black text-white">{u.username} ({u.email.split('@')[0]})</option>
+                            <option key={u.id} value={u.id} className="bg-background text-foreground">{u.username} ({u.email.split('@')[0]})</option>
                         ))}
                     </InputField>
                     <InputField label="External Assignee" name="assignedUser" defaultValue={item.assignedUser} placeholder="Manual name entry" />
@@ -190,7 +191,7 @@ export default function EditInventoryForm({ item, users }) {
 
             {/* Section 3: Hardware specs */}
             <Section title="Hardware Profile" description="Technical specifications and credentials.">
-                <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-8 space-y-8">
+                <div className="bg-card border border-border rounded-2xl p-8 space-y-8 shadow-sm">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
                         <InputField label="Operating System" name="os" defaultValue={item.os} placeholder="e.g. macOS Sonoma" />
                         <InputField label="Processor" name="processor" defaultValue={item.processor} placeholder="e.g. M2 Pro" />
@@ -201,12 +202,12 @@ export default function EditInventoryForm({ item, users }) {
                         <InputField label="System Password" name="password" defaultValue={item.password} />
                         <div className="flex gap-8 pt-4">
                             <label className="flex items-center gap-3 cursor-pointer group">
-                                <input type="checkbox" name="hasCharger" defaultChecked={item.hasCharger} className="w-5 h-5 rounded border-white/10 bg-black checked:bg-white checked:border-transparent transition-all" />
-                                <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest group-hover:text-white transition-colors">Includes Charger</span>
+                                <input type="checkbox" name="hasCharger" defaultChecked={item.hasCharger} className="w-5 h-5 rounded border-border bg-input checked:bg-primary checked:border-transparent transition-all" />
+                                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest group-hover:text-foreground transition-colors">Includes Charger</span>
                             </label>
                             <label className="flex items-center gap-3 cursor-pointer group">
-                                <input type="checkbox" name="hasMouse" defaultChecked={item.hasMouse} className="w-5 h-5 rounded border-white/10 bg-black checked:bg-white checked:border-transparent transition-all" />
-                                <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest group-hover:text-white transition-colors">Includes Mouse</span>
+                                <input type="checkbox" name="hasMouse" defaultChecked={item.hasMouse} className="w-5 h-5 rounded border-border bg-input checked:bg-primary checked:border-transparent transition-all" />
+                                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest group-hover:text-foreground transition-colors">Includes Mouse</span>
                             </label>
                         </div>
                     </div>
@@ -233,47 +234,47 @@ export default function EditInventoryForm({ item, users }) {
                     rows={4}
                     defaultValue={item.note}
                     placeholder="Technical logs..."
-                    className="w-full bg-white/[0.03] border border-white/10 rounded-2xl p-6 text-sm text-white focus:outline-none focus:border-white/30 transition-all [color-scheme:dark]"
+                    className="w-full bg-input/50 border border-input rounded-2xl p-6 text-sm text-foreground focus:outline-none focus:border-ring transition-all"
                 />
                 <div className="mt-8 space-y-4">
-                    <h4 className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Custom Metadata</h4>
+                    <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Custom Metadata</h4>
                     <div className="space-y-3">
                         {systemSpecs.map((spec, idx) => (
                             <div key={idx} className="flex gap-2 group">
                                 <input
                                     value={spec.key}
                                     onChange={(e) => updateSystemSpec(idx, 'key', e.target.value)}
-                                    className="w-1/3 h-10 rounded-lg bg-black border border-white/5 px-4 text-xs font-bold text-gray-400 focus:border-white/20 transition-all outline-none"
+                                    className="w-1/3 h-10 rounded-lg bg-input border border-input px-4 text-xs font-bold text-muted-foreground focus:border-ring transition-all outline-none"
                                 />
                                 <input
                                     value={spec.value}
                                     onChange={(e) => updateSystemSpec(idx, 'value', e.target.value)}
-                                    className="flex-1 h-10 rounded-lg bg-black border border-white/5 px-4 text-xs text-white focus:border-white/20 transition-all outline-none"
+                                    className="flex-1 h-10 rounded-lg bg-input border border-input px-4 text-xs text-foreground focus:border-ring transition-all outline-none"
                                 />
-                                <button type="button" onClick={() => removeSystemSpec(idx)} className="h-10 w-10 text-gray-700 hover:text-red-500 transition-colors">✕</button>
+                                <button type="button" onClick={() => removeSystemSpec(idx)} className="h-10 w-10 text-muted-foreground hover:text-destructive transition-colors">✕</button>
                             </div>
                         ))}
-                        <button type="button" onClick={addSystemSpec} className="text-[10px] font-bold text-blue-500 hover:text-blue-400 uppercase tracking-[0.2em] transition-colors">+ Append Dynamic Key</button>
+                        <button type="button" onClick={addSystemSpec} className="text-[10px] font-bold text-primary hover:text-primary/80 uppercase tracking-widest transition-colors">+ Append Dynamic Key</button>
                     </div>
                 </div>
             </Section>
 
             {/* Form Actions */}
-            <div className="pt-12 border-t border-white/5 flex items-center justify-between">
+            <div className="pt-12 border-t border-border flex items-center justify-between">
                 <button
                     type="button"
                     onClick={onDelete}
                     disabled={loading}
-                    className="h-12 px-8 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-bold uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all"
+                    className="h-12 px-8 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-xs font-bold uppercase tracking-widest hover:bg-destructive hover:text-destructive-foreground transition-all"
                 >
                     Decommission Asset
                 </button>
                 <div className="flex gap-4">
-                    <Link href={`/dashboard/inventory/${item.id}`} className="h-12 px-8 flex items-center text-sm font-bold text-gray-500 hover:text-white transition-colors uppercase tracking-widest">Discard</Link>
+                    <Link href={`/dashboard/inventory/${item.id}`} className="h-12 px-8 flex items-center text-sm font-bold text-muted-foreground hover:text-foreground transition-colors uppercase tracking-widest">Discard</Link>
                     <button
                         type="submit"
                         disabled={loading}
-                        className="h-12 px-10 bg-white text-black text-sm font-bold rounded-full hover:bg-gray-200 transition-all active:scale-95 disabled:opacity-50 shadow-xl shadow-white/5"
+                        className="h-12 px-10 bg-primary text-primary-foreground text-sm font-bold rounded-full hover:opacity-90 transition-all active:scale-95 disabled:opacity-50 shadow-xl"
                     >
                         {loading ? 'Committing...' : 'Confirm Changes'}
                     </button>
@@ -287,8 +288,8 @@ function Section({ title, description, children }) {
     return (
         <div className="space-y-6">
             <div className="space-y-1">
-                <h3 className="text-xs font-bold text-gray-500 uppercase tracking-[0.3em]">{title}</h3>
-                <p className="text-sm text-gray-400">{description}</p>
+                <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-[0.3em]">{title}</h3>
+                <p className="text-sm text-muted-foreground">{description}</p>
             </div>
             {children}
         </div>
@@ -298,29 +299,29 @@ function Section({ title, description, children }) {
 function StaticInfo({ label, value, isMono = false }) {
     return (
         <div className="space-y-1">
-            <p className="text-[9px] font-bold text-gray-600 uppercase tracking-widest">{label}</p>
-            <p className={`text-sm font-medium text-white truncate ${isMono ? 'font-mono' : ''}`}>{value || 'N/A'}</p>
+            <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">{label}</p>
+            <p className={`text-sm font-medium text-foreground truncate ${isMono ? 'font-mono' : ''}`}>{value || 'N/A'}</p>
         </div>
     );
 }
 
 function InputField({ label, name, type = 'text', defaultValue, children }) {
-    const baseStyle = "w-full h-11 rounded-xl bg-white/[0.03] border border-white/10 px-4 text-sm text-white focus:outline-none focus:border-white/30 transition-all [color-scheme:dark]";
+    const baseStyle = "w-full h-11 rounded-xl bg-input/50 border border-input px-4 text-sm text-foreground focus:outline-none focus:border-ring transition-all";
 
     return (
         <div className="space-y-2">
-            <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest">{label}</label>
+            <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{label}</label>
             {type === 'select' ? (
                 <div className="relative">
-                    <select name={name} defaultValue={defaultValue} className={`${baseStyle} appearance-none cursor-pointer bg-black`}>
+                    <select name={name} defaultValue={defaultValue} className={`${baseStyle} appearance-none cursor-pointer bg-background`}>
                         {children}
                     </select>
-                    <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none text-gray-600">
+                    <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none text-muted-foreground">
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
                     </div>
                 </div>
             ) : (
-                <input name={name} type={type} defaultValue={defaultValue} className={`${baseStyle} bg-black/40`} />
+                <input name={name} type={type} defaultValue={defaultValue} className={`${baseStyle} bg-input/50`} />
             )}
         </div>
     );

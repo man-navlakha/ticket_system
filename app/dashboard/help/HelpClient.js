@@ -176,7 +176,7 @@ export default function HelpClient({ supportStaff }) {
                             </div>
                             <div className="mt-6 pt-6 border-t border-border">
                                 <a
-                                    href="mailto:support@example.com"
+                                    href="mailto:man@excellentpublicity.com"
                                     className="block w-full text-center py-2.5 rounded-lg bg-primary text-primary-foreground font-semibold text-sm hover:opacity-90 transition-colors shadow-lg"
                                 >
                                     Contact General Support
@@ -187,8 +187,8 @@ export default function HelpClient({ supportStaff }) {
                         <div className="p-6 border border-blue-500/20 rounded-2xl bg-gradient-to-br from-blue-500/10 to-transparent">
                             <h4 className="text-blue-500 font-medium mb-2">Need immediate assistance?</h4>
                             <p className="text-sm text-blue-500/80 mb-4">For system outages or critical blockers, contact the emergency hotline.</p>
-                            <a href="tel:5551234567" className="text-sm font-bold text-blue-500 hover:underline">
-                                Call +1 (555) 123-4567
+                            <a href="tel:9898960882" className="text-sm font-bold text-blue-500 hover:underline">
+                                Call +91 98989 60882
                             </a>
                         </div>
                     </div>

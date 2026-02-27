@@ -65,7 +65,7 @@ export async function POST(request) {
                 if (ownershipRaw === 'C') ownershipRaw = 'COMPANY';
                 if (ownershipRaw === 'E') ownershipRaw = 'EMPLOYEE';
 
-                const type = mapEnum(getVal('Type'), ['COMPUTER', 'LAPTOP', 'DESKTOP', 'MOBILE', 'TABLET', 'PERIPHERAL', 'OTHER'], 'OTHER');
+                const type = mapEnum(getVal('Type'), ['COMPUTER', 'LAPTOP', 'DESKTOP', 'MOBILE', 'TABLET', 'PERIPHERAL', 'OTHER', 'PRINTER'], 'OTHER');
                 const ownership = mapEnum(ownershipRaw, ['COMPANY', 'EMPLOYEE', 'RENTED'], 'COMPANY');
                 const status = mapEnum(getVal('Status'), ['ACTIVE', 'MAINTENANCE', 'RETIRED', 'IN_STORAGE', 'SCRAP'], 'ACTIVE');
                 const condition = mapEnum(getVal('Condition'), ['NEW', 'EXCELLENT', 'GOOD', 'FAIR', 'POOR'], 'GOOD');

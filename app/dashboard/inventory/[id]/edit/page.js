@@ -31,18 +31,18 @@ export default async function EditInventoryPage({ params }) {
         <div className="space-y-12 animate-in fade-in duration-700">
             {/* Header / Breadcrumbs */}
             <div className="space-y-6">
-                <div className="flex items-center gap-2 text-xs font-medium text-gray-500 uppercase tracking-widest">
-                    <Link href="/dashboard/inventory" className="hover:text-white transition-colors">Inventory</Link>
+                <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-widest">
+                    <Link href="/dashboard/inventory" className="hover:text-foreground transition-colors">Inventory</Link>
                     <span>/</span>
-                    <Link href={`/dashboard/inventory/${id}`} className="hover:text-white transition-colors font-mono">{item.pid}</Link>
+                    <Link href={`/dashboard/inventory/${id}`} className="hover:text-foreground transition-colors font-mono">{item.pid}</Link>
                     <span>/</span>
-                    <span className="text-white">Edit</span>
+                    <span className="text-foreground">Edit</span>
                 </div>
 
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-8 border-b border-white/5">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-8 border-b border-border">
                     <div className="space-y-1">
-                        <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-white">Edit Asset Record</h1>
-                        <p className="text-lg text-gray-400 max-w-2xl leading-relaxed"> Modify lifecycle status or technical attributes for this hardware. </p>
+                        <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground">Edit Asset Record</h1>
+                        <p className="text-lg text-muted-foreground max-w-2xl leading-relaxed"> Modify lifecycle status or technical attributes for this hardware. </p>
                     </div>
                 </div>
             </div>

@@ -80,7 +80,10 @@ export default function Sidebar({ user }) {
                     subItems: [
                         { label: 'All Assets', href: '/dashboard/inventory' },
                         ...(user?.role === 'ADMIN' || user?.role === 'AGENT'
-                            ? [{ label: 'System Reports', href: '/dashboard/system-reports' }]
+                            ? [
+                                { label: 'Create New', href: '/dashboard/inventory/create' },
+                                { label: 'System Reports', href: '/dashboard/system-reports' }
+                            ]
                             : [])
                     ]
                 },

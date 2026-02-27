@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import InventoryActions from './InventoryActions';
+import { Monitor, Printer, Mouse, Keyboard, Headset, HardDrive, Tablet, Phone, Laptop } from 'lucide-react';
 
 export default function InventorySearch({ items, users, userRole }) {
     const router = useRouter();
@@ -125,15 +126,12 @@ export default function InventorySearch({ items, users, userRole }) {
                                 <td className="px-8 py-6">
                                     <div className="flex items-center gap-3">
                                         <div className="w-10 h-10 rounded-full bg-muted border border-border flex items-center justify-center text-muted-foreground group-hover:scale-110 transition-transform">
-                                            {item.type === 'COMPUTER' ? (
-                                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                                                </svg>
-                                            ) : (
-                                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1m-6 10a2 2 0 01-2-2v-5a2 2 0 012-2h7a2 2 0 012 2v5a2 2 0 01-2 2h-7z" />
-                                                </svg>
-                                            )}
+                                            {item.type === 'PRINTER' ? <Printer className="w-4 h-4" /> :
+                                                item.type === 'LAPTOP' ? <Laptop className="w-4 h-4" /> :
+                                                    item.type === 'MOBILE' ? <Phone className="w-4 h-4" /> :
+                                                        item.type === 'TABLET' ? <Tablet className="w-4 h-4" /> :
+                                                            (item.type === 'COMPUTER' || item.type === 'DESKTOP') ? <Monitor className="w-4 h-4" /> :
+                                                                <HardDrive className="w-4 h-4" />}
                                         </div>
                                         <div className="flex flex-col">
                                             <span className="text-sm font-semibold text-foreground tracking-tight">{item.brand}</span>
