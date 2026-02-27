@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { Laptop, Cloud, Plug } from 'lucide-react';
 
 function CreateTicketForm() {
     const router = useRouter();
@@ -149,21 +150,21 @@ function CreateTicketForm() {
                             onClick={() => setIssueType('inventory')}
                             disabled={inventory.length === 0}
                             title="Laptop & Desktop"
-                            icon="💻"
+                            Icon={Laptop}
                             description="Issues with laptops, monitors, or peripherals."
                         />
                         <TypeCard
                             active={issueType === 'email'}
                             onClick={() => setIssueType('email')}
                             title="Email & Drive"
-                            icon="☁️"
+                            Icon={Cloud}
                             description="Email, Drive, or software access issues."
                         />
                         <TypeCard
                             active={issueType === 'personal'}
                             onClick={() => setIssueType('personal')}
                             title="Other"
-                            icon="🔌"
+                            Icon={Plug}
                             description="Networking, physical access, or custom needs."
                         />
                     </div>
@@ -308,7 +309,7 @@ function CreateTicketForm() {
     );
 }
 
-function TypeCard({ active, onClick, disabled, title, icon, description }) {
+function TypeCard({ active, onClick, disabled, title, Icon, description }) {
     return (
         <button
             type="button"
@@ -316,7 +317,9 @@ function TypeCard({ active, onClick, disabled, title, icon, description }) {
             disabled={disabled}
             className={`p-6 rounded-[2rem] border text-left transition-all relative overflow-hidden group ${active ? 'bg-card border-primary text-foreground shadow-2xl ring-1 ring-primary' : 'bg-muted/30 border-border text-muted-foreground hover:bg-muted/50 hover:border-foreground/20 disabled:opacity-20 disabled:grayscale'}`}
         >
-            <div className={`text-2xl mb-4 transition-transform duration-500 group-hover:scale-125 ${active ? 'scale-110' : ''}`}>{icon}</div>
+            <div className={`mb-4 transition-transform duration-500 group-hover:scale-125 ${active ? 'scale-110' : ''}`}>
+                <Icon className={`w-6 h-6 ${active ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'} transition-colors`} />
+            </div>
             <h4 className="font-bold text-sm tracking-tight mb-2 uppercase">{title}</h4>
             <p className={`text-[11px] leading-relaxed font-medium ${active ? 'text-foreground/80' : 'text-muted-foreground'}`}>{description}</p>
         </button>
