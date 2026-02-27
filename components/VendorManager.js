@@ -186,13 +186,13 @@ export default function VendorManager({ initialVendors, userRole }) {
                                     </td>
                                     <td className="py-5 px-6 space-y-1">
                                         <div className="text-sm text-foreground/80 font-medium">{vendor.contactName || '—'}</div>
-                                        <div className="text-xs text-muted-foreground truncate max-w-[200px]">{vendor.email || vendor.phone || ''}</div>
+                                        <div className="text-xs text-muted-foreground truncate max-w-[200px]">{vendor.email || ''}</div>
                                         <div className="text-xs text-muted-foreground truncate max-w-[200px]">{vendor.phone || ''}</div>
                                     </td>
                                     <td className="py-5 px-6">
                                         <span className={`inline-flex items-center px-2 py-1 rounded text-[10px] font-bold uppercase tracking-widest ${vendor.status === 'ACTIVE'
-                                                ? 'bg-green-500/10 text-green-600 border border-green-500/20'
-                                                : 'bg-amber-500/10 text-amber-600 border border-amber-500/20'
+                                            ? 'bg-green-500/10 text-green-600 border border-green-500/20'
+                                            : 'bg-amber-500/10 text-amber-600 border border-amber-500/20'
                                             }`}>
                                             {vendor.status}
                                         </span>

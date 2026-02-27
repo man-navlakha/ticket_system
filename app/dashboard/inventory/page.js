@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import UserInventoryLink from "@/components/UserInventoryLink";
 import InventorySearch from "@/components/InventorySearch";
 import BulkInventoryUpload from "@/components/BulkInventoryUpload";
+import InventoryCharts from "@/components/InventoryCharts";
 
 export const dynamic = 'force-dynamic';
 export const metadata = {
@@ -102,6 +103,11 @@ export default async function InventoryPage() {
             </div>
 
             {user.role === 'USER' && <UserInventoryLink />}
+
+            {/* Inventory Charts — Admin/Agent only */}
+            {(user.role === 'ADMIN' || user.role === 'AGENT') && (
+                <InventoryCharts items={serializedItems} />
+            )}
 
             {/* Table Container */}
             <div className="bg-card border border-border rounded-[2rem] overflow-hidden shadow-sm">

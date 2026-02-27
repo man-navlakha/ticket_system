@@ -326,7 +326,7 @@ export default function Sidebar({ user }) {
                         className={`flex flex-col items-center justify-center p-2 rounded-xl transition-all w-16 group ${isActive('/dashboard/profile') ? 'text-foreground' : 'text-muted-foreground'}`}
                     >
                         <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-blue-500 to-purple-500 flex items-center justify-center text-[10px] font-bold text-white mb-1">
-                            {user?.name?.[0] || 'U'}
+                            {user?.username?.[0] || 'U'}
                         </div>
                         <span className="text-[10px] font-medium">You</span>
                     </Link>

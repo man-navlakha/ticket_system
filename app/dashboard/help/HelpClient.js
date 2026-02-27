@@ -88,7 +88,7 @@ export default function HelpClient({ supportStaff }) {
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                         />
-                        <svg className="w-5 h-5 text-muted-foreground absolute left-4 top-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg className="w-5 h-5 text-muted-foreground absolute left-4 top-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                         </svg>
                     </div>
@@ -117,19 +117,19 @@ export default function HelpClient({ supportStaff }) {
                             {filteredFaqs.length === 0 ? (
                                 <p className="text-muted-foreground">No results found for "{search}".</p>
                             ) : (
-                                filteredFaqs.map((faq, i) => (
-                                    <div key={i} className="border border-border rounded-xl bg-card overflow-hidden">
+                                filteredFaqs.map((faq) => (
+                                    <div key={faq.question} className="border border-border rounded-xl bg-card overflow-hidden">
                                         <button
-                                            onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                                            onClick={() => setOpenFaq(openFaq === faq.question ? null : faq.question)}
                                             className="w-full flex items-center justify-between p-6 text-left hover:bg-muted/30 transition-colors"
                                         >
                                             <span className="font-medium text-lg text-foreground">{faq.question}</span>
-                                            <svg className={`w-5 h-5 text-muted-foreground transition-transform duration-300 ${openFaq === i ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <svg className={`w-5 h-5 text-muted-foreground transition-transform duration-300 ${openFaq === faq.question ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 9l-7 7-7-7" />
                                             </svg>
                                         </button>
                                         <AnimatePresence>
-                                            {openFaq === i && (
+                                            {openFaq === faq.question && (
                                                 <motion.div
                                                     initial={{ height: 0, opacity: 0 }}
                                                     animate={{ height: 'auto', opacity: 1 }}
@@ -156,8 +156,8 @@ export default function HelpClient({ supportStaff }) {
                                 {supportStaff.length === 0 ? (
                                     <p className="text-sm text-muted-foreground">No active support staff.</p>
                                 ) : (
-                                    supportStaff.map((staff, i) => (
-                                        <div key={i} className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted/30 transition-colors group">
+                                    supportStaff.map((staff) => (
+                                        <div key={staff.email} className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted/30 transition-colors group">
                                             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-muted/50 to-transparent border border-border flex items-center justify-center text-xs font-bold font-mono text-foreground">
                                                 {staff.username?.[0]?.toUpperCase()}
                                             </div>
@@ -170,6 +170,13 @@ export default function HelpClient({ supportStaff }) {
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                                 </svg>
                                             </a>
+                                            {staff.phoneNumber && (
+                                                <a href={`tel:${staff.phoneNumber}`} className="opacity-0 group-hover:opacity-100 p-2 text-muted-foreground hover:text-foreground transition-all" title="Call">
+                                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                                                    </svg>
+                                                </a>
+                                            )}
                                         </div>
                                     ))
                                 )}
