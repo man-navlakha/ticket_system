@@ -163,7 +163,7 @@ export default function TicketsClient({ user, tickets }) {
                                         <td className="px-6 py-5 text-right">
                                             <div className="flex flex-col items-end gap-1">
                                                 <span className="text-[11px] font-bold text-muted-foreground">{ticket._count.comments} Comments</span>
-                                                <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-tighter">
+                                                <span suppressHydrationWarning className="text-[9px] font-bold text-muted-foreground uppercase tracking-tighter">
                                                     {new Date(ticket.createdAt).toLocaleDateString()}
                                                 </span>
                                             </div>

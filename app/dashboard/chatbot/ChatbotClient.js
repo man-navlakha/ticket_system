@@ -417,7 +417,7 @@ export default function ChatbotClient({ user }) {
                                                                             {ticket.priority}
                                                                         </span>
                                                                         <span>•</span>
-                                                                        <span>{new Date(ticket.createdAt).toLocaleDateString()}</span>
+                                                                        <span suppressHydrationWarning>{new Date(ticket.createdAt).toLocaleDateString()}</span>
                                                                     </div>
                                                                 </Link>
                                                             ))}
