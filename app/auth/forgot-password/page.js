@@ -51,7 +51,7 @@ export default function ForgotPasswordPage() {
                 </div>
                 <Link
                     href="/auth/login"
-                    className="inline-flex items-center justify-center px-6 py-2.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground border border-border rounded-full hover:text-[#C5A059] dark:hover:text-[#D4AF37] hover:border-[#C5A059]/40 dark:hover:border-[#D4AF37]/40 transition-all"
+                    className="inline-flex items-center justify-center px-6 py-2.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground border border-border rounded-full hover:text-[#ec4269] dark:hover:text-[#D4AF37] hover:border-[#ec4269]/40 dark:hover:border-[#D4AF37]/40 transition-all"
                 >
                     ← Back to Login
                 </Link>
@@ -63,7 +63,7 @@ export default function ForgotPasswordPage() {
         <div className="space-y-7 animate-in fade-in duration-700">
             {/* Header */}
             <div className="text-center space-y-2">
-                <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-[#C5A059]/10 dark:bg-[#D4AF37]/10 border border-[#C5A059]/20 dark:border-[#D4AF37]/20 text-[#C5A059] dark:text-[#D4AF37] mx-auto mb-3">
+                <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-[#ec4269]/10 dark:bg-[#D4AF37]/10 border border-[#ec4269]/20 dark:border-[#D4AF37]/20 text-[#ec4269] dark:text-[#D4AF37] mx-auto mb-3">
                     <Mail className="w-7 h-7" />
                 </div>
                 <h1 className="text-2xl font-light tracking-tight text-foreground">Reset Password</h1>
@@ -81,7 +81,7 @@ export default function ForgotPasswordPage() {
                         type="email"
                         placeholder="user@enterprise.com"
                         required
-                        className="w-full h-12 px-4 bg-background border border-border rounded-xl text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#C5A059]/60 dark:focus:border-[#D4AF37]/60 transition-all"
+                        className="w-full h-12 px-4 bg-background border border-border rounded-xl text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#ec4269]/60 dark:focus:border-[#D4AF37]/60 transition-all"
                         style={{ outline: 'none', boxShadow: 'none' }}
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
@@ -97,7 +97,7 @@ export default function ForgotPasswordPage() {
                 <button
                     type="submit"
                     disabled={loading}
-                    className="w-full h-12 bg-[#C5A059] dark:bg-[#D4AF37] text-white dark:text-zinc-900 font-bold text-xs uppercase tracking-widest rounded-xl hover:opacity-90 hover:scale-[1.01] transition-all active:scale-[0.98] disabled:opacity-50 mt-1 shadow-lg shadow-[#C5A059]/20 dark:shadow-[#D4AF37]/20 flex items-center justify-center gap-2"
+                    className="w-full h-12 bg-[#ec4269] dark:bg-[#D4AF37] text-white dark:text-zinc-900 font-bold text-xs uppercase tracking-widest rounded-xl hover:opacity-90 hover:scale-[1.01] transition-all active:scale-[0.98] disabled:opacity-50 mt-1 shadow-lg shadow-[#ec4269]/20 dark:shadow-[#D4AF37]/20 flex items-center justify-center gap-2"
                 >
                     {loading ? (
                         <><Loader2 className="w-4 h-4 animate-spin" /> Sending...</>
@@ -108,7 +108,7 @@ export default function ForgotPasswordPage() {
             <div className="pt-5 border-t border-border text-center">
                 <Link
                     href="/auth/login"
-                    className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest hover:text-[#C5A059] dark:hover:text-[#D4AF37] transition-colors"
+                    className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest hover:text-[#ec4269] dark:hover:text-[#D4AF37] transition-colors"
                 >
                     ← Return to Login
                 </Link>

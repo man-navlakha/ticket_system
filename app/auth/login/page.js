@@ -73,7 +73,7 @@ export default function LoginPage() {
                         type="text"
                         placeholder="Email or Username"
                         required
-                        className="w-full h-12 px-4 bg-background border border-border rounded-xl text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#C5A059]/60 dark:focus:border-[#D4AF37]/60 transition-all"
+                        className="w-full h-12 px-4 bg-background border border-border rounded-xl text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#ec4269]/60 dark:focus:border-[#D4AF37]/60 transition-all"
                         style={{ outline: 'none', boxShadow: 'none' }}
                         value={identifier}
                         onChange={(e) => setIdentifier(e.target.value)}
@@ -84,7 +84,7 @@ export default function LoginPage() {
                 <div className="space-y-1.5">
                     <div className="flex justify-between items-center ml-1">
                         <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Password</label>
-                        <Link href="/auth/forgot-password" className="text-[10px] font-semibold text-muted-foreground hover:text-[#C5A059] dark:hover:text-[#D4AF37] transition-colors">
+                        <Link href="/auth/forgot-password" className="text-[10px] font-semibold text-muted-foreground hover:text-[#ec4269] dark:hover:text-[#D4AF37] transition-colors">
                             Forgot?
                         </Link>
                     </div>
@@ -93,7 +93,7 @@ export default function LoginPage() {
                             type={showPassword ? 'text' : 'password'}
                             placeholder="••••••••"
                             required
-                            className="w-full h-12 px-4 pr-12 bg-background border border-border rounded-xl text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#C5A059]/60 dark:focus:border-[#D4AF37]/60 transition-all"
+                            className="w-full h-12 px-4 pr-12 bg-background border border-border rounded-xl text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#ec4269]/60 dark:focus:border-[#D4AF37]/60 transition-all"
                             style={{ outline: 'none', boxShadow: 'none' }}
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
@@ -119,7 +119,7 @@ export default function LoginPage() {
                 <button
                     type="submit"
                     disabled={loading}
-                    className="w-full h-12 bg-[#C5A059] dark:bg-[#D4AF37] text-white dark:text-zinc-900 font-bold text-xs uppercase tracking-widest rounded-xl hover:opacity-90 hover:scale-[1.01] transition-all active:scale-[0.98] disabled:opacity-50 mt-1 shadow-lg shadow-[#C5A059]/20 dark:shadow-[#D4AF37]/20 flex items-center justify-center gap-2"
+                    className="w-full h-12 bg-[#ec4269] dark:bg-[#D4AF37] text-white dark:text-zinc-900 font-bold text-xs uppercase tracking-widest rounded-xl hover:opacity-90 hover:scale-[1.01] transition-all active:scale-[0.98] disabled:opacity-50 mt-1 shadow-lg shadow-[#ec4269]/20 dark:shadow-[#D4AF37]/20 flex items-center justify-center gap-2"
                 >
                     {loading ? (
                         <><Loader2 className="w-4 h-4 animate-spin" /> Authenticating...</>
@@ -130,7 +130,7 @@ export default function LoginPage() {
             <div className="pt-5 border-t border-border text-center">
                 <p className="text-xs text-muted-foreground font-medium">
                     Don&apos;t have an account?{' '}
-                    <Link href="/auth/register" className="text-[#C5A059] dark:text-[#D4AF37] font-bold hover:underline underline-offset-4">
+                    <Link href="/auth/register" className="text-[#ec4269] dark:text-[#D4AF37] font-bold hover:underline underline-offset-4">
                         Request Access
                     </Link>
                 </p>

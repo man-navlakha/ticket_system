@@ -9,7 +9,7 @@ export default function Footer() {
                 {/* Top Bar */}
                 <div className="flex flex-col md:flex-row items-center justify-between gap-6 text-sm text-muted-foreground font-mono">
                     <div className="flex flex-col md:flex-row items-center gap-4 md:gap-8">
-                        <span>© {new Date().getFullYear()} Man&apos;s Support Desk.</span>
+                        <span>© {new Date().getFullYear()} Excellent&apos;s Support Desk. | <span className='text-foreground font-bold'><a href="https://man-navlakha.netlify.app/">Man Navlakha</a></span></span>
                         <div className="flex gap-6">
                             <Link href="/policies" className="hover:text-foreground transition-colors">Policies</Link>
                             <Link href="/terms" className="hover:text-foreground transition-colors">Terms</Link>
@@ -39,7 +39,7 @@ export default function Footer() {
                 {/* Huge Footer Text */}
                 <div className="w-full flex justify-center -z-10 pt-16 md:pt-16 pb-0 md:pb-0">
                     <h1 className="text-[13vw] leading-[0.8] font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-[#ff4d4d] via-[#a259ff] to-[#7f00ff] text-center select-none -m-24 opacity-80">
-                        MAN&apos;S SUPPORT
+                        EXCELLENT&apos;S SUPPORT
                     </h1>
                 </div>
             </div>

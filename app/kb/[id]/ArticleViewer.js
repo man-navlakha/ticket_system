@@ -26,13 +26,13 @@ export default function ArticleViewer({ article }) {
                 <nav className="flex items-center gap-2 text-[10px] sm:text-xs font-medium text-muted-foreground mb-8 md:mb-10 uppercase tracking-widest flex-wrap">
                     <Link
                         href="/kb"
-                        className="hover:text-[#C5A059] dark:hover:text-[#D4AF37] transition-colors flex items-center gap-1.5"
+                        className="hover:text-[#ec4269] dark:hover:text-[#D4AF37] transition-colors flex items-center gap-1.5"
                     >
                         <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
                         Knowledge Base
                     </Link>
                     <span className="text-border">/</span>
-                    <span className="text-[#C5A059] dark:text-[#D4AF37] font-semibold truncate max-w-[180px] sm:max-w-none">{article.category?.name || 'Article'}</span>
+                    <span className="text-[#ec4269] dark:text-[#D4AF37] font-semibold truncate max-w-[180px] sm:max-w-none">{article.category?.name || 'Article'}</span>
                 </nav>
 
                 {/* Header */}
@@ -46,7 +46,7 @@ export default function ArticleViewer({ article }) {
                             </span>
                             Published
                         </div>
-                        <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full bg-[#C5A059]/10 text-[#C5A059] dark:bg-[#D4AF37]/10 dark:text-[#D4AF37] border border-[#C5A059]/20 dark:border-[#D4AF37]/20">
+                        <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full bg-[#ec4269]/10 text-[#ec4269] dark:bg-[#D4AF37]/10 dark:text-[#D4AF37] border border-[#ec4269]/20 dark:border-[#D4AF37]/20">
                             {article.category?.name || 'General'}
                         </span>
                         <span className="text-[10px] sm:text-xs text-muted-foreground font-mono sm:ml-auto w-full sm:w-auto">
@@ -67,7 +67,7 @@ export default function ArticleViewer({ article }) {
                     {/* Meta / Sharing */}
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-6 md:mt-8 pt-5 md:pt-6 border-t border-border">
                         <div className="flex items-center gap-3">
-                            <div className="w-9 h-9 rounded-full bg-[#C5A059]/20 dark:bg-[#D4AF37]/20 text-[#C5A059] dark:text-[#D4AF37] flex items-center justify-center text-sm font-bold ring-2 ring-background shadow-sm">
+                            <div className="w-9 h-9 rounded-full bg-[#ec4269]/20 dark:bg-[#D4AF37]/20 text-[#ec4269] dark:text-[#D4AF37] flex items-center justify-center text-sm font-bold ring-2 ring-background shadow-sm">
                                 {article.createdBy?.username?.[0]?.toUpperCase() || 'S'}
                             </div>
                             <div className="text-sm">
@@ -113,7 +113,7 @@ export default function ArticleViewer({ article }) {
                 )}
 
                 {/* Content */}
-                <div className="prose prose-sm sm:prose-base md:prose-lg max-w-none text-foreground prose-headings:text-foreground prose-headings:font-bold prose-headings:tracking-tight prose-p:text-muted-foreground prose-p:leading-relaxed prose-strong:text-foreground prose-strong:font-bold prose-a:text-[#C5A059] dark:prose-a:text-[#D4AF37] prose-a:no-underline hover:prose-a:underline prose-a:font-medium prose-pre:bg-muted prose-pre:border prose-pre:border-border prose-pre:rounded-xl prose-pre:overflow-x-auto prose-code:text-[#C5A059] dark:prose-code:text-[#D4AF37] prose-code:bg-[#C5A059]/10 dark:prose-code:bg-[#D4AF37]/10 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm prose-code:font-mono prose-code:break-words prose-li:text-muted-foreground prose-hr:border-border prose-img:rounded-2xl">
+                <div className="prose prose-sm sm:prose-base md:prose-lg max-w-none text-foreground prose-headings:text-foreground prose-headings:font-bold prose-headings:tracking-tight prose-p:text-muted-foreground prose-p:leading-relaxed prose-strong:text-foreground prose-strong:font-bold prose-a:text-[#ec4269] dark:prose-a:text-[#D4AF37] prose-a:no-underline hover:prose-a:underline prose-a:font-medium prose-pre:bg-muted prose-pre:border prose-pre:border-border prose-pre:rounded-xl prose-pre:overflow-x-auto prose-code:text-[#ec4269] dark:prose-code:text-[#D4AF37] prose-code:bg-[#ec4269]/10 dark:prose-code:bg-[#D4AF37]/10 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm prose-code:font-mono prose-code:break-words prose-li:text-muted-foreground prose-hr:border-border prose-img:rounded-2xl">
                     <ReactMarkdown
                         remarkPlugins={[remarkGfm]}
                         components={{
@@ -133,7 +133,7 @@ export default function ArticleViewer({ article }) {
                             th: ({ node, ...props }) => <th className="bg-muted p-3 font-semibold text-foreground border-b border-border" {...props} />,
                             td: ({ node, ...props }) => <td className="p-3 border-b border-border text-muted-foreground" {...props} />,
                             blockquote: ({ node, ...props }) => (
-                                <blockquote className="border-l-4 border-[#C5A059]/50 dark:border-[#D4AF37]/50 pl-4 py-1 my-6 bg-[#C5A059]/5 dark:bg-[#D4AF37]/5 rounded-r italic text-muted-foreground" {...props} />
+                                <blockquote className="border-l-4 border-[#ec4269]/50 dark:border-[#D4AF37]/50 pl-4 py-1 my-6 bg-[#ec4269]/5 dark:bg-[#D4AF37]/5 rounded-r italic text-muted-foreground" {...props} />
                             ),
                         }}
                     >
@@ -144,13 +144,13 @@ export default function ArticleViewer({ article }) {
                 {/* CTA Footer */}
                 <footer className="mt-12 md:mt-20 pt-0">
                     <div className="p-8 md:p-12 rounded-3xl bg-card border border-border text-center relative overflow-hidden group">
-                        <div className="absolute top-0 right-0 w-64 h-64 bg-[#C5A059]/10 dark:bg-[#D4AF37]/10 blur-[100px] rounded-full group-hover:bg-[#C5A059]/20 dark:group-hover:bg-[#D4AF37]/20 transition-all duration-500 pointer-events-none" />
+                        <div className="absolute top-0 right-0 w-64 h-64 bg-[#ec4269]/10 dark:bg-[#D4AF37]/10 blur-[100px] rounded-full group-hover:bg-[#ec4269]/20 dark:group-hover:bg-[#D4AF37]/20 transition-all duration-500 pointer-events-none" />
                         <div className="absolute inset-0 bg-[linear-gradient(to_right,var(--color-border)_1px,transparent_1px),linear-gradient(to_bottom,var(--color-border)_1px,transparent_1px)] bg-[size:24px_24px] opacity-[0.05] pointer-events-none" />
                         <div className="relative z-10 space-y-4">
                             <h3 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">Was this article helpful?</h3>
                             <p className="text-muted-foreground font-light">Your feedback helps us improve our documentation.</p>
                             <div className="flex flex-col sm:flex-row justify-center gap-3 pt-2">
-                                <button className="px-6 py-2.5 rounded-full bg-[#C5A059] dark:bg-[#D4AF37] text-white dark:text-zinc-900 text-sm font-semibold hover:opacity-90 hover:scale-105 transition-all shadow-sm shadow-[#C5A059]/30 dark:shadow-[#D4AF37]/30">
+                                <button className="px-6 py-2.5 rounded-full bg-[#ec4269] dark:bg-[#D4AF37] text-white dark:text-zinc-900 text-sm font-semibold hover:opacity-90 hover:scale-105 transition-all shadow-sm shadow-[#ec4269]/30 dark:shadow-[#D4AF37]/30">
                                     👍 Yes, thanks
                                 </button>
                                 <button className="px-6 py-2.5 rounded-full border border-border bg-muted hover:bg-muted/80 text-foreground text-sm font-semibold transition-all">
@@ -160,7 +160,7 @@ export default function ArticleViewer({ article }) {
                             <div className="pt-4">
                                 <Link
                                     href="/dashboard/tickets/create"
-                                    className="text-sm text-muted-foreground hover:text-[#C5A059] dark:hover:text-[#D4AF37] transition-colors underline underline-offset-4"
+                                    className="text-sm text-muted-foreground hover:text-[#ec4269] dark:hover:text-[#D4AF37] transition-colors underline underline-offset-4"
                                 >
                                     Still need help? Open a support ticket →
                                 </Link>

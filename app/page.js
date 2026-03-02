@@ -40,7 +40,7 @@ export default function Home() {
   if (isCheckingAuth) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: 'var(--color-background, #fff)' }}>
-        <div style={{ width: 36, height: 36, border: '3px solid #C5A059', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
+        <div style={{ width: 36, height: 36, border: '3px solid #ec4269', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
     );
@@ -150,7 +150,7 @@ export default function Home() {
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400/50 opacity-75" />
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
                 </span>
-                Powered by <span className="text-[#C5A059] dark:text-[#D4AF37] font-semibold">MAN NAVLAKHA</span>
+                Powered by <span className="text-[#ec4269] dark:text-[#D4AF37] font-semibold">MAN NAVLAKHA</span>
               </div>
 
               {/* Heading */}
@@ -170,7 +170,7 @@ export default function Home() {
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
                 <Link
                   href="/dashboard"
-                  className="px-8 py-3 rounded-full bg-[#C5A059] dark:bg-[#D4AF37] text-white dark:text-zinc-900 font-semibold text-sm hover:opacity-90 hover:scale-105 transition-all outline-none ring-2 ring-[#C5A059]/50 ring-offset-2 ring-offset-background shadow-lg shadow-[#C5A059]/20"
+                  className="px-8 py-3 rounded-full bg-[#ec4269] dark:bg-[#D4AF37] text-white dark:text-zinc-900 font-semibold text-sm hover:opacity-90 hover:scale-105 transition-all outline-none ring-2 ring-[#ec4269]/50 ring-offset-2 ring-offset-background shadow-lg shadow-[#ec4269]/20"
                 >
                   Access Dashboard
                 </Link>
@@ -226,7 +226,7 @@ export default function Home() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="px-6 py-2 bg-[#C5A059] dark:bg-[#D4AF37] text-white dark:text-zinc-900  rounded text-sm font-semibold hover:opacity-90 transition-colors disabled:opacity-50"
+                    className="px-6 py-2 bg-[#ec4269] dark:bg-[#D4AF37] text-white dark:text-zinc-900  rounded text-sm font-semibold hover:opacity-90 transition-colors disabled:opacity-50"
                   >
                     {loading ? 'Searching...' : 'Track'}
                   </button>
@@ -264,7 +264,7 @@ export default function Home() {
         <section className="py-32 px-4 sm:px-6 lg:px-8 bg-background">
           <div className="max-w-7xl mx-auto">
             <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-center mb-20 text-foreground">
-              Everything you need to <br /> <span className="text-[#C5A059] dark:text-[#D4AF37]"> scale support.</span>
+              Everything you need to <br /> <span className="text-[#ec4269] dark:text-[#D4AF37]"> scale support.</span>
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-3">
@@ -272,7 +272,7 @@ export default function Home() {
               <div className="md:col-span-2 p-8 rounded-tl-3xl border-t border-l border-border bg-card hover:border-foreground/20 transition-colors relative overflow-hidden group">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/10 blur-[80px] rounded-full group-hover:bg-purple-500/20 transition-all duration-500"></div>
                 <div className="relative z-10">
-                  <div className="w-12 h-12 rounded-lg bg-muted/80 backdrop-blur-sm shadow-inner border border-border flex items-center text-[#C5A059] dark:text-[#D4AF37] justify-center mb-6 text-3xl">
+                  <div className="w-12 h-12 rounded-lg bg-muted/80 backdrop-blur-sm shadow-inner border border-border flex items-center text-[#ec4269] dark:text-[#D4AF37] justify-center mb-6 text-3xl">
                     <Brain />
                   </div>
                   <h3 className="text-xl font-semibold text-foreground mb-3">Smart Automation</h3>
@@ -286,8 +286,8 @@ export default function Home() {
               <div className="p-8 rounded-tr-3xl border-t border-r border-border bg-card hover:border-foreground/20 transition-colors relative overflow-hidden group">
                 <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-blue-500/10 to-transparent opacity-50 group-hover:opacity-100 transition-opacity"></div>
                 <div className="relative z-10">
-                  <div className="w-12 h-12 rounded-lg bg-muted border border-border flex items-center justify-center mb-6 text-2xl text-[#C5A059] dark:text-[#D4AF37]"><ShelvingUnit /></div>
-                  <h3 className="text-xl font-semibold text-[#C5A059] dark:text-[#D4AF37] mb-3">Inventory Sync</h3>
+                  <div className="w-12 h-12 rounded-lg bg-muted border border-border flex items-center justify-center mb-6 text-2xl text-[#ec4269] dark:text-[#D4AF37]"><ShelvingUnit /></div>
+                  <h3 className="text-xl font-semibold text-[#ec4269] dark:text-[#D4AF37] mb-3">Inventory Sync</h3>
                   <p className="text-muted-foreground text-sm leading-relaxed">
                     Link assets directly to support tickets for complete context.
                   </p>
@@ -298,8 +298,8 @@ export default function Home() {
               <div className="p-8 rounded-bl-3xl border-b border-l border-border bg-card hover:border-foreground/20 transition-colors relative overflow-hidden group">
                 <div className="absolute top-0 -right-3 w-64 h-64 bg-pink-800/10 blur-[80px] rounded-full group-hover:bg-pink-500/20 transition-all duration-500"></div>
                 <div className="relative z-10">
-                  <div className="w-12 h-12 rounded-lg bg-muted border border-border flex items-center justify-center mb-6 text-2xl text-[#C5A059] dark:text-[#D4AF37]"><Users /></div>
-                  <h3 className="text-xl font-semibold text-[#C5A059] dark:text-[#D4AF37] mb-3">Collaboration</h3>
+                  <div className="w-12 h-12 rounded-lg bg-muted border border-border flex items-center justify-center mb-6 text-2xl text-[#ec4269] dark:text-[#D4AF37]"><Users /></div>
+                  <h3 className="text-xl font-semibold text-[#ec4269] dark:text-[#D4AF37] mb-3">Collaboration</h3>
                   <p className="text-muted-foreground text-sm leading-relaxed">
                     Mention team members and maintain internal notes in real-time.
                   </p>
@@ -310,7 +310,7 @@ export default function Home() {
               <div className="md:col-span-2 p-8 rounded-br-3xl border-b border-r border-border bg-card hover:border-foreground/20 hover:border-b hover:border-r transition-colors relative overflow-hidden group">
                 <div className="absolute top-0 left-0 w-64 h-64 bg-pink-800/10 blur-[80px] rounded-full group-hover:bg-pink-500/20 transition-all duration-500"></div>
                 <div className="relative z-10">
-                  <div className="w-12 h-12 rounded-lg bg-muted border border-border flex items-center text-[#C5A059] dark:text-[#D4AF37] justify-center mb-6 text-3xl">
+                  <div className="w-12 h-12 rounded-lg bg-muted border border-border flex items-center text-[#ec4269] dark:text-[#D4AF37] justify-center mb-6 text-3xl">
                     <WandSparkles /></div>
                   <h3 className="text-xl font-semibold text-foreground mb-3">AI Suggestions</h3>
                   <p className="text-muted-foreground leading-relaxed max-w-md">
@@ -375,7 +375,7 @@ export default function Home() {
               <button
                 type="submit"
                 disabled={requestStatus === 'loading' || requestStatus === 'success'}
-                className="w-full py-3 bg-[#C5A059] dark:bg-[#D4AF37] text-white dark:text-zinc-900 font-medium rounded-lg hover:opacity-90 transition-colors text-sm disabled:opacity-50"
+                className="w-full py-3 bg-[#ec4269] dark:bg-[#D4AF37] text-white dark:text-zinc-900 font-medium rounded-lg hover:opacity-90 transition-colors text-sm disabled:opacity-50"
               >
                 {requestStatus === 'loading' ? 'Submitting...' : 'Join Waitlist'}
               </button>

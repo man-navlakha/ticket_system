@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { ThemeToggle } from './theme-toggle';
 import { Menu, X } from 'lucide-react';
+import ThemeLogo from './ThemeLogo';
 
 export default function LandingNav() {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -18,17 +19,8 @@ export default function LandingNav() {
             <div className="container mx-auto px-4 md:px-6">
                 <div className="flex h-16 items-center justify-between">
                     {/* Logo */}
-                    <Link href="/" className="flex items-center gap-2 md:gap-3 hover:opacity-80 transition-opacity">
-                        <Image
-                            src="/logo_my.png"
-                            alt="Man's Support Desk Logo"
-                            width={32}
-                            height={32}
-                            className="rounded-lg"
-                        />
-                        <div className="text-lg md:text-xl font-bold tracking-tight text-foreground">
-                            MAN&apos;S SUPPORT DESK
-                        </div>
+                    <Link href="/" className="flex items-center hover:opacity-80 transition-opacity">
+                        <ThemeLogo />
                     </Link>
 
                     {/* Desktop Actions */}

@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import LogoutButton from './LogoutButton';
 import { ThemeToggle } from './theme-toggle';
+import ThemeLogo from './ThemeLogo';
 
 export default function Sidebar({ user }) {
     const pathname = usePathname();
@@ -169,20 +170,8 @@ export default function Sidebar({ user }) {
             <aside className="hidden md:flex flex-col w-[280px] min-h-screen bg-background border-r border-border sticky top-0 h-screen overflow-y-auto z-50 no-scrollbar transition-colors duration-300">
                 {/* Brand Header */}
                 <div className="flex items-center gap-3 px-6 h-16 border-b border-border shrink-0 bg-background/50 backdrop-blur-md sticky top-0 z-10">
-                    <Link href="/dashboard" className="flex items-center gap-3 group">
-                        <div className="w-8 h-8 rounded-lg bg-muted border border-border flex items-center justify-center group-hover:bg-muted/80 transition-colors">
-                            <Image
-                                src="/logo_my.png"
-                                alt="Logo"
-                                width={20}
-                                height={20}
-                                className="object-contain"
-                            />
-                        </div>
-                        <div className="flex flex-col">
-                            <span className="font-semibold text-sm text-foreground tracking-tight">Man&apos;s Support</span>
-                            <span className="text-[10px] text-muted-foreground font-mono">Enterprise</span>
-                        </div>
+                    <Link href="/dashboard" className="flex items-center group hover:opacity-80 transition-opacity">
+                        <ThemeLogo />
                     </Link>
                 </div>
 
@@ -265,7 +254,7 @@ export default function Sidebar({ user }) {
                         <ThemeToggle />
                     </div>
                     <div className="flex items-center gap-3 px-3 py-3 rounded-xl bg-muted/30 border border-border hover:border-foreground/10 transition-colors group cursor-pointer">
-                        <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-blue-500 to-purple-500 flex items-center justify-center text-xs font-bold text-white shadow-lg">
+                        <div className="w-9 h-9 rounded-full  bg-gradient-to-tr from-[#ec4269] to-[#ec3176]  flex items-center justify-center text-xs font-bold text-white shadow-lg">
                             {user?.username?.[0] || 'U'}
                         </div>
                         <div className="flex-1 min-w-0">
@@ -325,7 +314,7 @@ export default function Sidebar({ user }) {
                         href="/dashboard/profile"
                         className={`flex flex-col items-center justify-center p-2 rounded-xl transition-all w-16 group ${isActive('/dashboard/profile') ? 'text-foreground' : 'text-muted-foreground'}`}
                     >
-                        <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-blue-500 to-purple-500 flex items-center justify-center text-[10px] font-bold text-white mb-1">
+                        <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-[#ec4269] to-[#ec3176] flex items-center justify-center text-[10px] font-bold text-white mb-1">
                             {user?.username?.[0] || 'U'}
                         </div>
                         <span className="text-[10px] font-medium">You</span>

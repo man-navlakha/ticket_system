@@ -19,7 +19,7 @@ function InputField({ label, type = 'text', ...props }) {
             <div className="relative">
                 <input
                     type={isPassword ? (show ? 'text' : 'password') : type}
-                    className="w-full h-12 px-4 pr-11 bg-background border border-border rounded-xl text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#C5A059]/60 dark:focus:border-[#D4AF37]/60 transition-all"
+                    className="w-full h-12 px-4 pr-11 bg-background border border-border rounded-xl text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#ec4269]/60 dark:focus:border-[#D4AF37]/60 transition-all"
                     style={{ outline: 'none', boxShadow: 'none' }}
                     {...props}
                 />
@@ -95,7 +95,7 @@ function SetupForm() {
                     <h1 className="text-xl font-semibold text-foreground tracking-tight">Invalid Session</h1>
                     <p className="text-sm text-muted-foreground font-light">This invitation link is missing a valid token or has expired.</p>
                 </div>
-                <Link href="/auth/login" className="inline-block text-sm font-semibold text-[#C5A059] dark:text-[#D4AF37] hover:underline underline-offset-4 transition-all">
+                <Link href="/auth/login" className="inline-block text-sm font-semibold text-[#ec4269] dark:text-[#D4AF37] hover:underline underline-offset-4 transition-all">
                     Return to login →
                 </Link>
             </div>
@@ -115,7 +115,7 @@ function SetupForm() {
                 </div>
                 {/* Progress bar */}
                 <div className="w-48 h-1 bg-border rounded-full overflow-hidden mx-auto">
-                    <div className="h-full bg-[#C5A059] dark:bg-[#D4AF37] rounded-full animate-[progress_3s_ease-in-out_forwards]" style={{ width: '100%', animationDuration: '3s' }} />
+                    <div className="h-full bg-[#ec4269] dark:bg-[#D4AF37] rounded-full animate-[progress_3s_ease-in-out_forwards]" style={{ width: '100%', animationDuration: '3s' }} />
                 </div>
             </div>
         );
@@ -128,8 +128,8 @@ function SetupForm() {
             <div className="text-center space-y-2">
                 <div className="inline-flex items-center gap-2 rounded-full border border-border bg-muted/50 px-3 py-1.5 text-xs font-medium text-muted-foreground mb-3">
                     <span className="relative flex h-2 w-2">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#C5A059]/50 dark:bg-[#D4AF37]/50 opacity-75" />
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-[#C5A059] dark:bg-[#D4AF37]" />
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#ec4269]/50 dark:bg-[#D4AF37]/50 opacity-75" />
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-[#ec4269] dark:bg-[#D4AF37]" />
                     </span>
                     Invitation Active
                 </div>
@@ -154,9 +154,9 @@ function SetupForm() {
                 {/* Terms */}
                 <div
                     onClick={() => setAcceptedTerms(!acceptedTerms)}
-                    className="flex items-start gap-3 p-4 bg-muted/30 rounded-2xl border border-border hover:border-[#C5A059]/30 dark:hover:border-[#D4AF37]/30 transition-colors cursor-pointer"
+                    className="flex items-start gap-3 p-4 bg-muted/30 rounded-2xl border border-border hover:border-[#ec4269]/30 dark:hover:border-[#D4AF37]/30 transition-colors cursor-pointer"
                 >
-                    <div className={`mt-0.5 w-5 h-5 rounded-md border-2 transition-all flex items-center justify-center shrink-0 ${acceptedTerms ? 'bg-[#C5A059] dark:bg-[#D4AF37] border-[#C5A059] dark:border-[#D4AF37]' : 'border-border'}`}>
+                    <div className={`mt-0.5 w-5 h-5 rounded-md border-2 transition-all flex items-center justify-center shrink-0 ${acceptedTerms ? 'bg-[#ec4269] dark:bg-[#D4AF37] border-[#ec4269] dark:border-[#D4AF37]' : 'border-border'}`}>
                         {acceptedTerms && (
                             <svg className="w-3 h-3 text-white dark:text-zinc-900" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
@@ -165,16 +165,16 @@ function SetupForm() {
                     </div>
                     <p className="text-xs text-muted-foreground leading-relaxed font-light">
                         I agree to the{' '}
-                        <Link href="/terms" onClick={e => e.stopPropagation()} className="text-[#C5A059] dark:text-[#D4AF37] hover:underline underline-offset-4 font-medium">Terms of Service</Link>
+                        <Link href="/terms" onClick={e => e.stopPropagation()} className="text-[#ec4269] dark:text-[#D4AF37] hover:underline underline-offset-4 font-medium">Terms of Service</Link>
                         {' '}and{' '}
-                        <Link href="/policies" onClick={e => e.stopPropagation()} className="text-[#C5A059] dark:text-[#D4AF37] hover:underline underline-offset-4 font-medium">Privacy Policy</Link>.
+                        <Link href="/policies" onClick={e => e.stopPropagation()} className="text-[#ec4269] dark:text-[#D4AF37] hover:underline underline-offset-4 font-medium">Privacy Policy</Link>.
                     </p>
                 </div>
 
                 <button
                     type="submit"
                     disabled={loading}
-                    className="w-full h-12 bg-[#C5A059] dark:bg-[#D4AF37] text-white dark:text-zinc-900 text-[10px] font-bold uppercase tracking-widest rounded-xl hover:opacity-90 hover:scale-[1.01] transition-all active:scale-[0.98] disabled:opacity-50 shadow-lg shadow-[#C5A059]/20 dark:shadow-[#D4AF37]/20 flex items-center justify-center gap-2"
+                    className="w-full h-12 bg-[#ec4269] dark:bg-[#D4AF37] text-white dark:text-zinc-900 text-[10px] font-bold uppercase tracking-widest rounded-xl hover:opacity-90 hover:scale-[1.01] transition-all active:scale-[0.98] disabled:opacity-50 shadow-lg shadow-[#ec4269]/20 dark:shadow-[#D4AF37]/20 flex items-center justify-center gap-2"
                 >
                     {loading ? (
                         <><Loader2 className="w-4 h-4 animate-spin" /> Configuring Account...</>
@@ -183,7 +183,7 @@ function SetupForm() {
             </form>
 
             <div className="text-center">
-                <Link href="/dashboard/help" className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest hover:text-[#C5A059] dark:hover:text-[#D4AF37] transition-colors flex items-center justify-center gap-1.5">
+                <Link href="/dashboard/help" className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest hover:text-[#ec4269] dark:hover:text-[#D4AF37] transition-colors flex items-center justify-center gap-1.5">
                     <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
@@ -202,12 +202,12 @@ export default function SetupAccountPage() {
 
             {/* Background glow */}
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[500px] bg-blue-500/10 dark:bg-blue-500/5 blur-[120px] rounded-full -z-10 pointer-events-none" />
-            <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-[#C5A059]/10 dark:bg-[#D4AF37]/5 blur-[100px] rounded-full -z-10 pointer-events-none" />
+            <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-[#ec4269]/10 dark:bg-[#D4AF37]/5 blur-[100px] rounded-full -z-10 pointer-events-none" />
 
             {/* Header */}
             <header className="w-full px-6 py-5 flex items-center justify-between relative z-10">
                 <Link href="/" className="flex items-center gap-3 group">
-                    <div className="p-2 bg-background/80 backdrop-blur rounded-xl border border-border shadow-sm group-hover:border-[#C5A059]/40 dark:group-hover:border-[#D4AF37]/40 transition-colors">
+                    <div className="p-2 bg-background/80 backdrop-blur rounded-xl border border-border shadow-sm group-hover:border-[#ec4269]/40 dark:group-hover:border-[#D4AF37]/40 transition-colors">
                         <Image src="/logo_my.png" alt="Logo" width={28} height={28} priority />
                     </div>
                     <span className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground group-hover:text-foreground transition-colors hidden sm:block">
@@ -221,11 +221,11 @@ export default function SetupAccountPage() {
             <main className="flex-1 flex items-center justify-center px-4 py-10 relative z-10">
                 <div className="w-full max-w-[440px] animate-in fade-in duration-700">
                     <div className="relative group">
-                        <div className="absolute -inset-[2px] rounded-[2.5rem] bg-gradient-to-br from-[#C5A059]/30 via-purple-500/10 to-blue-500/20 blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
+                        <div className="absolute -inset-[2px] rounded-[2.5rem] bg-gradient-to-br from-[#ec4269]/30 via-purple-500/10 to-blue-500/20 blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
                         <div className="relative bg-card/80 backdrop-blur-xl p-8 md:p-10 rounded-[2.2rem] border border-border shadow-2xl shadow-black/5">
                             <Suspense fallback={
                                 <div className="flex items-center justify-center py-16">
-                                    <Loader2 className="w-8 h-8 text-[#C5A059] dark:text-[#D4AF37] animate-spin" />
+                                    <Loader2 className="w-8 h-8 text-[#ec4269] dark:text-[#D4AF37] animate-spin" />
                                 </div>
                             }>
                                 <SetupForm />

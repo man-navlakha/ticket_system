@@ -77,7 +77,7 @@ export default async function KnowledgeBasePage({ searchParams }) {
                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400/50 opacity-75" />
                         <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
                     </span>
-                    Knowledge Base by <span className="text-[#C5A059] dark:text-[#D4AF37] font-semibold">MAN NAVLAKHA</span>
+                    Knowledge Base by <span className="text-[#ec4269] dark:text-[#D4AF37] font-semibold">MAN NAVLAKHA</span>
                 </div>
 
                 <h1 className="text-3xl sm:text-5xl sm:leading-tight lg:text-7xl font-light tracking-tight text-foreground drop-shadow-sm pb-1 md:pb-2">
@@ -95,7 +95,7 @@ export default async function KnowledgeBasePage({ searchParams }) {
             <div className="flex flex-wrap justify-center gap-2 sm:gap-3 relative z-10 pt-2 md:pt-4">
                 <Link
                     href="/kb"
-                    className={`px-4 sm:px-6 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-semibold transition-all shadow-sm ${!currentCategory ? 'bg-[#C5A059] dark:bg-[#D4AF37] text-white dark:text-zinc-900 hover:opacity-90' : 'bg-muted text-foreground hover:bg-muted/80 border border-border'}`}
+                    className={`px-4 sm:px-6 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-semibold transition-all shadow-sm ${!currentCategory ? 'bg-[#ec4269] dark:bg-[#D4AF37] text-white dark:text-zinc-900 hover:opacity-90' : 'bg-muted text-foreground hover:bg-muted/80 border border-border'}`}
                 >
                     All
                 </Link>
@@ -103,7 +103,7 @@ export default async function KnowledgeBasePage({ searchParams }) {
                     <Link
                         key={cat.id}
                         href={`/kb?category=${cat.name}`}
-                        className={`px-4 sm:px-6 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-semibold transition-all shadow-sm flex items-center gap-1.5 sm:gap-2 ${currentCategory === cat.name ? 'bg-[#C5A059] dark:bg-[#D4AF37] text-white dark:text-zinc-900 hover:opacity-90' : 'bg-muted text-foreground hover:bg-muted/80 border border-border'}`}
+                        className={`px-4 sm:px-6 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-semibold transition-all shadow-sm flex items-center gap-1.5 sm:gap-2 ${currentCategory === cat.name ? 'bg-[#ec4269] dark:bg-[#D4AF37] text-white dark:text-zinc-900 hover:opacity-90' : 'bg-muted text-foreground hover:bg-muted/80 border border-border'}`}
                     >
                         {cat.name} <span className="opacity-60 text-[10px] sm:text-xs font-normal">({cat._count.knowledgeBaseArticles})</span>
                     </Link>
@@ -115,7 +115,7 @@ export default async function KnowledgeBasePage({ searchParams }) {
                 {articles.length === 0 ? (
                     <div className="col-span-full py-24 text-center border border-dashed border-border rounded-2xl bg-muted/30">
                         <p className="text-muted-foreground text-lg">No articles found matching your criteria.</p>
-                        <Link href="/kb" className="mt-4 inline-block text-[#C5A059] dark:text-[#D4AF37] hover:underline hover:opacity-80 font-medium">View all articles</Link>
+                        <Link href="/kb" className="mt-4 inline-block text-[#ec4269] dark:text-[#D4AF37] hover:underline hover:opacity-80 font-medium">View all articles</Link>
                     </div>
                 ) : (
                     articles.map((article) => (
@@ -127,14 +127,14 @@ export default async function KnowledgeBasePage({ searchParams }) {
                             <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/5 blur-[50px] rounded-full group-hover:bg-purple-500/10 transition-all duration-500 flex pointer-events-none" />
                             <div className="relative z-10">
                                 <div className="flex items-center justify-between mb-4 sm:mb-6">
-                                    <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded bg-[#C5A059]/10 text-[#C5A059] dark:bg-[#D4AF37]/10 dark:text-[#D4AF37] border border-[#C5A059]/20 dark:border-[#D4AF37]/20 max-w-[120px] sm:max-w-none truncate">
+                                    <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded bg-[#ec4269]/10 text-[#ec4269] dark:bg-[#D4AF37]/10 dark:text-[#D4AF37] border border-[#ec4269]/20 dark:border-[#D4AF37]/20 max-w-[120px] sm:max-w-none truncate">
                                         {article.category?.name || 'General'}
                                     </span>
                                     <span className="text-[10px] sm:text-xs text-muted-foreground font-mono shrink-0 ml-2">
                                         {new Date(article.createdAt).toLocaleDateString()}
                                     </span>
                                 </div>
-                                <h3 className="text-lg sm:text-xl font-semibold text-foreground mb-2 sm:mb-3 group-hover:text-[#C5A059] dark:group-hover:text-[#D4AF37] transition-colors line-clamp-2">
+                                <h3 className="text-lg sm:text-xl font-semibold text-foreground mb-2 sm:mb-3 group-hover:text-[#ec4269] dark:group-hover:text-[#D4AF37] transition-colors line-clamp-2">
                                     {article.title}
                                 </h3>
                                 <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3 mb-6">
@@ -151,7 +151,7 @@ export default async function KnowledgeBasePage({ searchParams }) {
                                 {article.tags.length > 3 && (
                                     <span className="text-[10px] text-muted-foreground font-medium">+ {article.tags.length - 3}</span>
                                 )}
-                                <span className="ml-auto text-xs text-[#C5A059] dark:text-[#D4AF37] font-semibold transition-colors flex items-center gap-1 opacity-80 group-hover:opacity-100 group-hover:gap-2">
+                                <span className="ml-auto text-xs text-[#ec4269] dark:text-[#D4AF37] font-semibold transition-colors flex items-center gap-1 opacity-80 group-hover:opacity-100 group-hover:gap-2">
                                     Read <svg className="w-3 h-3 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
                                 </span>
                             </div>
@@ -162,7 +162,7 @@ export default async function KnowledgeBasePage({ searchParams }) {
 
             {/* CTA */}
             <div className="mt-24 p-8 md:p-16 rounded-3xl bg-card border border-border text-center relative overflow-hidden group">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-[#C5A059]/10 dark:bg-[#D4AF37]/10 blur-[100px] rounded-full group-hover:bg-[#C5A059]/20 dark:group-hover:bg-[#D4AF37]/20 transition-all duration-500 flex pointer-events-none" />
+                <div className="absolute top-0 right-0 w-64 h-64 bg-[#ec4269]/10 dark:bg-[#D4AF37]/10 blur-[100px] rounded-full group-hover:bg-[#ec4269]/20 dark:group-hover:bg-[#D4AF37]/20 transition-all duration-500 flex pointer-events-none" />
                 <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-blue-500/5 to-transparent opacity-50 group-hover:opacity-100 transition-opacity flex pointer-events-none" />
 
                 {/* Grid Pattern */}
@@ -174,7 +174,7 @@ export default async function KnowledgeBasePage({ searchParams }) {
                         If you couldn&apos;t find the answer you were looking for, our support team is ready to assist you.
                     </p>
                     <div className="flex justify-center gap-4 pt-6">
-                        <Link href="/dashboard/tickets/create" className="px-8 py-3 rounded-full bg-[#C5A059] dark:bg-[#D4AF37] text-white dark:text-zinc-900 font-semibold text-sm hover:opacity-90 hover:scale-105 transition-all outline-none ring-2 ring-[#C5A059]/50 dark:ring-[#D4AF37]/50 ring-offset-2 ring-offset-background shadow-lg shadow-[#C5A059]/20 dark:shadow-[#D4AF37]/20">
+                        <Link href="/dashboard/tickets/create" className="px-8 py-3 rounded-full bg-[#ec4269] dark:bg-[#D4AF37] text-white dark:text-zinc-900 font-semibold text-sm hover:opacity-90 hover:scale-105 transition-all outline-none ring-2 ring-[#ec4269]/50 dark:ring-[#D4AF37]/50 ring-offset-2 ring-offset-background shadow-lg shadow-[#ec4269]/20 dark:shadow-[#D4AF37]/20">
                             Open a Ticket
                         </Link>
                     </div>

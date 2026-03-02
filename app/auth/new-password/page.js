@@ -15,7 +15,7 @@ function PasswordInput({ label, value, onChange, placeholder = '•••••�
                     type={show ? 'text' : 'password'}
                     placeholder={placeholder}
                     required
-                    className="w-full h-12 px-4 pr-12 bg-background border border-border rounded-xl text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#C5A059]/60 dark:focus:border-[#D4AF37]/60 transition-all"
+                    className="w-full h-12 px-4 pr-12 bg-background border border-border rounded-xl text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#ec4269]/60 dark:focus:border-[#D4AF37]/60 transition-all"
                     style={{ outline: 'none', boxShadow: 'none' }}
                     value={value}
                     onChange={onChange}
@@ -85,7 +85,7 @@ function ResetPasswordForm() {
                         Invalid or missing reset token. Please request a new link.
                     </p>
                 </div>
-                <Link href="/auth/forgot-password" className="inline-block text-sm font-semibold text-[#C5A059] dark:text-[#D4AF37] hover:underline underline-offset-4 transition-all">
+                <Link href="/auth/forgot-password" className="inline-block text-sm font-semibold text-[#ec4269] dark:text-[#D4AF37] hover:underline underline-offset-4 transition-all">
                     Request new link →
                 </Link>
             </div>
@@ -126,7 +126,7 @@ function ResetPasswordForm() {
             <button
                 type="submit"
                 disabled={loading}
-                className="w-full h-12 bg-[#C5A059] dark:bg-[#D4AF37] text-white dark:text-zinc-900 font-bold text-xs uppercase tracking-widest rounded-xl hover:opacity-90 hover:scale-[1.01] transition-all active:scale-[0.98] disabled:opacity-50 mt-1 shadow-lg shadow-[#C5A059]/20 dark:shadow-[#D4AF37]/20 flex items-center justify-center gap-2"
+                className="w-full h-12 bg-[#ec4269] dark:bg-[#D4AF37] text-white dark:text-zinc-900 font-bold text-xs uppercase tracking-widest rounded-xl hover:opacity-90 hover:scale-[1.01] transition-all active:scale-[0.98] disabled:opacity-50 mt-1 shadow-lg shadow-[#ec4269]/20 dark:shadow-[#D4AF37]/20 flex items-center justify-center gap-2"
             >
                 {loading ? (
                     <><Loader2 className="w-4 h-4 animate-spin" /> Updating...</>
@@ -141,7 +141,7 @@ export default function NewPasswordPage() {
         <div className="space-y-7 animate-in fade-in duration-700">
             {/* Header */}
             <div className="text-center space-y-2">
-                <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-[#C5A059]/10 dark:bg-[#D4AF37]/10 border border-[#C5A059]/20 dark:border-[#D4AF37]/20 text-[#C5A059] dark:text-[#D4AF37] mx-auto mb-3">
+                <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-[#ec4269]/10 dark:bg-[#D4AF37]/10 border border-[#ec4269]/20 dark:border-[#D4AF37]/20 text-[#ec4269] dark:text-[#D4AF37] mx-auto mb-3">
                     <ShieldCheck className="w-7 h-7" />
                 </div>
                 <h1 className="text-2xl font-light tracking-tight text-foreground">Security Update</h1>
@@ -150,7 +150,7 @@ export default function NewPasswordPage() {
 
             <Suspense fallback={
                 <div className="flex items-center justify-center py-10">
-                    <Loader2 className="w-7 h-7 text-[#C5A059] dark:text-[#D4AF37] animate-spin" />
+                    <Loader2 className="w-7 h-7 text-[#ec4269] dark:text-[#D4AF37] animate-spin" />
                 </div>
             }>
                 <ResetPasswordForm />
@@ -159,7 +159,7 @@ export default function NewPasswordPage() {
             <div className="pt-5 border-t border-border text-center">
                 <Link
                     href="/auth/login"
-                    className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest hover:text-[#C5A059] dark:hover:text-[#D4AF37] transition-colors"
+                    className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest hover:text-[#ec4269] dark:hover:text-[#D4AF37] transition-colors"
                 >
                     ← Back to Login
                 </Link>

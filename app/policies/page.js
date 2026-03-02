@@ -6,6 +6,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 const defaultPolicies = [
     {
+        title: "Enterprise Use Only",
+        rules: "This product was created by Man Navlakha exclusively for enterprise use. Any unauthorized external access, personal use, or commercial redistribution of this system is strictly prohibited."
+    },
+    {
         title: "Data Privacy & Confidentiality",
         rules: "We take your data seriously. All data managed within our enterprise support system is strictly confidential, encrypted, and governed by applicable data protection laws. Employee information is only processed on an as-needed basis for IT resolutions."
     },
@@ -43,7 +47,7 @@ export default function PoliciesPage() {
                     </Link>
                     <h1 className="text-4xl md:text-5xl font-semibold tracking-tight text-foreground">Policies</h1>
                     <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-                        Read our overarching system policies outlining privacy, acceptable use, and standard operational guidelines.
+                        Read our overarching system policies outlining privacy, acceptable use, and standard operational guidelines. Please note that this product was created by Man Navlakha exclusively for EXCELLENT PUBLICITY use.
                     </p>
                 </div>
 

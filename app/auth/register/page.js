@@ -53,7 +53,7 @@ export default function RegisterPage() {
                 </div>
                 <Link
                     href="/auth/login"
-                    className="flex items-center justify-center w-full h-12 bg-[#C5A059] dark:bg-[#D4AF37] text-white dark:text-zinc-900 text-[10px] font-bold uppercase tracking-widest rounded-xl hover:opacity-90 transition-all active:scale-[0.98] shadow-lg shadow-[#C5A059]/20 dark:shadow-[#D4AF37]/20"
+                    className="flex items-center justify-center w-full h-12 bg-[#ec4269] dark:bg-[#D4AF37] text-white dark:text-zinc-900 text-[10px] font-bold uppercase tracking-widest rounded-xl hover:opacity-90 transition-all active:scale-[0.98] shadow-lg shadow-[#ec4269]/20 dark:shadow-[#D4AF37]/20"
                 >
                     Back to Login
                 </Link>
@@ -61,13 +61,13 @@ export default function RegisterPage() {
         );
     }
 
-    const inputClass = "w-full h-11 px-4 bg-background border border-border rounded-xl text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#C5A059]/60 dark:focus:border-[#D4AF37]/60 transition-all";
+    const inputClass = "w-full h-11 px-4 bg-background border border-border rounded-xl text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#ec4269]/60 dark:focus:border-[#D4AF37]/60 transition-all";
 
     return (
         <div className="space-y-7 animate-in fade-in duration-700">
             {/* Header */}
             <div className="text-center space-y-2">
-                <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-[#C5A059]/10 dark:bg-[#D4AF37]/10 border border-[#C5A059]/20 dark:border-[#D4AF37]/20 text-[#C5A059] dark:text-[#D4AF37] mx-auto mb-3">
+                <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-[#ec4269]/10 dark:bg-[#D4AF37]/10 border border-[#ec4269]/20 dark:border-[#D4AF37]/20 text-[#ec4269] dark:text-[#D4AF37] mx-auto mb-3">
                     <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
                     </svg>
@@ -110,7 +110,7 @@ export default function RegisterPage() {
                 <button
                     type="submit"
                     disabled={status === 'loading'}
-                    className="w-full h-12 bg-[#C5A059] dark:bg-[#D4AF37] text-white dark:text-zinc-900 text-[10px] font-bold uppercase tracking-widest rounded-xl hover:opacity-90 hover:scale-[1.01] transition-all active:scale-[0.98] disabled:opacity-50 shadow-lg shadow-[#C5A059]/20 dark:shadow-[#D4AF37]/20 flex items-center justify-center gap-2"
+                    className="w-full h-12 bg-[#ec4269] dark:bg-[#D4AF37] text-white dark:text-zinc-900 text-[10px] font-bold uppercase tracking-widest rounded-xl hover:opacity-90 hover:scale-[1.01] transition-all active:scale-[0.98] disabled:opacity-50 shadow-lg shadow-[#ec4269]/20 dark:shadow-[#D4AF37]/20 flex items-center justify-center gap-2"
                 >
                     {status === 'loading' ? (
                         <><Loader2 className="w-4 h-4 animate-spin" /> Submitting...</>
@@ -119,7 +119,7 @@ export default function RegisterPage() {
             </form>
 
             <div className="pt-5 border-t border-border text-center">
-                <Link href="/auth/login" className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest hover:text-[#C5A059] dark:hover:text-[#D4AF37] transition-colors">
+                <Link href="/auth/login" className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest hover:text-[#ec4269] dark:hover:text-[#D4AF37] transition-colors">
                     ← Back to Login
                 </Link>
             </div>

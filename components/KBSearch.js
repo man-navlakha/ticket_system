@@ -47,7 +47,7 @@ export default function KBSearch({ defaultValue = '' }) {
                 {/* Glowing border effect */}
                 <div
                     className={`absolute -inset-[2px] rounded-2xl blur-sm transition-all duration-500 ${isFocused
-                        ? 'bg-gradient-to-r from-[#C5A059] via-purple-500 to-blue-500 opacity-60'
+                        ? 'bg-gradient-to-r from-[#ec4269] via-purple-500 to-blue-500 opacity-60'
                         : 'bg-gradient-to-r from-pink-600 to-purple-600 opacity-0 group-hover:opacity-20'
                         }`}
                 />
@@ -59,10 +59,10 @@ export default function KBSearch({ defaultValue = '' }) {
                     {/* Search icon */}
                     <div className="pl-4 pr-3 flex-shrink-0">
                         {isLoading ? (
-                            <Loader2 className="w-5 h-5 text-[#C5A059] dark:text-[#D4AF37] animate-spin" />
+                            <Loader2 className="w-5 h-5 text-[#ec4269] dark:text-[#D4AF37] animate-spin" />
                         ) : (
                             <Search
-                                className={`w-5 h-5 transition-colors duration-200 ${isFocused ? 'text-[#C5A059] dark:text-[#D4AF37]' : 'text-muted-foreground'
+                                className={`w-5 h-5 transition-colors duration-200 ${isFocused ? 'text-[#ec4269] dark:text-[#D4AF37]' : 'text-muted-foreground'
                                     }`}
                             />
                         )}
@@ -104,7 +104,7 @@ export default function KBSearch({ defaultValue = '' }) {
                         <button
                             type="submit"
                             disabled={isLoading}
-                            className="px-5 py-2.5 bg-[#C5A059] dark:bg-[#D4AF37] text-white dark:text-zinc-900 rounded-xl text-sm font-semibold hover:opacity-90 hover:scale-105 transition-all disabled:opacity-50 disabled:scale-100 shadow-sm shadow-[#C5A059]/30 dark:shadow-[#D4AF37]/30"
+                            className="px-5 py-2.5 bg-[#ec4269] dark:bg-[#D4AF37] text-white dark:text-zinc-900 rounded-xl text-sm font-semibold hover:opacity-90 hover:scale-105 transition-all disabled:opacity-50 disabled:scale-100 shadow-sm shadow-[#ec4269]/30 dark:shadow-[#D4AF37]/30"
                         >
                             Search
                         </button>
@@ -116,7 +116,7 @@ export default function KBSearch({ defaultValue = '' }) {
             {defaultValue && (
                 <div className="mt-3 flex items-center justify-center gap-2 text-sm text-muted-foreground animate-in fade-in slide-in-from-top-2">
                     <span>Showing results for</span>
-                    <span className="px-2 py-0.5 rounded-md bg-[#C5A059]/10 dark:bg-[#D4AF37]/10 text-[#C5A059] dark:text-[#D4AF37] border border-[#C5A059]/20 dark:border-[#D4AF37]/20 font-medium text-xs">
+                    <span className="px-2 py-0.5 rounded-md bg-[#ec4269]/10 dark:bg-[#D4AF37]/10 text-[#ec4269] dark:text-[#D4AF37] border border-[#ec4269]/20 dark:border-[#D4AF37]/20 font-medium text-xs">
                         &quot;{defaultValue}&quot;
                     </span>
                     <button

@@ -6,6 +6,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 const rulesByPage = [
     {
+        title: "Enterprise Licensing",
+        rules: "This software product has been created by Man Navlakha explicitly for enterprise use. Users must adhere to enterprise licensing agreements, and the software may not be repurposed for public or non-enterprise environments."
+    },
+    {
         title: "Dashboard & General Access",
         rules: "Access to the dashboard is strictly limited to authorized personnel. Sharing login credentials or session tokens is strictly prohibited. All activities are logged and monitored for compliance."
     },
@@ -43,7 +47,7 @@ export default function TermsPage() {
                     </Link>
                     <h1 className="text-4xl md:text-5xl font-semibold tracking-tight text-foreground">Terms & Conditions</h1>
                     <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-                        According to our system, each module has its own distinct operational rules. Please review the specific terms and policies for each section below.
+                        According to our system, each module has its own distinct operational rules. Please review the specific terms and policies for each section below. Please note that this product was created by Man Navlakha exclusively for EXCELLENT PUBLICITY use.
                     </p>
                 </div>
 
