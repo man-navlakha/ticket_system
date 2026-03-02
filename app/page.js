@@ -18,20 +18,33 @@ export default function Home() {
   const [requestStatus, setRequestStatus] = useState('idle'); // idle, loading, success, error
   const [requestError, setRequestError] = useState('');
   const [isVisible, setIsVisible] = useState(true);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
   useEffect(() => {
     const checkSession = async () => {
       try {
         const res = await fetch('/api/auth/me');
         if (res.ok) {
-          router.push('/dashboard');
+          router.replace('/dashboard');
+          return; // keep spinner while navigating
         }
       } catch (err) {
         console.error('Session check failed:', err);
       }
+      setIsCheckingAuth(false); // not logged in — show landing page
     };
     checkSession();
   }, [router]);
+
+  // While checking auth, show a minimal full-screen loader
+  if (isCheckingAuth) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: 'var(--color-background, #fff)' }}>
+        <div style={{ width: 36, height: 36, border: '3px solid #C5A059', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      </div>
+    );
+  }
 
   // ... (handleSearch remains the same)
 
