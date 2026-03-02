@@ -19,7 +19,7 @@ export default function AuthLayout({ children }) {
                         <ThemeLogo />
                     </div>
                 </Link>
-                <ThemeToggle />
+
             </header>
 
             {/* Main centred card area */}
