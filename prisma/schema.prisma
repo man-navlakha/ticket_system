@@ -50,6 +50,8 @@ model Proposal {
   ticketId    String?
   ticket      Ticket?  @relation(fields: [ticketId], references: [id])
 
+  vendors     Json?
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }

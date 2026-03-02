@@ -61,7 +61,7 @@ export async function POST(request) {
         }
 
         const body = await request.json();
-        const { title, description, approverId } = body;
+        const { title, description, approverId, vendors } = body;
 
         if (!title || !description || !approverId) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -73,8 +73,7 @@ export async function POST(request) {
                 description,
                 createdById: user.id,
                 approverId,
-                createdById: user.id,
-                approverId,
+                vendors: vendors || null,
                 inventoryItemId: body.inventoryItemId || null,
                 ticketId: body.ticketId || null
             }

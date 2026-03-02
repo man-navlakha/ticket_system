@@ -4,7 +4,7 @@ import { getCurrentUser } from '@/lib/session';
 
 export async function GET(request) {
     const user = await getCurrentUser();
-    if (!user || user.role === 'USER') {
+    if (!user) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 

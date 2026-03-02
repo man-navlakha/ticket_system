@@ -16,6 +16,9 @@ export default function ProposalsPage() {
     const [selectedApprover, setSelectedApprover] = useState('');
     const [selectedInventory, setSelectedInventory] = useState('');
     const [ticketId, setTicketId] = useState('');
+    const [vendors, setVendors] = useState([{ name: '', customName: '', price: '' }]);
+    const [availableTickets, setAvailableTickets] = useState([]);
+    const [availableVendors, setAvailableVendors] = useState([]);
     const [submitting, setSubmitting] = useState(false);
 
     const [filter, setFilter] = useState('all');
@@ -24,6 +27,8 @@ export default function ProposalsPage() {
         fetchCurrentUser();
         fetchApprovers();
         fetchInventory();
+        fetchTickets();
+        fetchVendors();
     }, []);
 
     useEffect(() => {
@@ -75,6 +80,34 @@ export default function ProposalsPage() {
         }
     };
 
+    const addVendor = () => {
+        if (vendors.length < 10) setVendors([...vendors, { name: '', customName: '', price: '' }]);
+    };
+
+    const removeVendor = (index) => {
+        if (vendors.length > 1) setVendors(vendors.filter((_, i) => i !== index));
+    };
+
+    const fetchTickets = async () => {
+        try {
+            const res = await fetch('/api/tickets');
+            const data = await res.json();
+            if (res.ok) setAvailableTickets(data);
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const fetchVendors = async () => {
+        try {
+            const res = await fetch('/api/vendors');
+            const data = await res.json();
+            if (res.ok) setAvailableVendors(data);
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
     const handleCreate = async (e) => {
         e.preventDefault();
         setSubmitting(true);
@@ -87,7 +120,11 @@ export default function ProposalsPage() {
                     description,
                     approverId: selectedApprover,
                     inventoryItemId: selectedInventory,
-                    ticketId: ticketId || null
+                    ticketId: ticketId || null,
+                    vendors: vendors.filter(v => v.name).map(v => ({
+                        vendorName: v.name === 'custom' ? v.customName : v.name,
+                        price: v.price ? parseFloat(v.price) : null
+                    }))
                 })
             });
             if (res.ok) {
@@ -97,6 +134,7 @@ export default function ProposalsPage() {
                 setSelectedApprover('');
                 setSelectedInventory('');
                 setTicketId('');
+                setVendors([{ name: '', customName: '', price: '' }]);
                 fetchProposals();
             }
         } finally {
@@ -194,7 +232,14 @@ export default function ProposalsPage() {
                                 />
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                <InputField label="Linked Ticket (Optional)" value={ticketId} onChange={e => setTicketId(e.target.value)} placeholder="TICKET-UUID" />
+                                <InputField label="Linked Ticket (Optional)" type="select" value={ticketId} onChange={e => setTicketId(e.target.value)}>
+                                    <option value="" className="bg-background">SELECT TICKET...</option>
+                                    {Array.isArray(availableTickets) && availableTickets.map(t => (
+                                        <option key={t.id} value={t.id} className="bg-background">
+                                            {t.title}
+                                        </option>
+                                    ))}
+                                </InputField>
                                 <InputField label="Associated Asset" type="select" value={selectedInventory} onChange={e => setSelectedInventory(e.target.value)}>
                                     <option value="" className="bg-background">SELECT ASSET...</option>
                                     {Array.isArray(inventoryItems) && inventoryItems.map(item => (
@@ -203,6 +248,46 @@ export default function ProposalsPage() {
                                         </option>
                                     ))}
                                 </InputField>
+                            </div>
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between pb-2 border-b border-border">
+                                    <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Vendors & Pricing (Max 10)</label>
+                                    <button type="button" onClick={addVendor} disabled={vendors.length >= 10} className="text-[10px] font-bold text-primary tracking-widest uppercase hover:text-primary/80 disabled:opacity-50">+ ADD VENDOR</button>
+                                </div>
+                                {vendors.map((v, i) => (
+                                    <div key={i} className="grid grid-cols-1 md:grid-cols-2 gap-8 p-6 border border-dashed border-border/50 rounded-2xl relative bg-muted/5">
+                                        {vendors.length > 1 && (
+                                            <button type="button" onClick={() => removeVendor(i)} className="absolute -top-3 -right-3 w-8 h-8 bg-destructive text-destructive-foreground rounded-full flex items-center justify-center text-xs shadow-xl active:scale-95 transition-all">✕</button>
+                                        )}
+                                        <div className="space-y-4">
+                                            <InputField label={`Vendor ${i + 1}`} type="select" value={v.name} onChange={e => {
+                                                const newV = [...vendors];
+                                                newV[i].name = e.target.value;
+                                                setVendors(newV);
+                                            }}>
+                                                <option value="" className="bg-background">SELECT VENDOR...</option>
+                                                {Array.isArray(availableVendors) && availableVendors.map(vendor => (
+                                                    <option key={vendor.id} value={vendor.name} className="bg-background">
+                                                        {vendor.name}
+                                                    </option>
+                                                ))}
+                                                <option value="custom" className="bg-background">Other (Custom Vendor)</option>
+                                            </InputField>
+                                            {v.name === 'custom' && (
+                                                <InputField label="Custom Vendor Name" value={v.customName} onChange={e => {
+                                                    const newV = [...vendors];
+                                                    newV[i].customName = e.target.value;
+                                                    setVendors(newV);
+                                                }} placeholder="e.g. Local Shop" required />
+                                            )}
+                                        </div>
+                                        <InputField label={`Price ${i + 1} (Estimated)`} type="number" name="price" value={v.price} onChange={e => {
+                                            const newV = [...vendors];
+                                            newV[i].price = e.target.value;
+                                            setVendors(newV);
+                                        }} placeholder="Enter numeric price" />
+                                    </div>
+                                ))}
                             </div>
                             <InputField label="Decision Approver" type="select" required value={selectedApprover} onChange={e => setSelectedApprover(e.target.value)}>
                                 <option value="" className="bg-background">SELECT AUTHORITY...</option>
@@ -234,13 +319,21 @@ function ProposalCard({ proposal, currentUser, refresh }) {
     const [processing, setProcessing] = useState(false);
 
     const handleStatus = async (status) => {
-        if (!confirm(`Confirm ${status.toLowerCase()} of action?`)) return;
+        const actionVerb = status === 'APPROVED' ? 'approve' : 'deny';
+        const adminComment = prompt(`Please provide a mandatory note to ${actionVerb} this proposal:`);
+
+        if (!adminComment) {
+            alert('A note is mandatory to proceed.');
+            return;
+        }
+
+        if (!confirm(`Are you sure you want to ${actionVerb} this proposal?`)) return;
         setProcessing(true);
         try {
             const res = await fetch(`/api/proposals/${proposal.id}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ status })
+                body: JSON.stringify({ status, adminComment })
             });
             if (res.ok) refresh();
         } finally {
@@ -263,10 +356,41 @@ function ProposalCard({ proposal, currentUser, refresh }) {
                     <p className="text-sm text-muted-foreground leading-relaxed max-w-2xl">{proposal.description}</p>
                 </div>
 
-                <div className="flex flex-wrap gap-3">
-                    {proposal.ticket && <MetaTag label="TICKET" value={proposal.ticket.title} />}
-                    {proposal.inventoryItem && <MetaTag label="ASSET" value={`${proposal.inventoryItem.brand} ${proposal.inventoryItem.model}`} color="blue" />}
+                <div className="flex flex-col gap-[2px] rounded-xl overflow-hidden border border-border/50">
+                    {proposal.ticket && (
+                        <div className="flex flex-col sm:flex-row sm:items-center bg-muted/20 p-3 hover:bg-muted/40 transition-colors">
+                            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] w-32 shrink-0">TICKET</span>
+                            <span className="text-sm font-medium text-foreground">{proposal.ticket.title} | ID:<a href={`/dashboard/${proposal.ticket.id}`}> {proposal.ticket.id.slice(0, 8)}</a></span>
+                        </div>
+                    )}
+                    {proposal.inventoryItem && (
+                        <div className="flex flex-col sm:flex-row sm:items-center bg-muted/20 p-3 hover:bg-muted/40 transition-colors">
+                            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] w-32 shrink-0">ASSET</span>
+                            <span className="text-sm font-medium text-blue-500">{proposal.inventoryItem.brand} {proposal.inventoryItem.model}</span>
+                        </div>
+                    )}
+                    {Array.isArray(proposal.vendors) && proposal.vendors.map((v, i) => (
+                        <div key={i} className="flex flex-col sm:flex-row sm:items-center bg-muted/20 p-3 hover:bg-muted/40 transition-colors">
+                            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] w-32 shrink-0">VENDOR {i + 1}</span>
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6 flex-1">
+                                <span className="text-sm font-medium text-foreground min-w-[150px]">{v.vendorName || 'Unknown Vendor'}</span>
+                                {v.price != null && (
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">PRICE</span>
+                                        <span className="text-sm font-bold text-green-500">₹{v.price}</span>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    ))}
                 </div>
+
+                {proposal.adminComment && (
+                    <div className="p-4 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-600 dark:text-orange-400">
+                        <span className="text-[10px] font-bold uppercase tracking-widest block mb-1">Authority Note</span>
+                        <p className="text-sm font-medium">{proposal.adminComment}</p>
+                    </div>
+                )}
 
                 <div className="flex items-center justify-between pt-6 border-t border-border">
                     <div className="flex items-center gap-6">
@@ -306,7 +430,8 @@ function StatusBadge({ status }) {
 function MetaTag({ label, value, color = 'gray' }) {
     const colors = {
         gray: 'bg-muted/50 border-border text-muted-foreground',
-        blue: 'bg-blue-500/5 border-blue-500/20 text-blue-500'
+        blue: 'bg-blue-500/5 border-blue-500/20 text-blue-500',
+        green: 'bg-green-500/5 border-green-500/20 text-green-500'
     };
     return (
         <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-lg border text-[10px] font-bold ${colors[color]}`}>
