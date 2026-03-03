@@ -29,6 +29,9 @@ export default function DashboardSearch(props) {
     const debouncedText = useDebounce(text, 500);
 
     useEffect(() => {
+        const currentSearch = searchParams.get('search') || '';
+        if (debouncedText === currentSearch) return;
+
         // Create new params
         const params = new URLSearchParams(searchParams);
         if (debouncedText) {
