@@ -71,7 +71,7 @@ export default function LoginPage() {
 
                     <div>
                         <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground mb-2">
-                            Welcome Back
+                            Welcome Back!!
                         </h1>
                         <p className="text-muted-foreground text-sm font-medium leading-relaxed">
                             Log in to secure ticketing infrastructure.
