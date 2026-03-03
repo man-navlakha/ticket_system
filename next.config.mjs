@@ -1,9 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  /* config options here */
   reactCompiler: true,
+  // Use a static ID or a build-time environment variable
   generateBuildId: async () => {
-    return 'man-support-desk-v2-' + Date.now();
+    return process.env.COMMIT_REF || 'man-support-desk-v2';
   },
 };
 
