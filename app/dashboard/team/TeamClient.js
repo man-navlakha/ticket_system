@@ -58,11 +58,18 @@ export default function TeamClient({ user }) {
 
             const data = await res.json();
             if (res.ok) {
-                setFeedback({ type: 'success', msg: `Invitation${emails.length > 1 ? 's' : ''} sent successfully.` });
-                setInviteEmail('');
+                if (data.results && data.results.failed && data.results.failed.length > 0) {
+                    const failedEmails = data.results.failed.map(f => f.email).join(', ');
+                    setFeedback({ type: 'error', msg: `Failed for: ${failedEmails}` });
+                } else {
+                    setFeedback({ type: 'success', msg: `Invitation${emails.length > 1 ? 's' : ''} sent successfully.` });
+                    setInviteEmail('');
+                }
             } else {
                 setFeedback({ type: 'error', msg: data.error || 'Failed to send invite.' });
             }
+        } catch (error) {
+            setFeedback({ type: 'error', msg: error.message || 'An unexpected error occurred.' });
         } finally {
             setLoading(false);
         }
@@ -281,6 +288,12 @@ export default function TeamClient({ user }) {
                                     {loading ? 'TRANSMITTING...' : 'DISPATCH INVITATIONS'}
                                     <span className="opacity-40">→</span>
                                 </button>
+
+                                {feedback.msg && feedback.type === 'error' && (
+                                    <div className="p-4 rounded-xl border border-destructive/20 bg-destructive/10 text-destructive text-xs font-bold uppercase tracking-widest text-center animate-in fade-in slide-in-from-bottom-2">
+                                        ⚠ {feedback.msg}
+                                    </div>
+                                )}
                             </form>
                         </div>
                     </div>
