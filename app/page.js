@@ -106,7 +106,7 @@ export default function Home() {
     '@context': 'https://schema.org',
     '@type': 'SoftwareApplication',
     name: "Man's Support Desk",
-    image: "https://man-support-desk.netlify.app/favicon.png",
+    image: "https://it.excellentpublicity.com//favicon.png",
     description: "Enterprise IT support ticketing system with integrated inventory management and automation.",
     applicationCategory: "BusinessApplication",
     operatingSystem: "Web",

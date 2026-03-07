@@ -36,7 +36,7 @@ export const metadata = {
   openGraph: {
     title: "Man's Support Desk | Enterprise IT Ticketing System",
     description: "Streamline your IT support infrastructure with automated workflows and smart inventory tracking. Built for modern teams.",
-    url: 'https://man-support-desk.netlify.app',
+    url: 'https://it.excellentpublicity.com/',
     siteName: "Man's Support Desk",
     images: [
       {
