@@ -97,7 +97,7 @@ export default async function InventoryPage() {
                 />
                 <StatCard
                     label="Portfolio Value"
-                    value={`$${items.reduce((acc, curr) => acc + (curr.price || 0), 0).toLocaleString()}`}
+                    value={`₹${items.reduce((acc, curr) => acc + (curr.price || 0), 0).toLocaleString()}`}
                     color="text-green-500"
                 />
             </div>

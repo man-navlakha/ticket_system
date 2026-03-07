@@ -60,18 +60,29 @@ export async function POST(request) {
             inventoryItemId: inventoryItem.id,
             userName: json.userName || null,
             reportDate: json.reportDate || null,
-            systemName: json.systemName || null,
-            manufacturer: json.manufacturer || null,
-            model: json.model || null,
-            serialNumber: json.serialNumber || null,
-            windowsEdition: json.windowsEdition || null,
-            windowsVersion: json.windowsVersion || null,
-            buildNumber: json.buildNumber || null,
-            processor: json.processor || null,
-            totalRamGB: json.totalRamGB !== undefined ? parseFloat(json.totalRamGB) : null,
-            ramDetails: json.ramDetails || null,
-            gpuDetails: json.gpuDetails || null,
-            diskDetails: json.diskDetails || null
+            // systemInfo
+            systemName: json.systemInfo?.systemName || null,
+            manufacturer: json.systemInfo?.manufacturer || null,
+            model: json.systemInfo?.model || null,
+            serialNumber: json.systemInfo?.serialNumber || null,
+            processor: json.systemInfo?.processor || null,
+            totalRamGB: json.systemInfo?.totalRamGB !== undefined ? parseFloat(json.systemInfo.totalRamGB) : null,
+            // windowsInfo
+            windowsEdition: json.windowsInfo?.edition || null,
+            windowsVersion: json.windowsInfo?.version || null,
+            buildNumber: json.windowsInfo?.buildNumber || null,
+            licenseStatus: json.windowsInfo?.licenseStatus || null,
+            // officeInfo
+            officeLicense: json.officeInfo?.licenseStatus || null,
+            // batteryInfo
+            batteryHealth: json.batteryInfo?.healthPercent || null,
+            batteryRating: json.batteryInfo?.rating || null,
+            // hardware arrays
+            ramDetails: json.hardware?.ramDetails || null,
+            gpuDetails: json.hardware?.gpuDetails || null,
+            diskDetails: json.hardware?.diskDetails || null,
+            // installed software
+            installedSoftware: json.installedSoftware || null
         };
 
         const newReport = await prisma.systemReport.upsert({

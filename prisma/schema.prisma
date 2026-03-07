@@ -175,6 +175,7 @@ model InventoryItem {
   maintenanceRecords MaintenanceRecord[]
   auditLogs       AuditLog[]
   systemReport    SystemReport?
+  rentalPayments  RentalPayment[]
 }
 
 enum Condition {
@@ -215,16 +216,24 @@ model SystemReport {
   manufacturer    String?
   model           String?
   serialNumber    String?
+  processor       String?
+  totalRamGB      Float?
+  // OS Details
   windowsEdition  String?
   windowsVersion  String?
   buildNumber     String?
-  processor       String?
-  totalRamGB      Float?
+  licenseStatus   String?
+
+  // Additional Software and Hardware Info
+  officeLicense   String?
+  batteryHealth   String?
+  batteryRating   String?
 
   // Details as JSON to store arrays of objects
   ramDetails      Json?    // e.g. [{ BankLabel, Manufacturer, Speed, Capacity }]
   gpuDetails      Json?    // e.g. [{ Name, DriverVersion, Memory }]
   diskDetails     Json?    // e.g. [{ Model, InterfaceType, Size }]
+  installedSoftware Json?  // e.g. [{ DisplayName, DisplayVersion }]
 
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
@@ -415,4 +424,29 @@ model Vendor {
 enum VendorStatus {
   ACTIVE
   INACTIVE
+}
+
+model Expense {
+  id               String   @id @default(uuid())
+  product          String
+  price            Float
+  vendor           String?
+  purchaseDate     DateTime?
+  note             String?  @db.Text
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model RentalPayment {
+  id              String        @id @default(uuid())
+  inventoryItemId String
+  inventoryItem   InventoryItem @relation(fields: [inventoryItemId], references: [id], onDelete: Cascade)
+  
+  month           Int           // 1 to 12
+  year            Int           
+  amount          Float
+  paidAt          DateTime      @default(now())
+  
+  @@unique([inventoryItemId, month, year])
+  @@index([inventoryItemId])
 }
