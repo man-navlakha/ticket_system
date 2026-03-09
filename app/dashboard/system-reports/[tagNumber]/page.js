@@ -14,7 +14,7 @@ export default async function SystemReportDetailPage({ params }) {
     const user = await getCurrentUser();
 
     if (!user) {
-        redirect('/login');
+        redirect('/auth/login');
     }
 
     const { tagNumber } = await params;

@@ -57,6 +57,8 @@ export const metadata = {
   },
 };
 
+import { Toaster } from "sonner";
+
 export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
@@ -70,6 +72,7 @@ export default function RootLayout({ children }) {
           disableTransitionOnChange
         >
           {children}
+          <Toaster position="top-right" richColors />
         </ThemeProvider>
         <Script id="microsoft-clarity" strategy="afterInteractive">
           {`

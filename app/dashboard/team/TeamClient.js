@@ -1,51 +1,47 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown, Check } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { ChevronDown, Check, Users, MailOpen, UserRoundX, Inbox } from 'lucide-react';
+import { toast } from 'sonner';
+import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 
-export default function TeamClient({ user }) {
+export default function TeamClient({ user, initialUsers = [], initialRequests = [] }) {
+    const router = useRouter();
     const [activeTab, setActiveTab] = useState('members');
-    const [users, setUsers] = useState([]);
-    const [requests, setRequests] = useState([]);
+    const [users, setUsers] = useState(initialUsers);
+    const [requests, setRequests] = useState(initialRequests);
     const [loading, setLoading] = useState(false);
     const [search, setSearch] = useState('');
     const [inviteEmail, setInviteEmail] = useState('');
     const [inviteRole, setInviteRole] = useState('USER');
-    const [feedback, setFeedback] = useState({ type: '', msg: '' });
     const [roleFilter, setRoleFilter] = useState('ALL');
     const [statusFilter, setStatusFilter] = useState('ALL');
 
     useEffect(() => {
-        if (activeTab === 'members') fetchUsers();
-        if (activeTab === 'requests') fetchRequests();
-    }, [activeTab]);
+        setUsers(initialUsers);
+    }, [initialUsers]);
 
-    const fetchUsers = async () => {
-        setLoading(true);
-        try {
-            const res = await fetch('/api/admin/users');
-            if (res.ok) setUsers(await res.json());
-        } finally {
-            setLoading(false);
-        }
-    };
+    useEffect(() => {
+        setRequests(initialRequests);
+    }, [initialRequests]);
 
     const fetchRequests = async () => {
-        setLoading(true);
         try {
             const res = await fetch('/api/access-requests');
-            if (res.ok) setRequests(await res.json());
-        } finally {
-            setLoading(false);
+            if (res.ok) {
+                const data = await res.json();
+                setRequests(data);
+            }
+        } catch (error) {
+            console.error("Failed to fetch requests", error);
         }
     };
 
     const handleInvite = async (e) => {
         e.preventDefault();
         setLoading(true);
-        setFeedback({ type: '', msg: '' });
 
         try {
             const emails = inviteEmail.split(',').map(e => e.trim()).filter(Boolean);
@@ -62,16 +58,17 @@ export default function TeamClient({ user }) {
             if (res.ok) {
                 if (data.results && data.results.failed && data.results.failed.length > 0) {
                     const failedEmails = data.results.failed.map(f => f.email).join(', ');
-                    setFeedback({ type: 'error', msg: `Failed for: ${failedEmails}` });
+                    toast.error(`Failed for: ${failedEmails}`);
                 } else {
-                    setFeedback({ type: 'success', msg: `Invitation${emails.length > 1 ? 's' : ''} sent successfully.` });
+                    toast.success(`Invitation${emails.length > 1 ? 's' : ''} sent successfully.`);
                     setInviteEmail('');
+                    router.refresh();
                 }
             } else {
-                setFeedback({ type: 'error', msg: data.error || 'Failed to send invite.' });
+                toast.error(data.error || 'Failed to send invite.');
             }
         } catch (error) {
-            setFeedback({ type: 'error', msg: error.message || 'An unexpected error occurred.' });
+            toast.error(error.message || 'An unexpected error occurred.');
         } finally {
             setLoading(false);
         }
@@ -93,10 +90,21 @@ export default function TeamClient({ user }) {
             }
 
             if (res.ok) {
-                if (type === 'user-delete') setUsers(users.filter(u => u.id !== id));
-                if (type === 'request') fetchRequests();
-                setFeedback({ type: 'success', msg: 'Operation executed.' });
+                if (type === 'user-delete') {
+                    setUsers(users.filter(u => u.id !== id));
+                    toast.success('User revoked successfully.');
+                }
+                if (type === 'request') {
+                    await fetchRequests();
+                    toast.success(`Request ${action === 'APPROVE' ? 'approved' : 'denied'} successfully.`);
+                    if (action === 'APPROVE') router.refresh(); // Fetch new users list
+                }
+            } else {
+                const data = await res.json();
+                toast.error(data.error || 'Operation failed.');
             }
+        } catch (error) {
+            toast.error('An unexpected error occurred.');
         } finally {
             setLoading(false);
         }
@@ -114,6 +122,8 @@ export default function TeamClient({ user }) {
         return matchesSearch && matchesRole && matchesStatus;
     });
 
+    const isFiltersActive = search || roleFilter !== 'ALL' || statusFilter !== 'ALL';
+
     return (
         <div className="space-y-12 animate-in fade-in duration-700">
             {/* Header */}
@@ -129,11 +139,6 @@ export default function TeamClient({ user }) {
                         <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground">Team</h1>
                         <p className="text-lg text-muted-foreground max-w-2xl leading-relaxed"> Orchestrate enterprise access, roles, and administrative governance. </p>
                     </div>
-                    {feedback.msg && (
-                        <div className={`h-12 flex items-center px-6 rounded-full text-xs font-bold uppercase tracking-widest border transition-all animate-in slide-in-from-right-4 ${feedback.type === 'success' ? 'bg-green-500/10 text-green-500 border-green-500/20' : 'bg-red-500/10 text-red-500 border-red-500/20'}`}>
-                            {feedback.msg}
-                        </div>
-                    )}
                 </div>
             </div>
 
@@ -163,7 +168,7 @@ export default function TeamClient({ user }) {
                                 <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none opacity-50 text-muted-foreground">🔍</div>
                             </div>
 
-                            {(search || roleFilter !== 'ALL' || statusFilter !== 'ALL') && (
+                            {isFiltersActive && (
                                 <div className="flex items-center gap-4">
                                     <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Filters:</span>
                                     <div className="flex flex-wrap gap-2">
@@ -207,13 +212,40 @@ export default function TeamClient({ user }) {
                                 </thead>
                                 <tbody className="divide-y divide-border">
                                     {filteredUsers.length === 0 ? (
-                                        <tr><td colSpan="4" className="p-12 text-center text-[10px] font-bold text-muted-foreground uppercase tracking-widest italic">No matching records synchronization.</td></tr>
+                                        <tr>
+                                            <td colSpan="4">
+                                                <div className="flex flex-col items-center justify-center p-16 text-center space-y-4">
+                                                    <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center">
+                                                        <UserRoundX className="w-8 h-8 text-muted-foreground/50" />
+                                                    </div>
+                                                    <div className="space-y-1 max-w-[250px]">
+                                                        <p className="text-sm font-bold text-foreground">No personnel found</p>
+                                                        <p className="text-xs text-muted-foreground leading-relaxed">We couldn't find any team members matching your current criteria.</p>
+                                                    </div>
+                                                    {isFiltersActive ? (
+                                                        <button
+                                                            onClick={() => { setSearch(''); setRoleFilter('ALL'); setStatusFilter('ALL'); }}
+                                                            className="h-9 px-4 rounded-xl bg-primary text-primary-foreground text-[10px] font-bold uppercase tracking-widest transition-all active:scale-95"
+                                                        >
+                                                            Clear Filters
+                                                        </button>
+                                                    ) : (
+                                                        <button
+                                                            onClick={() => setActiveTab('invite')}
+                                                            className="h-9 px-4 rounded-xl bg-primary text-primary-foreground text-[10px] font-bold uppercase tracking-widest transition-all active:scale-95"
+                                                        >
+                                                            Provision Access
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </td>
+                                        </tr>
                                     ) : (
                                         filteredUsers.map(u => (
                                             <tr key={u.id} className="hover:bg-muted/20 transition-colors group">
                                                 <td className="px-8 py-6">
                                                     <div className="flex items-center gap-4">
-                                                        <div className="w-10 h-10 rounded-full bg-muted border border-border flex items-center justify-center text-xs font-bold text-muted-foreground transition-transform group-hover:scale-110">
+                                                        <div className="w-10 h-10 rounded-full bg-muted border border-border flex items-center justify-center text-xs font-bold text-muted-foreground transition-transform group-hover:scale-110 shadow-sm">
                                                             {u.username?.[0]?.toUpperCase()}
                                                         </div>
                                                         <div>
@@ -290,12 +322,6 @@ export default function TeamClient({ user }) {
                                     {loading ? 'TRANSMITTING...' : 'DISPATCH INVITATIONS'}
                                     <span className="opacity-40">→</span>
                                 </button>
-
-                                {feedback.msg && feedback.type === 'error' && (
-                                    <div className="p-4 rounded-xl border border-destructive/20 bg-destructive/10 text-destructive text-xs font-bold uppercase tracking-widest text-center animate-in fade-in slide-in-from-bottom-2">
-                                        ⚠ {feedback.msg}
-                                    </div>
-                                )}
                             </form>
                         </div>
                     </div>
@@ -314,7 +340,19 @@ export default function TeamClient({ user }) {
                             </thead>
                             <tbody className="divide-y divide-border">
                                 {requests.length === 0 ? (
-                                    <tr><td colSpan="4" className="p-12 text-center text-[10px] font-bold text-muted-foreground uppercase tracking-widest italic">No pending entrance requests detected.</td></tr>
+                                    <tr>
+                                        <td colSpan="4">
+                                            <div className="flex flex-col items-center justify-center p-16 text-center space-y-4">
+                                                <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center">
+                                                    <Inbox className="w-8 h-8 text-muted-foreground/50" />
+                                                </div>
+                                                <div className="space-y-1">
+                                                    <p className="text-sm font-bold text-foreground">Zero pending requests</p>
+                                                    <p className="text-xs text-muted-foreground leading-relaxed">All infrastructure access vectors are currently clear.</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
                                 ) : (
                                     requests.map(req => (
                                         <tr key={req.id} className="hover:bg-muted/20 transition-colors">
@@ -390,72 +428,56 @@ function ActionBtn({ label, color, onClick }) {
         </button>
     );
 }
+
 function HeaderFilter({ label, value, onChange, options }) {
-    const [isOpen, setIsOpen] = useState(false);
-    const dropdownRef = useRef(null);
-
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-                setIsOpen(false);
-            }
-        };
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
-
     const selectedLabel = value === 'ALL' ? label : value;
 
     return (
-        <div className="relative" ref={dropdownRef}>
-            <button
-                type="button"
-                onClick={() => setIsOpen(!isOpen)}
-                className={`flex items-center gap-2 group/filter transition-colors ${isOpen ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
-            >
-                <span className="text-[10px] font-black uppercase tracking-widest">{selectedLabel}</span>
-                <ChevronDown className={`w-3 h-3 transition-transform duration-300 ${isOpen ? 'rotate-180 text-foreground' : 'text-muted-foreground group-hover/filter:text-foreground'}`} />
-                {value !== 'ALL' && (
-                    <div className="absolute -top-1.5 -right-3 w-1.5 h-1.5 bg-primary rounded-full shadow-[0_0_8px_rgba(var(--primary),0.6)]" />
-                )}
-            </button>
+        <DropdownMenu.Root>
+            <DropdownMenu.Trigger asChild>
+                <button
+                    type="button"
+                    className="flex items-center gap-2 group/filter transition-colors text-muted-foreground hover:text-foreground data-[state=open]:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
+                >
+                    <span className="text-[10px] font-black uppercase tracking-widest">{selectedLabel}</span>
+                    <ChevronDown className="w-3 h-3 transition-transform duration-300 group-data-[state=open]/filter:rotate-180 text-muted-foreground group-hover/filter:text-foreground" />
+                    {value !== 'ALL' && (
+                        <div className="absolute -top-1.5 -right-3 w-1.5 h-1.5 bg-primary rounded-full shadow-[0_0_8px_rgba(var(--primary),0.6)]" />
+                    )}
+                </button>
+            </DropdownMenu.Trigger>
 
-            <AnimatePresence>
-                {isOpen && (
-                    <motion.div
-                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                        transition={{ duration: 0.2, ease: "easeOut" }}
-                        className="absolute right-0 top-full mt-4 w-48 bg-card/80 backdrop-blur-xl border border-border/50 rounded-2xl shadow-2xl overflow-hidden z-50 p-2"
+            <DropdownMenu.Portal>
+                <DropdownMenu.Content
+                    className="min-w-[192px] bg-card/95 backdrop-blur-xl border border-border/50 rounded-2xl shadow-2xl p-2 z-50 animate-in fade-in zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out data-[state=closed]:zoom-out-95"
+                    sideOffset={12}
+                    align="start"
+                >
+                    <DropdownMenu.Item
+                        onClick={() => onChange('ALL')}
+                        className={`w-full text-left px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-between transition-all cursor-pointer outline-none focus:bg-muted/50 ${value === 'ALL' ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'}`}
                     >
-                        {/* Header for ALL */}
-                        <button
-                            onClick={() => { onChange('ALL'); setIsOpen(false); }}
-                            className={`w-full text-left px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-between transition-all ${value === 'ALL' ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'}`}
+                        <span>{label} (ALL)</span>
+                        {value === 'ALL' && <Check className="w-3.5 h-3.5" />}
+                    </DropdownMenu.Item>
+
+                    <DropdownMenu.Separator className="h-px bg-border/50 my-1 mx-2" />
+
+                    {options.map(opt => (
+                        <DropdownMenu.Item
+                            key={opt}
+                            onClick={() => onChange(opt)}
+                            className={`w-full text-left px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-between transition-all cursor-pointer outline-none focus:bg-muted/50 group ${value === opt ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'}`}
                         >
-                            <span>{label}</span>
-                            {value === 'ALL' && <Check className="w-3.5 h-3.5" />}
-                        </button>
-
-                        <div className="h-px bg-border/50 my-1 mx-2" />
-
-                        {options.map(opt => (
-                            <button
-                                key={opt}
-                                onClick={() => { onChange(opt); setIsOpen(false); }}
-                                className={`w-full text-left px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-between transition-all group ${value === opt ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'}`}
-                            >
-                                <span className={`transition-transform duration-200 ${value !== opt ? 'group-hover:translate-x-1' : ''}`}>
-                                    {opt}
-                                </span>
-                                {value === opt && <Check className="w-3.5 h-3.5" />}
-                            </button>
-                        ))}
-                    </motion.div>
-                )}
-            </AnimatePresence>
-        </div>
+                            <span className={`transition-transform duration-200 ${value !== opt ? 'group-hover:translate-x-1' : ''}`}>
+                                {opt}
+                            </span>
+                            {value === opt && <Check className="w-3.5 h-3.5" />}
+                        </DropdownMenu.Item>
+                    ))}
+                </DropdownMenu.Content>
+            </DropdownMenu.Portal>
+        </DropdownMenu.Root>
     );
 }
 
@@ -463,7 +485,7 @@ function FilterTag({ label, onClear }) {
     return (
         <div className="flex items-center gap-1.5 px-2 py-1 bg-muted/50 border border-border rounded-lg text-[9px] font-bold uppercase tracking-widest text-muted-foreground">
             <span>{label}</span>
-            <button onClick={onClear} className="hover:text-foreground transition-colors">✕</button>
+            <button onClick={onClear} className="hover:text-foreground transition-colors focus:outline-none focus:ring-1 focus:ring-ring rounded-full">✕</button>
         </div>
     );
 }

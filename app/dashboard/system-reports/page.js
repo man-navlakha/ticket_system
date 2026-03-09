@@ -11,7 +11,7 @@ export default async function SystemReportsPage() {
     const user = await getCurrentUser();
 
     if (!user) {
-        redirect('/login');
+        redirect('/auth/login');
     }
 
     return <SystemReportsClient user={user} />;
