@@ -1,7 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronDown, Check } from 'lucide-react';
 
 export default function TeamClient({ user }) {
     const [activeTab, setActiveTab] = useState('members');
@@ -389,27 +391,70 @@ function ActionBtn({ label, color, onClick }) {
     );
 }
 function HeaderFilter({ label, value, onChange, options }) {
+    const [isOpen, setIsOpen] = useState(false);
+    const dropdownRef = useRef(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setIsOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    const selectedLabel = value === 'ALL' ? label : value;
+
     return (
-        <div className="relative group/filter flex items-center gap-2">
-            <select
-                value={value}
-                onChange={(e) => onChange(e.target.value)}
-                className="appearance-none bg-transparent pr-4 text-[10px] font-black text-muted-foreground uppercase tracking-widest focus:outline-none cursor-pointer hover:text-foreground transition-colors"
-                title={`Filter by ${label}`}
+        <div className="relative" ref={dropdownRef}>
+            <button
+                type="button"
+                onClick={() => setIsOpen(!isOpen)}
+                className={`flex items-center gap-2 group/filter transition-colors ${isOpen ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
             >
-                <option value="ALL" className="bg-background text-foreground">{label}</option>
-                {options.map(opt => (
-                    <option key={opt} value={opt} className="bg-background text-foreground">{opt}</option>
-                ))}
-            </select>
-            <div className="absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground group-hover/filter:text-foreground transition-colors">
-                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 9l-7 7-7-7" />
-                </svg>
-            </div>
-            {value !== 'ALL' && (
-                <div className="absolute -top-1.5 -right-2 w-1.5 h-1.5 bg-primary rounded-full" />
-            )}
+                <span className="text-[10px] font-black uppercase tracking-widest">{selectedLabel}</span>
+                <ChevronDown className={`w-3 h-3 transition-transform duration-300 ${isOpen ? 'rotate-180 text-foreground' : 'text-muted-foreground group-hover/filter:text-foreground'}`} />
+                {value !== 'ALL' && (
+                    <div className="absolute -top-1.5 -right-3 w-1.5 h-1.5 bg-primary rounded-full shadow-[0_0_8px_rgba(var(--primary),0.6)]" />
+                )}
+            </button>
+
+            <AnimatePresence>
+                {isOpen && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                        transition={{ duration: 0.2, ease: "easeOut" }}
+                        className="absolute right-0 top-full mt-4 w-48 bg-card/80 backdrop-blur-xl border border-border/50 rounded-2xl shadow-2xl overflow-hidden z-50 p-2"
+                    >
+                        {/* Header for ALL */}
+                        <button
+                            onClick={() => { onChange('ALL'); setIsOpen(false); }}
+                            className={`w-full text-left px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-between transition-all ${value === 'ALL' ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'}`}
+                        >
+                            <span>{label}</span>
+                            {value === 'ALL' && <Check className="w-3.5 h-3.5" />}
+                        </button>
+
+                        <div className="h-px bg-border/50 my-1 mx-2" />
+
+                        {options.map(opt => (
+                            <button
+                                key={opt}
+                                onClick={() => { onChange(opt); setIsOpen(false); }}
+                                className={`w-full text-left px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-between transition-all group ${value === opt ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'}`}
+                            >
+                                <span className={`transition-transform duration-200 ${value !== opt ? 'group-hover:translate-x-1' : ''}`}>
+                                    {opt}
+                                </span>
+                                {value === opt && <Check className="w-3.5 h-3.5" />}
+                            </button>
+                        ))}
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }
