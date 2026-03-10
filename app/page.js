@@ -3,10 +3,15 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import FloatingLines from '@/components/FloatingLines';
 import LandingNav from '@/components/LandingNav';
 import Footer from '@/components/Footer';
-import { Brain, WandSparkles, Users, ShelvingUnit } from 'lucide-react';
+import dynamic from 'next/dynamic';
+
+const FloatingLines = dynamic(() => import('@/components/FloatingLines'), { ssr: false });
+const Brain = dynamic(() => import('lucide-react').then(mod => mod.Brain), { ssr: false });
+const WandSparkles = dynamic(() => import('lucide-react').then(mod => mod.WandSparkles), { ssr: false });
+const Users = dynamic(() => import('lucide-react').then(mod => mod.Users), { ssr: false });
+const ShelvingUnit = dynamic(() => import('lucide-react').then(mod => mod.ShelvingUnit), { ssr: false });
 
 export default function Home() {
   const router = useRouter();
@@ -18,33 +23,6 @@ export default function Home() {
   const [requestStatus, setRequestStatus] = useState('idle'); // idle, loading, success, error
   const [requestError, setRequestError] = useState('');
   const [isVisible, setIsVisible] = useState(true);
-  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
-
-  useEffect(() => {
-    const checkSession = async () => {
-      try {
-        const res = await fetch('/api/auth/me');
-        if (res.ok) {
-          router.replace('/dashboard');
-          return; // keep spinner while navigating
-        }
-      } catch (err) {
-        console.error('Session check failed:', err);
-      }
-      setIsCheckingAuth(false); // not logged in — show landing page
-    };
-    checkSession();
-  }, [router]);
-
-  // While checking auth, show a minimal full-screen loader
-  if (isCheckingAuth) {
-    return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: 'var(--color-background, #fff)' }}>
-        <div style={{ width: 36, height: 36, border: '3px solid #ec4269', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
-        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-      </div>
-    );
-  }
 
 
   const handleRequestAccess = async (e) => {
