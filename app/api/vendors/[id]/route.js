@@ -8,9 +8,11 @@ export async function GET(request, { params }) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { id } = await params;
+
     try {
         const vendor = await prisma.vendor.findUnique({
-            where: { id: params.id }
+            where: { id }
         });
 
         if (!vendor) return NextResponse.json({ error: 'Vendor not found' }, { status: 404 });
@@ -27,6 +29,8 @@ export async function PUT(request, { params }) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { id } = await params;
+
     try {
         const json = await request.json();
         const { name, category, contactName, email, phone, website, address, gstin, note, status } = json;
@@ -36,7 +40,7 @@ export async function PUT(request, { params }) {
         }
 
         const vendor = await prisma.vendor.update({
-            where: { id: params.id },
+            where: { id },
             data: {
                 name,
                 category,
@@ -64,9 +68,11 @@ export async function DELETE(request, { params }) {
         return NextResponse.json({ error: 'Unauthorized. Only admins can delete vendors.' }, { status: 401 });
     }
 
+    const { id } = await params;
+
     try {
         await prisma.vendor.delete({
-            where: { id: params.id }
+            where: { id }
         });
         return NextResponse.json({ success: true });
     } catch (error) {

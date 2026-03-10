@@ -11,24 +11,54 @@ export async function PUT(req) {
     }
 
     try {
-        const { userId, username } = await req.json();
+        const { userId, username, email, role, status, phoneNumber } = await req.json();
 
-        if (!userId || !username) {
-            return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+        if (!userId) {
+            return NextResponse.json({ error: 'Missing user ID' }, { status: 400 });
         }
 
-        // Check if username is taken
-        const existing = await prisma.user.findUnique({
-            where: { username }
-        });
+        const dataToUpdate = {};
 
-        if (existing && existing.id !== userId) {
-            return NextResponse.json({ error: 'Username already taken' }, { status: 400 });
+        if (username) {
+            // Check if username is taken
+            const existingUsername = await prisma.user.findFirst({
+                where: { username, id: { not: userId } }
+            });
+            if (existingUsername) {
+                return NextResponse.json({ error: 'Username already taken' }, { status: 400 });
+            }
+            dataToUpdate.username = username;
+        }
+
+        if (email) {
+            // Check if email is taken
+            const existingEmail = await prisma.user.findFirst({
+                where: { email, id: { not: userId } }
+            });
+            if (existingEmail) {
+                return NextResponse.json({ error: 'Email already taken' }, { status: 400 });
+            }
+            dataToUpdate.email = email;
+        }
+
+        if (role) {
+            if (user.role !== 'ADMIN' && role === 'ADMIN') {
+                return NextResponse.json({ error: 'Agents cannot assign Admin role' }, { status: 403 });
+            }
+            dataToUpdate.role = role;
+        }
+
+        if (status) {
+            dataToUpdate.status = status;
+        }
+
+        if (phoneNumber !== undefined) {
+            dataToUpdate.phoneNumber = phoneNumber;
         }
 
         const updatedUser = await prisma.user.update({
             where: { id: userId },
-            data: { username }
+            data: dataToUpdate
         });
 
         return NextResponse.json(updatedUser);

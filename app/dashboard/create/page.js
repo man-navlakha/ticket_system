@@ -193,6 +193,8 @@ function CreateTicketForm() {
                                 onChange={(e) => setSelectedComponent(e.target.value)}
                             >
                                 <option value="" className="bg-background text-foreground">ENTIRE SYSTEM</option>
+                                <option value="Webcam" className="bg-background text-foreground">Webcam</option>
+                                <option value="power cable and adapter" className="bg-background text-foreground">Power Cable and Adapter</option>
                                 <option value="Display / Screen" className="bg-background text-foreground">Display / Screen</option>
                                 <option value="Keyboard / Trackpad" className="bg-background text-foreground">Keyboard / Trackpad</option>
                                 <option value="Battery / Power" className="bg-background text-foreground">Battery / Power</option>

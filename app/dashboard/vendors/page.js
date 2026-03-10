@@ -6,7 +6,7 @@ import VendorManager from "@/components/VendorManager";
 
 export const dynamic = 'force-dynamic';
 export const metadata = {
-    title: "Vendor Management",
+    title: "Vendors & Suppliers",
     description: "Manage enterprise vendors, suppliers, and service providers.",
 };
 
@@ -25,60 +25,70 @@ export default async function VendorsPage() {
         updatedAt: v.updatedAt?.toISOString()
     }));
 
+    const activeCount = vendors.filter(v => v.status === 'ACTIVE').length;
+
     return (
-        <div className="space-y-12 animate-in fade-in duration-700">
-            {/* Header */}
-            <div className="space-y-4">
-                <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-widest">
-                    <Link href="/dashboard" className="hover:text-foreground transition-colors">Workspace</Link>
-                    <span>/</span>
-                    <span className="text-foreground">Vendors</span>
+        <div className="min-h-screen animate-in fade-in duration-500">
+
+            {/* ── Page header ──────────────────────────────────── */}
+            <div className="mb-8">
+
+                {/* Breadcrumb */}
+                <div className="flex items-center gap-2 text-[11px] font-medium text-muted-foreground uppercase tracking-widest mb-5">
+                    <Link href="/dashboard" className="hover:text-foreground transition-colors">Dashboard</Link>
+                    <span className="opacity-30">/</span>
+                    <span className="text-foreground">Vendors &amp; Suppliers</span>
                 </div>
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-4">
-                    <div className="space-y-1">
-                        <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground">Vendors & Suppliers</h1>
-                        <p className="text-lg text-muted-foreground max-w-2xl leading-relaxed">
-                            Maintain your relationships, contacts, and billing profiles for third-party services.
+
+                {/* Title row */}
+                <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+                    <div className="space-y-1.5">
+                        <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-muted/60 border border-border text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                            Procurement
+                        </div>
+                        <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">
+                            Vendors &amp; Suppliers
+                        </h1>
+                        <p className="text-sm text-muted-foreground max-w-lg">
+                            Centralise your supplier relationships, billing contacts, and service provider records.
                         </p>
+                    </div>
+
+                    {/* Header stats */}
+                    <div className="flex items-center gap-5 shrink-0">
+                        <MiniStat label="Total" value={vendors.length} />
+                        <div className="w-px h-8 bg-border" />
+                        <MiniStat label="Active" value={activeCount} accent />
+                        <div className="w-px h-8 bg-border" />
+                        <MiniStat label="Inactive" value={vendors.length - activeCount} />
                     </div>
                 </div>
             </div>
 
-            {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <StatCard label="Total Vendors" value={vendors.length.toString()} color="text-foreground" />
-                <StatCard 
-                    label="Active Partners" 
-                    value={vendors.filter(v => v.status === 'ACTIVE').length.toString()} 
-                    color="text-green-500" 
-                />
-                <StatCard 
-                    label="Inactive / Pending" 
-                    value={vendors.filter(v => v.status === 'INACTIVE').length.toString()} 
-                    color="text-amber-500" 
-                />
-            </div>
-
-            {/* Main Manager Component */}
-            <div className="bg-card border border-border rounded-[2rem] overflow-hidden shadow-sm">
+            {/* ── Main card ────────────────────────────────────── */}
+            <div className="bg-card border border-border rounded-2xl shadow-sm overflow-hidden">
                 <VendorManager initialVendors={serializedVendors} userRole={user.role} />
             </div>
-            
-            <div className="pt-8 border-t border-border text-center">
-                <p className="text-sm text-muted-foreground">
-                    Need additional vendor vetting processes? <Link href="/dashboard/help" className="text-foreground hover:underline font-medium">Contact Procurement</Link>.
-                </p>
-            </div>
+
+            {/* ── Footer note ──────────────────────────────────── */}
+            <p className="mt-6 text-center text-xs text-muted-foreground/60">
+                Need vetting or onboarding help?{' '}
+                <Link href="/dashboard/help" className="text-muted-foreground hover:text-foreground transition-colors underline underline-offset-2">
+                    Contact Procurement
+                </Link>
+            </p>
         </div>
     );
 }
 
-function StatCard({ label, value, color }) {
+function MiniStat({ label, value, accent }) {
     return (
-        <div className="group p-6 rounded-[2rem] border border-border bg-card hover:bg-muted/30 transition-all relative overflow-hidden shadow-sm">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-foreground/5 to-transparent -mr-12 -mt-12 rounded-full group-hover:scale-150 transition-transform duration-700" />
-            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3">{label}</p>
-            <h3 className={`text-3xl font-bold tracking-tighter ${color}`}>{value}</h3>
+        <div className="flex flex-col items-end">
+            <span className={`text-xl font-bold tracking-tighter tabular-nums ${accent ? 'text-emerald-500' : 'text-foreground'}`}>
+                {value}
+            </span>
+            <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">{label}</span>
         </div>
     );
 }
