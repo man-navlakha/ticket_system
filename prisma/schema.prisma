@@ -428,17 +428,6 @@ enum VendorStatus {
   INACTIVE
 }
 
-model Expense {
-  id               String   @id @default(uuid())
-  product          String
-  price            Float
-  vendor           String?
-  purchaseDate     DateTime?
-  note             String?  @db.Text
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-}
-
 model RentalPayment {
   id              String        @id @default(uuid())
   inventoryItemId String
