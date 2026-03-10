@@ -116,20 +116,95 @@ export default function ArticleDetailPage() {
                 </header>
 
                 {/* Content */}
-                <div className="prose prose-neutral dark:prose-invert max-w-none 
-                    prose-headings:font-bold prose-headings:tracking-tight
-                    prose-p:leading-relaxed prose-p:text-lg
-                    prose-pre:bg-card prose-pre:border prose-pre:border-border prose-pre:rounded-xl
-                    prose-code:text-primary prose-code:bg-secondary prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm
-                    prose-li:text-lg
-                    prose-hr:border-border
-                    ">
+                <div className="max-w-none text-foreground">
                     <ReactMarkdown
                         remarkPlugins={[remarkGfm]}
                         components={{
-                            h1: ({ node, ...props }) => <h1 className="text-3xl mt-12 mb-6" {...props} />,
-                            h2: ({ node, ...props }) => <h2 className="text-2xl mt-10 mb-5" {...props} />,
-                            h3: ({ node, ...props }) => <h3 className="text-xl mt-8 mb-4" {...props} />,
+                            h1: ({ node, ...props }) => (
+                                <h1 className="text-3xl font-bold tracking-tight text-foreground mt-12 mb-5 pb-3 border-b border-border" {...props} />
+                            ),
+                            h2: ({ node, ...props }) => (
+                                <h2 className="text-2xl font-bold tracking-tight text-foreground mt-10 mb-4 pb-2 border-b border-border/50" {...props} />
+                            ),
+                            h3: ({ node, ...props }) => (
+                                <h3 className="text-xl font-semibold text-foreground mt-8 mb-3" {...props} />
+                            ),
+                            h4: ({ node, ...props }) => (
+                                <h4 className="text-lg font-semibold text-foreground mt-6 mb-2" {...props} />
+                            ),
+                            h5: ({ node, ...props }) => (
+                                <h5 className="text-base font-semibold text-foreground mt-5 mb-2" {...props} />
+                            ),
+                            h6: ({ node, ...props }) => (
+                                <h6 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mt-5 mb-2" {...props} />
+                            ),
+                            p: ({ node, ...props }) => (
+                                <p className="text-base leading-7 text-foreground/90 mb-5" {...props} />
+                            ),
+                            ul: ({ node, ...props }) => (
+                                <ul className="list-disc list-outside pl-6 mb-5 space-y-1.5 text-foreground/90" {...props} />
+                            ),
+                            ol: ({ node, ...props }) => (
+                                <ol className="list-decimal list-outside pl-6 mb-5 space-y-1.5 text-foreground/90" {...props} />
+                            ),
+                            li: ({ node, ...props }) => (
+                                <li className="text-base leading-7" {...props} />
+                            ),
+                            a: ({ node, ...props }) => (
+                                <a className="text-blue-500 dark:text-blue-400 underline underline-offset-4 hover:text-blue-400 dark:hover:text-blue-300 transition-colors font-medium" target="_blank" rel="noopener noreferrer" {...props} />
+                            ),
+                            strong: ({ node, ...props }) => (
+                                <strong className="font-semibold text-foreground" {...props} />
+                            ),
+                            em: ({ node, ...props }) => (
+                                <em className="italic text-foreground/80" {...props} />
+                            ),
+                            blockquote: ({ node, ...props }) => (
+                                <blockquote className="border-l-4 border-primary/40 bg-muted/30 pl-5 pr-4 py-3 my-6 rounded-r-lg italic text-muted-foreground text-base leading-7" {...props} />
+                            ),
+                            code: ({ node, inline, className, children, ...props }) => {
+                                if (inline) {
+                                    return (
+                                        <code className="bg-muted text-foreground font-mono text-[0.85em] px-1.5 py-0.5 rounded border border-border" {...props}>
+                                            {children}
+                                        </code>
+                                    );
+                                }
+                                return (
+                                    <code className="block font-mono text-sm text-foreground" {...props}>
+                                        {children}
+                                    </code>
+                                );
+                            },
+                            pre: ({ node, ...props }) => (
+                                <pre className="bg-card border border-border rounded-xl p-5 my-6 overflow-x-auto text-sm font-mono leading-relaxed text-foreground" {...props} />
+                            ),
+                            hr: ({ node, ...props }) => (
+                                <hr className="border-border my-10" {...props} />
+                            ),
+                            table: ({ node, ...props }) => (
+                                <div className="overflow-x-auto my-6 rounded-xl border border-border">
+                                    <table className="w-full text-sm text-left" {...props} />
+                                </div>
+                            ),
+                            thead: ({ node, ...props }) => (
+                                <thead className="bg-muted/50 border-b border-border" {...props} />
+                            ),
+                            tbody: ({ node, ...props }) => (
+                                <tbody className="divide-y divide-border" {...props} />
+                            ),
+                            tr: ({ node, ...props }) => (
+                                <tr className="hover:bg-muted/30 transition-colors" {...props} />
+                            ),
+                            th: ({ node, ...props }) => (
+                                <th className="px-4 py-3 font-semibold text-foreground text-xs uppercase tracking-wider" {...props} />
+                            ),
+                            td: ({ node, ...props }) => (
+                                <td className="px-4 py-3 text-foreground/85" {...props} />
+                            ),
+                            img: ({ node, ...props }) => (
+                                <img className="rounded-xl border border-border max-w-full my-6 shadow-sm" {...props} />
+                            ),
                         }}
                     >
                         {article.content}
