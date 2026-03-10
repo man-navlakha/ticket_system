@@ -46,7 +46,6 @@ export default function Home() {
     );
   }
 
-  // ... (handleSearch remains the same)
 
   const handleRequestAccess = async (e) => {
     e.preventDefault();
@@ -106,7 +105,7 @@ export default function Home() {
     '@context': 'https://schema.org',
     '@type': 'SoftwareApplication',
     name: "Man's Support Desk",
-    image: "https://it.excellentpublicity.com//favicon.png",
+    image: "https://it.excellentpublicity.com/favicon.png",
     description: "Enterprise IT support ticketing system with integrated inventory management and automation.",
     applicationCategory: "BusinessApplication",
     operatingSystem: "Web",
