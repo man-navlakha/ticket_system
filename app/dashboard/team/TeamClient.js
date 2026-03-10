@@ -7,6 +7,22 @@ import { ChevronDown, Check, Users, MailOpen, UserRoundX, Inbox, Download, Searc
 import { toast } from 'sonner';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 
+const DEPT_LABELS = {
+    accounts: 'Accounts',
+    design: 'Design',
+    it: 'IT',
+    hr: 'HR',
+    coders: 'Coders',
+    management: 'Management',
+    sales: 'Sales',
+    marketing: 'Marketing',
+    support: 'Support',
+    operations: 'Operations',
+    finance: 'Finance',
+    legal: 'Legal',
+    other: 'Other',
+};
+
 export default function TeamClient({ user, initialUsers = [], initialRequests = [] }) {
     const router = useRouter();
     const [activeTab, setActiveTab] = useState('members');
@@ -244,6 +260,7 @@ export default function TeamClient({ user, initialUsers = [], initialRequests = 
                                     <thead>
                                         <tr className="border-b border-border bg-muted/30">
                                             <th className="px-6 py-4 text-xs font-bold text-muted-foreground uppercase tracking-wider">Personnel</th>
+                                            <th className="px-6 py-4 text-xs font-bold text-muted-foreground uppercase tracking-wider">Department</th>
                                             <th className="px-6 py-4">
                                                 <HeaderFilter
                                                     label="Role"
@@ -266,7 +283,7 @@ export default function TeamClient({ user, initialUsers = [], initialRequests = 
                                     <tbody className="divide-y divide-border/50">
                                         {filteredUsers.length === 0 ? (
                                             <tr>
-                                                <td colSpan="4">
+                                                <td colSpan="5">
                                                     <div className="flex flex-col items-center justify-center p-12 text-center space-y-4">
                                                         <div className="w-12 h-12 rounded-full bg-muted/50 flex items-center justify-center">
                                                             <UserRoundX className="w-6 h-6 text-muted-foreground/50" />
@@ -306,6 +323,15 @@ export default function TeamClient({ user, initialUsers = [], initialRequests = 
                                                                 <p className="text-xs text-muted-foreground">{u.email}</p>
                                                             </div>
                                                         </div>
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        {u.department ? (
+                                                            <span className="text-xs font-medium bg-muted/60 border border-border px-2.5 py-0.5 rounded-full text-foreground whitespace-nowrap">
+                                                                {DEPT_LABELS[u.department] || u.department}
+                                                            </span>
+                                                        ) : (
+                                                            <span className="text-[10px] text-muted-foreground/50 italic">—</span>
+                                                        )}
                                                     </td>
                                                     <td className="px-6 py-4"><RoleBadge role={u.role} /></td>
                                                     <td className="px-6 py-4"><StatusIndicator status={u.status} /></td>

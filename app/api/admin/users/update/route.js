@@ -11,7 +11,7 @@ export async function PUT(req) {
     }
 
     try {
-        const { userId, username, email, role, status, phoneNumber } = await req.json();
+        const { userId, username, email, role, status, phoneNumber, department, location } = await req.json();
 
         if (!userId) {
             return NextResponse.json({ error: 'Missing user ID' }, { status: 400 });
@@ -54,6 +54,14 @@ export async function PUT(req) {
 
         if (phoneNumber !== undefined) {
             dataToUpdate.phoneNumber = phoneNumber;
+        }
+
+        if (department !== undefined) {
+            dataToUpdate.department = department;
+        }
+
+        if (location !== undefined) {
+            dataToUpdate.location = location;
         }
 
         const updatedUser = await prisma.user.update({

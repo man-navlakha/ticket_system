@@ -4,7 +4,7 @@ import { hashPassword } from '@/lib/auth';
 
 export async function POST(req) {
     try {
-        const { token, username, phoneNumber, password } = await req.json();
+        const { token, username, phoneNumber, department, location, password } = await req.json();
 
         if (!token || !password || !username) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -31,7 +31,9 @@ export async function POST(req) {
             where: { id: user.id },
             data: {
                 username,
-                phoneNumber, // Add phone number
+                phoneNumber,
+                department: department || null,
+                location: location || null,
                 password: hashedPassword,
                 inviteToken: null,
                 inviteExpires: null,

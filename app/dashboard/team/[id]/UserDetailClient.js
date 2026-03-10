@@ -3,8 +3,26 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Edit, Save, Activity, BookOpen, Package, MessageSquare, Ticket, FileText, Phone } from 'lucide-react';
+import { ArrowLeft, Edit, Save, Activity, BookOpen, Package, MessageSquare, Ticket, FileText, Phone, MapPin, Building2 } from 'lucide-react';
 import { toast } from 'sonner';
+
+const DEPARTMENTS = [
+    { value: 'accounts', label: 'Accounts Team' },
+    { value: 'design', label: 'Designer Team' },
+    { value: 'it', label: 'IT Team' },
+    { value: 'hr', label: 'HR' },
+    { value: 'coders', label: 'Coders' },
+    { value: 'management', label: 'Main Sir — CEO / Founder / Partner' },
+    { value: 'sales', label: 'Sales Team' },
+    { value: 'marketing', label: 'Marketing Team' },
+    { value: 'support', label: 'Support Team' },
+    { value: 'operations', label: 'Operations' },
+    { value: 'finance', label: 'Finance' },
+    { value: 'legal', label: 'Legal' },
+    { value: 'other', label: 'Other' },
+];
+
+const DEPT_LABEL = (v) => DEPARTMENTS.find(d => d.value === v)?.label || v;
 
 export default function UserDetailClient({ currentUser, targetUser }) {
     const router = useRouter();
@@ -16,6 +34,8 @@ export default function UserDetailClient({ currentUser, targetUser }) {
         username: targetUser.username || '',
         email: targetUser.email || '',
         phoneNumber: targetUser.phoneNumber || '',
+        department: targetUser.department || '',
+        location: targetUser.location || '',
         role: targetUser.role || 'USER',
         status: targetUser.status || 'ACTIVE'
     });
@@ -125,7 +145,30 @@ export default function UserDetailClient({ currentUser, targetUser }) {
                                     value={form.phoneNumber}
                                     onChange={(e) => setForm({ ...form, phoneNumber: e.target.value })}
                                     className="w-full h-11 bg-background border border-border rounded-xl px-4 text-sm text-foreground focus:outline-none focus:border-primary transition-all"
-                                    placeholder="+1 (555) 000-0000"
+                                    placeholder="+91 98765 43210"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Department</label>
+                                <select
+                                    value={form.department}
+                                    onChange={(e) => setForm({ ...form, department: e.target.value })}
+                                    className="w-full h-11 bg-background border border-border rounded-xl px-4 text-sm text-foreground focus:outline-none focus:border-primary transition-all"
+                                >
+                                    <option value="">— Not set —</option>
+                                    {DEPARTMENTS.map(d => (
+                                        <option key={d.value} value={d.value}>{d.label}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Location / Office</label>
+                                <input
+                                    type="text"
+                                    value={form.location}
+                                    onChange={(e) => setForm({ ...form, location: e.target.value })}
+                                    className="w-full h-11 bg-background border border-border rounded-xl px-4 text-sm text-foreground focus:outline-none focus:border-primary transition-all"
+                                    placeholder="e.g. Building 2, Floor 3"
                                 />
                             </div>
                             <div className="space-y-2">
@@ -152,7 +195,7 @@ export default function UserDetailClient({ currentUser, targetUser }) {
                                     <option value="PENDING">PENDING</option>
                                 </select>
                             </div>
-                            <div className="flex items-end lg:col-span-1">
+                            <div className="flex items-end">
                                 <button
                                     type="submit"
                                     disabled={loading}
@@ -167,10 +210,26 @@ export default function UserDetailClient({ currentUser, targetUser }) {
                 )}
 
                 {/* Info Display if not editing */}
-                {!isEditing && targetUser.phoneNumber && (
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Phone className="w-4 h-4" />
-                        <span className="font-medium">{targetUser.phoneNumber}</span>
+                {!isEditing && (targetUser.phoneNumber || targetUser.department || targetUser.location) && (
+                    <div className="flex flex-wrap items-center gap-4">
+                        {targetUser.phoneNumber && (
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                <Phone className="w-4 h-4" />
+                                <span className="font-medium">{targetUser.phoneNumber}</span>
+                            </div>
+                        )}
+                        {targetUser.department && (
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                <Building2 className="w-4 h-4" />
+                                <span className="font-medium">{DEPT_LABEL(targetUser.department)}</span>
+                            </div>
+                        )}
+                        {targetUser.location && (
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                <MapPin className="w-4 h-4" />
+                                <span className="font-medium">{targetUser.location}</span>
+                            </div>
+                        )}
                     </div>
                 )}
 

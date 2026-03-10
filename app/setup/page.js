@@ -1,12 +1,28 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import FloatingLines from '@/components/FloatingLines';
 import { ThemeToggle } from '@/components/theme-toggle';
-import { Eye, EyeOff, Loader2, CheckCircle2, XCircle } from 'lucide-react';
+import { Eye, EyeOff, Loader2, CheckCircle2, XCircle, ChevronDown } from 'lucide-react';
+
+// ── Department options ─────────────────────────────────────────────────────────
+export const DEPARTMENTS = [
+    { value: 'accounts', label: 'Accounts Team' },
+    { value: 'design', label: 'Designer Team' },
+    { value: 'it', label: 'IT Team' },
+    { value: 'hr', label: 'HR' },
+    { value: 'coders', label: 'Coders' },
+    { value: 'management', label: 'Main Sir — CEO / Founder / Partner' },
+    { value: 'sales', label: 'Sales Team' },
+    { value: 'marketing', label: 'Marketing Team' },
+    { value: 'support', label: 'Support Team' },
+    { value: 'operations', label: 'Operations' },
+    { value: 'finance', label: 'Finance' },
+    { value: 'legal', label: 'Legal' },
+    { value: 'other', label: 'Other' },
+];
 
 // ── Input component ────────────────────────────────────────────────────────────
 function InputField({ label, type = 'text', ...props }) {
@@ -47,6 +63,8 @@ function SetupForm() {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState(false);
     const [acceptedTerms, setAcceptedTerms] = useState(false);
+    const [department, setDepartment] = useState('');
+    const [location, setLocation] = useState('');
 
     async function onSubmit(e) {
         e.preventDefault();
@@ -60,6 +78,7 @@ function SetupForm() {
         const phoneNumber = formData.get('phoneNumber');
         const password = formData.get('password');
         const confirmPassword = formData.get('confirmPassword');
+        const locationVal = formData.get('location');
 
         if (password !== confirmPassword) { setError('Passwords do not match'); setLoading(false); return; }
 
@@ -67,7 +86,7 @@ function SetupForm() {
             const res = await fetch('/api/auth/setup', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ token, username, phoneNumber, password }),
+                body: JSON.stringify({ token, username, phoneNumber, department, location: locationVal, password }),
             });
 
             if (!res.ok) {
@@ -146,7 +165,30 @@ function SetupForm() {
 
                 <div className="space-y-4">
                     <InputField label="Workspace Identity" name="username" placeholder="Display Name / Handle" type="text" required />
-                    <InputField label="Phone Number" name="phoneNumber" placeholder="+1 (555) 000-0000" type="tel" required />
+                    <InputField label="Phone Number" name="phoneNumber" placeholder="+91 98765 43210" type="tel" required />
+
+                    {/* Department */}
+                    <div className="space-y-1.5">
+                        <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground ml-1">Department</label>
+                        <div className="relative">
+                            <select
+                                value={department}
+                                onChange={(e) => setDepartment(e.target.value)}
+                                className="w-full h-12 px-4 pr-10 bg-background border border-border rounded-xl text-sm text-foreground appearance-none focus:outline-none focus:border-[#ec4269]/60 dark:focus:border-[#D4AF37]/60 transition-all cursor-pointer"
+                                required
+                            >
+                                <option value="">Select department...</option>
+                                {DEPARTMENTS.map(d => (
+                                    <option key={d.value} value={d.value}>{d.label}</option>
+                                ))}
+                            </select>
+                            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+                        </div>
+                    </div>
+
+                    {/* Location */}
+                    <InputField label="Location / Office" name="location" placeholder="e.g. Building 2, Floor 3" type="text" />
+
                     <InputField label="Access Password" name="password" type="password" placeholder="••••••••" required />
                     <InputField label="Verify Password" name="confirmPassword" type="password" placeholder="••••••••" required />
                 </div>
@@ -198,8 +240,6 @@ function SetupForm() {
 export default function SetupAccountPage() {
     return (
         <div className="min-h-screen flex flex-col bg-background text-foreground font-sans selection:bg-primary/20 transition-colors duration-300 relative overflow-hidden">
-            <FloatingLines />
-
             {/* Background glow */}
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[500px] bg-blue-500/10 dark:bg-blue-500/5 blur-[120px] rounded-full -z-10 pointer-events-none" />
             <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-[#ec4269]/10 dark:bg-[#D4AF37]/5 blur-[100px] rounded-full -z-10 pointer-events-none" />

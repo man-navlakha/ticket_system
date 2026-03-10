@@ -5,6 +5,22 @@ import Image from 'next/image';
 import Link from 'next/link';
 import LogoutButton from '@/components/LogoutButton';
 
+const DEPARTMENT_LABELS = {
+    accounts: 'Accounts Team',
+    design: 'Designer Team',
+    it: 'IT Team',
+    hr: 'HR',
+    coders: 'Coders',
+    management: 'Main Sir — CEO / Founder / Partner',
+    sales: 'Sales Team',
+    marketing: 'Marketing Team',
+    support: 'Support Team',
+    operations: 'Operations',
+    finance: 'Finance',
+    legal: 'Legal',
+    other: 'Other',
+};
+
 export default function ProfileClient({ user }) {
     const [activeTab, setActiveTab] = useState('overview');
 
@@ -31,13 +47,27 @@ export default function ProfileClient({ user }) {
                                 </span>
                             )}
                         </div>
-
                     </div>
 
                     <div className="space-y-4">
                         <div className="space-y-1">
                             <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground">{user.username}</h1>
                             <p className="text-lg text-muted-foreground font-mono tracking-tight">{user.email}</p>
+                            {/* Department & Location badges */}
+                            {(user.department || user.location) && (
+                                <div className="flex items-center gap-2 mt-1 flex-wrap">
+                                    {user.department && (
+                                        <span className="text-xs font-medium bg-muted/60 border border-border px-2.5 py-0.5 rounded-full text-foreground">
+                                            {DEPARTMENT_LABELS[user.department] || user.department}
+                                        </span>
+                                    )}
+                                    {user.location && (
+                                        <span className="text-xs font-medium bg-muted/60 border border-border px-2.5 py-0.5 rounded-full text-muted-foreground">
+                                            {user.location}
+                                        </span>
+                                    )}
+                                </div>
+                            )}
                         </div>
                         <div className="flex items-center justify-center md:justify-start gap-3">
                             <Badge text={user.role} />
@@ -47,7 +77,6 @@ export default function ProfileClient({ user }) {
                 </div>
 
                 <div className="flex items-center gap-4">
-
                     <LogoutButton className="h-11 px-6 bg-muted border border-border text-foreground text-sm font-bold rounded-full hover:bg-muted/80 transition-all flex items-center justify-center" />
                 </div>
             </div>
@@ -99,6 +128,11 @@ export default function ProfileClient({ user }) {
                             <InfoRow label="Employee ID" value={user.id.slice(0, 12)} isMono />
                             <InfoRow label="Authorized Role" value={user.role} />
                             <InfoRow label="Security Status" value={user.status} color={user.status === 'ACTIVE' ? 'text-green-500' : 'text-red-500'} />
+                            {user.phoneNumber && <InfoRow label="Phone" value={user.phoneNumber} isMono />}
+                            {user.department && (
+                                <InfoRow label="Department" value={DEPARTMENT_LABELS[user.department] || user.department} />
+                            )}
+                            {user.location && <InfoRow label="Location" value={user.location} />}
                         </div>
                     </Section>
 
