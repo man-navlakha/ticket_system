@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { jwtVerify } from 'jose';
 
-const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET || 'supersecretrefreshkey';
+const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET;
 
 export async function middleware(request) {
     const { pathname } = request.nextUrl;
@@ -18,6 +18,11 @@ export async function middleware(request) {
     }
 
     try {
+        // If secret is not configured, skip the redirect check (fail safe → show landing page)
+        if (!REFRESH_TOKEN_SECRET) {
+            return NextResponse.next();
+        }
+
         // Verify the JWT at the edge (no DB call needed)
         const secret = new TextEncoder().encode(REFRESH_TOKEN_SECRET);
         await jwtVerify(refreshToken, secret);

@@ -227,13 +227,105 @@ export default function Home() {
                       <span className="text-xs text-muted-foreground capitalize">{ticketData.status.replace('_', ' ').toLowerCase()}</span>
                     </div>
                   </div>
-                  <span className="text-xs font-mono border border-border px-2 py-1 rounded text-muted-foreground">{ticketData.priority}</span>
                 </div>
                 <div className="text-xs text-muted-foreground pt-4 border-t border-border flex justify-between">
-                  <span>Updated {new Date(ticketData.updatedAt || ticketData.createdAt).toLocaleDateString()}</span>
+                  <span>Updated {new Date(ticketData.updatedAt).toLocaleDateString()}</span>
                 </div>
               </div>
             )}
+          </div>
+        </section>
+
+        {/* How to Create a Ticket — Bento Grid */}
+        <section className="py-32 px-4 sm:px-6 lg:px-8 bg-background border-b border-border">
+          <div className="max-w-7xl mx-auto">
+            <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-center mb-4 text-foreground">
+              Raise a ticket in <br /><span className="text-[#ec4269] dark:text-[#D4AF37]">four simple steps.</span>
+            </h2>
+            <p className="text-center text-muted-foreground text-base mb-20 max-w-xl mx-auto">
+              From issue to resolution — our guided flow gets your request in front of the right people instantly.
+            </p>
+
+            <div className="grid grid-cols-1 md:grid-cols-3">
+
+              {/* Step 1 — Large Card */}
+              <div className="md:col-span-2 p-8 rounded-tl-3xl border-t border-l border-border bg-card hover:border-foreground/20 transition-colors relative overflow-hidden group">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 blur-[80px] rounded-full group-hover:bg-blue-500/20 transition-all duration-500" />
+                <div className="relative z-10">
+                  <span className="text-[11px] font-mono font-bold text-[#ec4269] dark:text-[#D4AF37] uppercase tracking-widest mb-4 block">Step 01</span>
+                  <div className="w-12 h-12 rounded-lg bg-muted/80 backdrop-blur-sm shadow-inner border border-border flex items-center justify-center mb-6 text-[#ec4269] dark:text-[#D4AF37]">
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                  </div>
+                  <h3 className="text-xl font-semibold text-foreground mb-3">Describe Your Issue</h3>
+                  <p className="text-muted-foreground leading-relaxed max-w-md">
+                    Write a clear title and description of the problem. Attach screenshots or files to give our team full context from the start.
+                  </p>
+                  <div className="mt-6 flex flex-wrap gap-2">
+                    {['Title', 'Description', 'Attachments'].map(tag => (
+                      <span key={tag} className="text-xs font-mono px-2.5 py-1 rounded-full border border-border text-muted-foreground bg-muted/50">{tag}</span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Step 2 — Small Card */}
+              <div className="p-8 rounded-tr-3xl border-t border-r border-border bg-card hover:border-foreground/20 transition-colors relative overflow-hidden group">
+                <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-purple-500/10 to-transparent opacity-50 group-hover:opacity-100 transition-opacity" />
+                <div className="relative z-10">
+                  <span className="text-[11px] font-mono font-bold text-[#ec4269] dark:text-[#D4AF37] uppercase tracking-widest mb-4 block">Step 02</span>
+                  <div className="w-12 h-12 rounded-lg bg-muted border border-border flex items-center justify-center mb-6 text-[#ec4269] dark:text-[#D4AF37]">
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                    </svg>
+                  </div>
+                  <h3 className="text-xl font-semibold text-[#ec4269] dark:text-[#D4AF37] mb-3">AI Auto-Triage</h3>
+                  <p className="text-muted-foreground text-sm leading-relaxed">
+                    Our AI instantly reads your ticket, assigns priority, category, and smart tags — no manual sorting needed.
+                  </p>
+                </div>
+              </div>
+
+              {/* Step 3 — Small Card */}
+              <div className="p-8 rounded-bl-3xl border-b border-l border-border bg-card hover:border-foreground/20 transition-colors relative overflow-hidden group">
+                <div className="absolute top-0 right-0 w-48 h-48 bg-emerald-500/10 blur-[60px] rounded-full group-hover:bg-emerald-500/20 transition-all duration-500" />
+                <div className="relative z-10">
+                  <span className="text-[11px] font-mono font-bold text-[#ec4269] dark:text-[#D4AF37] uppercase tracking-widest mb-4 block">Step 03</span>
+                  <div className="w-12 h-12 rounded-lg bg-muted border border-border flex items-center justify-center mb-6 text-[#ec4269] dark:text-[#D4AF37]">
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                    </svg>
+                  </div>
+                  <h3 className="text-xl font-semibold text-[#ec4269] dark:text-[#D4AF37] mb-3">Link Your Asset</h3>
+                  <p className="text-muted-foreground text-sm leading-relaxed">
+                    Connect the ticket to a device from your inventory so the agent sees the full asset history in one click.
+                  </p>
+                </div>
+              </div>
+
+              {/* Step 4 — Large Card */}
+              <div className="md:col-span-2 p-8 rounded-br-3xl border-b border-r border-border bg-card hover:border-foreground/20 transition-colors relative overflow-hidden group">
+                <div className="absolute top-0 left-0 w-64 h-64 bg-pink-800/10 blur-[80px] rounded-full group-hover:bg-pink-500/20 transition-all duration-500" />
+                <div className="relative z-10">
+                  <span className="text-[11px] font-mono font-bold text-[#ec4269] dark:text-[#D4AF37] uppercase tracking-widest mb-4 block">Step 04</span>
+                  <div className="w-12 h-12 rounded-lg bg-muted border border-border flex items-center justify-center mb-6 text-[#ec4269] dark:text-[#D4AF37]">
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <h3 className="text-xl font-semibold text-foreground mb-3">Track &amp; Get Resolved</h3>
+                  <p className="text-muted-foreground leading-relaxed max-w-md">
+                    Use your ticket ID to check live status at any time — even without logging in. Get notified when your issue is resolved.
+                  </p>
+                  <div className="mt-6 inline-flex items-center gap-2 text-xs text-muted-foreground border border-border rounded-full px-4 py-1.5">
+                    <span className="relative flex h-2 w-2"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400/50 opacity-75" /><span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" /></span>
+                    SLA-tracked · Real-time updates
+                  </div>
+                </div>
+              </div>
+
+            </div>
           </div>
         </section>
 

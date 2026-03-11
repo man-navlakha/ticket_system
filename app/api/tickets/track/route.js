@@ -15,9 +15,7 @@ export async function GET(request) {
             select: {
                 id: true,
                 status: true,
-                priority: true,
                 updatedAt: true,
-                createdAt: true
             }
         });
 

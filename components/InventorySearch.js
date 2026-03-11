@@ -4,7 +4,8 @@ import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import InventoryActions from './InventoryActions';
-import { Monitor, Printer, Mouse, Keyboard, Headset, HardDrive, Tablet, Phone, Laptop } from 'lucide-react';
+import { Monitor, Printer, Mouse, Keyboard, Headset, HardDrive, Tablet, Phone, Laptop, ChevronDown, Check } from 'lucide-react';
+import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 
 export default function InventorySearch({ items, users, userRole }) {
     const router = useRouter();
@@ -234,28 +235,52 @@ function StatusBadge({ status }) {
 }
 
 function HeaderFilter({ label, value, onChange, options }) {
+    const selectedLabel = value === 'ALL' ? label : value;
+
     return (
-        <div className="relative group/filter inline-block">
-            <select
-                value={value}
-                onChange={(e) => onChange(e.target.value)}
-                className="appearance-none bg-transparent pr-4 text-[10px] font-bold text-muted-foreground uppercase tracking-widest focus:outline-none cursor-pointer hover:text-foreground transition-colors"
-                title={`Filter by ${label}`}
-            >
-                <option value="ALL" className="bg-background text-foreground">{label}</option>
-                {options.map(opt => (
-                    <option key={opt} value={opt} className="bg-background text-foreground">{opt.replace('_', ' ')}</option>
-                ))}
-            </select>
-            <div className="absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground group-hover/filter:text-foreground transition-colors">
-                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 9l-7 7-7-7" />
-                </svg>
-            </div>
-            {value !== 'ALL' && (
-                <div className="absolute -top-1 -right-2 w-1.5 h-1.5 bg-primary rounded-full" />
-            )}
-        </div>
+        <DropdownMenu.Root>
+            <DropdownMenu.Trigger asChild>
+                <button
+                    type="button"
+                    className="flex items-center gap-1.5 group/filter transition-colors text-muted-foreground hover:text-foreground data-[state=open]:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
+                >
+                    <span className="text-[10px] font-bold uppercase tracking-widest">{selectedLabel}</span>
+                    <ChevronDown className="w-3 h-3 transition-transform duration-300 group-data-[state=open]/filter:rotate-180 text-muted-foreground group-hover/filter:text-foreground" />
+                    {value !== 'ALL' && (
+                        <div className="absolute -top-1 -right-2 w-1.5 h-1.5 bg-primary rounded-full shadow-sm" />
+                    )}
+                </button>
+            </DropdownMenu.Trigger>
+
+            <DropdownMenu.Portal>
+                <DropdownMenu.Content
+                    className="min-w-[160px] bg-card border border-border/50 rounded-xl shadow-lg p-1.5 z-50 animate-in fade-in zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out data-[state=closed]:zoom-out-95"
+                    sideOffset={8}
+                    align="start"
+                >
+                    <DropdownMenu.Item
+                        onClick={() => onChange('ALL')}
+                        className={`w-full text-left px-3 py-2 rounded-lg text-[11px] font-semibold flex items-center justify-between transition-all cursor-pointer outline-none ${value === 'ALL' ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'}`}
+                    >
+                        <span>{label} (ALL)</span>
+                        {value === 'ALL' && <Check className="w-3 h-3" />}
+                    </DropdownMenu.Item>
+
+                    <DropdownMenu.Separator className="h-px bg-border/50 my-1 mx-2" />
+
+                    {options.map(opt => (
+                        <DropdownMenu.Item
+                            key={opt}
+                            onClick={() => onChange(opt)}
+                            className={`w-full text-left px-3 py-2 rounded-lg text-[11px] font-semibold flex items-center justify-between transition-all cursor-pointer outline-none group ${value === opt ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'}`}
+                        >
+                            <span>{opt.replace('_', ' ')}</span>
+                            {value === opt && <Check className="w-3 h-3" />}
+                        </DropdownMenu.Item>
+                    ))}
+                </DropdownMenu.Content>
+            </DropdownMenu.Portal>
+        </DropdownMenu.Root>
     );
 }
 
