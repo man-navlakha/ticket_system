@@ -13,15 +13,16 @@ export default function ProfileCompletion({ user }) {
     const [error, setError] = useState('');
     const router = useRouter();
 
-    // Check for user existence
-    if (!user) return null;
-
-    // Check if fields are missing
-    const missingPhone = user ? !user.phoneNumber : false;
-
+    // ✅ All hooks must be called BEFORE any conditional returns
     useEffect(() => {
-        checkInventory();
-    }, []);
+        // Only check inventory for regular users
+        if (user && user.role === 'USER') {
+            checkInventory();
+        } else {
+            // ADMIN/AGENT don't need a personal device linked
+            setHasInventory(true);
+        }
+    }, [user]);
 
     const checkInventory = async () => {
         try {
@@ -34,14 +35,20 @@ export default function ProfileCompletion({ user }) {
                 } else {
                     setHasInventory(false);
                 }
+            } else {
+                setHasInventory(false);
             }
         } catch (err) {
             console.error('Failed to check inventory', err);
+            setHasInventory(false);
         }
     };
 
-    if (hasInventory === null) return null;
+    // ✅ Conditional returns AFTER all hooks
+    if (!user) return null;
+    if (hasInventory === null) return null; // Still loading
 
+    const missingPhone = !user.phoneNumber;
     const missingInventory = !hasInventory;
 
     if (!missingPhone && !missingInventory) return null;
@@ -135,7 +142,7 @@ export default function ProfileCompletion({ user }) {
                                     <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Phone Number</label>
                                     <input
                                         type="tel"
-                                        placeholder="+1 (555) 000-0000"
+                                        placeholder="+91 98765 43210"
                                         value={phoneNumber}
                                         onChange={(e) => setPhoneNumber(e.target.value)}
                                         className="w-full bg-background border border-input rounded-lg px-4 py-3 text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"

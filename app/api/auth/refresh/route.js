@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { verifyRefreshTokenToken, generateAccessToken, getRefreshTokenFromCookie } from '@/lib/auth';
+import { verifyRefreshTokenToken, generateAccessToken, getRefreshTokenFromCookie, setAccessTokenCookie } from '@/lib/auth';
 
 export async function POST() {
     try {
@@ -21,6 +21,7 @@ export async function POST() {
         }
 
         const newAccessToken = generateAccessToken(user);
+        await setAccessTokenCookie(newAccessToken); // Write to httpOnly cookie
 
         return NextResponse.json({ accessToken: newAccessToken });
     } catch (error) {

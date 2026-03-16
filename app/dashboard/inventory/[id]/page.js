@@ -80,6 +80,15 @@ export default async function InventoryItemPage({ params }) {
                         <span className="px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-widest bg-blue-500/10 text-blue-500 border border-blue-500/20">
                             {item.ownership} Portfolio
                         </span>
+                        <Link
+                            href={`/dashboard/system-reports/${item.pid}`}
+                            className="h-10 px-5 bg-card border border-border text-foreground rounded-lg text-sm font-bold hover:bg-muted/50 transition-all flex items-center gap-2 shadow-sm"
+                        >
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            System Reports
+                        </Link>
                         {isAdmin && (
                             <Link
                                 href={`/dashboard/inventory/${item.id}/edit`}

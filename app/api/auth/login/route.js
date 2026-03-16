@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { verifyPassword, generateAccessToken, generateRefreshToken, setRefreshTokenCookie } from '@/lib/auth';
+import { verifyPassword, generateAccessToken, generateRefreshToken, setRefreshTokenCookie, setAccessTokenCookie } from '@/lib/auth';
 
 export async function POST(req) {
     try {
@@ -46,6 +46,7 @@ export async function POST(req) {
         const accessToken = generateAccessToken(user);
         const refreshToken = generateRefreshToken(user);
         await setRefreshTokenCookie(refreshToken);
+        await setAccessTokenCookie(accessToken); // Short-lived session cookie
 
         return NextResponse.json({
             message: 'Login successful',
