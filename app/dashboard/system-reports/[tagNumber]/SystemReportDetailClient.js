@@ -104,7 +104,8 @@ export default function SystemReportDetailClient({ user, tagNumber }) {
                 <h2 className="text-lg font-semibold text-foreground mb-2">Error Loading Report</h2>
                 <p className="text-muted-foreground mb-6">{error || 'Report not found'}</p>
                 <button
-                    onClick={() => router.push('/dashboard/system-reports')}
+                    // onClick={() => router.push('/dashboard/system-reports')}
+                    onClick={() => router.back()}
                     className="px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:opacity-90 transition-colors"
                 >
                     Back to System Reports

@@ -90,17 +90,19 @@ export default async function InventoryItemPage({ params }) {
                             System Reports
                         </Link>
                         {isAdmin && (
-                            <Link
-                                href={`/dashboard/inventory/${item.id}/edit`}
-                                className="h-10 px-5 bg-card border border-border text-foreground rounded-lg text-sm font-bold hover:bg-muted/50 transition-all flex items-center gap-2 shadow-sm"
-                            >
-                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                </svg>
-                                Edit Details
-                            </Link>
+                            <>
+                                <Link
+                                    href={`/dashboard/inventory/${item.id}/edit`}
+                                    className="h-10 px-5 bg-card border border-border text-foreground rounded-lg text-sm font-bold hover:bg-muted/50 transition-all flex items-center gap-2 shadow-sm"
+                                >
+                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                    </svg>
+                                    Edit Details
+                                </Link>
+                                <InventoryActions item={item} />
+                            </>
                         )}
-                        <InventoryActions item={item} />
                     </div>
                 </div>
             </div>
@@ -179,8 +181,10 @@ export default async function InventoryItemPage({ params }) {
                 <div className="space-y-6">
                     <div className="flex items-center justify-between border-b border-border pb-4">
                         <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.3em]">Operational History</h3>
-                        <Link href={`/dashboard/create?inventoryId=${item.id}`} className="px-4 py-1.5 bg-amber-500/10 text-amber-500 border border-amber-500/20 rounded-lg text-[10px] font-bold uppercase tracking-widest hover:bg-amber-500/20 transition-all">
-                            Initialize Repair
+                        <Link href={`/dashboard/create?inventoryId=${item.id}`}
+                            className="text-sm text-primary font-bold hover:underline"
+                        >
+                            Create a Ticket +
                         </Link>
                     </div>
 
