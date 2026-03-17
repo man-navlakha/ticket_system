@@ -8,7 +8,7 @@ import { ThemeToggle } from '@/components/theme-toggle';
 import { Eye, EyeOff, Loader2, CheckCircle2, XCircle, ChevronDown } from 'lucide-react';
 
 // ── Department options ─────────────────────────────────────────────────────────
-export const DEPARTMENTS = [
+const DEPARTMENTS = [
     { value: 'accounts', label: 'Accounts Team' },
     { value: 'design', label: 'Designer Team' },
     { value: 'it', label: 'IT Team' },
