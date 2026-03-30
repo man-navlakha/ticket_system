@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/session';
 import { sendNewTicketNotification } from '@/lib/email';
+import { rateLimit } from '@/lib/rate-limit';
 
 export async function GET(request) {
     const user = await getCurrentUser();
@@ -39,6 +40,15 @@ export async function POST(request) {
     }
 
     try {
+        // --- Rate Limiting (5 tickets per 10 minutes) ---
+        const ratelimit = await rateLimit(`create_ticket:${user.id}`, 5, 10 * 60000);
+        if (!ratelimit.success) {
+            return NextResponse.json(
+                { error: 'Too many tickets created. Please wait a few minutes before trying again.' },
+                { status: 429 } // Too Many Requests
+            );
+        }
+
         const json = await request.json();
         const {
             title,

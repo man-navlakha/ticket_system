@@ -441,3 +441,11 @@ model RentalPayment {
   @@unique([inventoryItemId, month, year])
   @@index([inventoryItemId])
 }
+
+model RateLimit {
+  key       String   @id
+  count     Int      @default(0)
+  expiresAt DateTime
+
+  @@index([expiresAt])
+}

@@ -1,5 +1,7 @@
 import { v2 as cloudinary } from 'cloudinary';
 import { NextResponse } from 'next/server';
+import { getCurrentUser } from '@/lib/session';
+import { rateLimit } from '@/lib/rate-limit';
 
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -9,6 +11,18 @@ cloudinary.config({
 
 export async function POST(request) {
     try {
+        const user = await getCurrentUser();
+        const identifier = user ? user.id : (request.headers.get('x-forwarded-for') || 'anonymous');
+
+        // --- Rate Limiting (20 uploads per 10 minutes) ---
+        const ratelimit = await rateLimit(`upload:${identifier}`, 20, 10 * 60000);
+        if (!ratelimit.success) {
+            return NextResponse.json(
+                { error: 'Upload limit reached. Please wait a few minutes.' },
+                { status: 429 }
+            );
+        }
+
         const formData = await request.formData();
         const file = formData.get('file');
 
