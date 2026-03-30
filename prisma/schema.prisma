@@ -280,6 +280,10 @@ enum ItemType {
   PERIPHERAL
   OTHER
   PRINTER
+  MONITOR
+  MOUSE
+  KEYBOARD
+  HEADSET
 }
 
 enum Ownership {

@@ -4,7 +4,7 @@ import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import InventoryActions from './InventoryActions';
-import { Monitor, Printer, Mouse, Keyboard, Headset, HardDrive, Tablet, Phone, Laptop, ChevronDown, Check } from 'lucide-react';
+import { Monitor, Printer, Mouse, Keyboard, Headset, HardDrive, Tablet, Phone, Laptop, ChevronDown, Check, Calendar } from 'lucide-react';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 
 export default function InventorySearch({ items, users, userRole }) {
@@ -131,8 +131,11 @@ export default function InventorySearch({ items, users, userRole }) {
                                                 item.type === 'LAPTOP' ? <Laptop className="w-4 h-4" /> :
                                                     item.type === 'MOBILE' ? <Phone className="w-4 h-4" /> :
                                                         item.type === 'TABLET' ? <Tablet className="w-4 h-4" /> :
-                                                            (item.type === 'COMPUTER' || item.type === 'DESKTOP') ? <Monitor className="w-4 h-4" /> :
-                                                                <HardDrive className="w-4 h-4" />}
+                                                            item.type === 'KEYBOARD' ? <Keyboard className="w-4 h-4" /> :
+                                                                item.type === 'MOUSE' ? <Mouse className="w-4 h-4" /> :
+                                                                    item.type === 'HEADSET' ? <Headset className="w-4 h-4" /> :
+                                                                        (item.type === 'COMPUTER' || item.type === 'DESKTOP' || item.type === 'MONITOR') ? <Monitor className="w-4 h-4" /> :
+                                                                            <HardDrive className="w-4 h-4" />}
                                         </div>
                                         <div className="flex flex-col">
                                             <span className="text-sm font-semibold text-foreground tracking-tight">{item.brand}</span>
@@ -152,6 +155,12 @@ export default function InventorySearch({ items, users, userRole }) {
                                             <div className="flex flex-col">
                                                 <span className="text-sm font-bold text-foreground tracking-tight">{item.user.username}</span>
                                                 <span className="text-[10px] text-muted-foreground font-mono truncate max-w-[140px]">{item.user.email}</span>
+                                                {item.returnDate && (
+                                                    <span className="mt-1 text-[9px] font-black text-amber-500 uppercase tracking-widest flex items-center gap-1">
+                                                        <Calendar className="w-2.5 h-2.5" />
+                                                        Due: {new Date(item.returnDate).toLocaleDateString()}
+                                                    </span>
+                                                )}
                                             </div>
                                         </div>
                                     ) : item.assignedUser ? (

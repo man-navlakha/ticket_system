@@ -80,6 +80,7 @@ export default function Sidebar({ user }) {
                     ),
                     subItems: [
                         { label: 'All Assets', href: '/dashboard/inventory' },
+                        { label: 'EquipHub (Rentals)', href: '/dashboard/rental' },
                         ...(user?.role === 'ADMIN' || user?.role === 'AGENT'
                             ? [
                                 { label: 'Create New', href: '/dashboard/inventory/create' },

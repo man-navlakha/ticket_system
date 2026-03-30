@@ -163,6 +163,10 @@ export default function CreateInventoryForm({ users }) {
                         <option value="COMPUTER" className="bg-background text-foreground">COMPUTER</option>
                         <option value="MOBILE" className="bg-background text-foreground">MOBILE</option>
                         <option value="PRINTER" className="bg-background text-foreground">PRINTER</option>
+                        <option value="MONITOR" className="bg-background text-foreground">MONITOR</option>
+                        <option value="MOUSE" className="bg-background text-foreground">MOUSE</option>
+                        <option value="KEYBOARD" className="bg-background text-foreground">KEYBOARD</option>
+                        <option value="HEADSET" className="bg-background text-foreground">HEADSET</option>
                         <option value="OTHER" className="bg-background text-foreground">OTHER</option>
                     </InputField>
                     <InputField label="Portfolio" name="ownership" type="select">
