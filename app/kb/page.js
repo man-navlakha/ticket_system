@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { prisma } from '@/lib/prisma'; // Use Prisma directly for Server Component performance
 import FloatingLines from '@/components/FloatingLines';
 import KBSearch from '@/components/KBSearch';
+import { getKbArticlePath, getKbCategoryPath } from '@/lib/kb-url';
 
 export const dynamic = 'force-dynamic'; // Ensure fresh content on each request if needed, or revalidate
 
@@ -102,7 +103,7 @@ export default async function KnowledgeBasePage({ searchParams }) {
                 {categories.map((cat) => (
                     <Link
                         key={cat.id}
-                        href={`/kb?category=${cat.name}`}
+                        href={getKbCategoryPath(cat.name)}
                         className={`px-4 sm:px-6 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-semibold transition-all shadow-sm flex items-center gap-1.5 sm:gap-2 ${currentCategory === cat.name ? 'bg-[#ec4269] dark:bg-[#D4AF37] text-white dark:text-zinc-900 hover:opacity-90' : 'bg-muted text-foreground hover:bg-muted/80 border border-border'}`}
                     >
                         {cat.name} <span className="opacity-60 text-[10px] sm:text-xs font-normal">({cat._count.knowledgeBaseArticles})</span>
@@ -121,7 +122,7 @@ export default async function KnowledgeBasePage({ searchParams }) {
                     articles.map((article) => (
                         <Link
                             key={article.id}
-                            href={`/kb/${article.id}`}
+                            href={getKbArticlePath(article.id, article.title)}
                             className="group flex flex-col justify-between p-5 sm:p-8 rounded-2xl sm:rounded-3xl border border-border bg-card/50 backdrop-blur-sm hover:border-foreground/20 hover:bg-card transition-all hover:-translate-y-1 shadow-lg shadow-black/5 overflow-hidden relative"
                         >
                             <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/5 blur-[50px] rounded-full group-hover:bg-purple-500/10 transition-all duration-500 flex pointer-events-none" />

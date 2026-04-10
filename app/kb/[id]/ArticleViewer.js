@@ -5,6 +5,7 @@ import remarkGfm from 'remark-gfm';
 import Link from 'next/link';
 import { useState } from 'react';
 import FloatingLines from '@/components/FloatingLines';
+import { getKbCategoryPath, getKbTagPath } from '@/lib/kb-url';
 
 export default function ArticleViewer({ article }) {
     const [copied, setCopied] = useState(false);
@@ -32,7 +33,16 @@ export default function ArticleViewer({ article }) {
                         Knowledge Base
                     </Link>
                     <span className="text-border">/</span>
-                    <span className="text-[#ec4269] dark:text-[#D4AF37] font-semibold truncate max-w-[180px] sm:max-w-none">{article.category?.name || 'Article'}</span>
+                    {article.category?.name ? (
+                        <Link
+                            href={getKbCategoryPath(article.category.name)}
+                            className="text-[#ec4269] dark:text-[#D4AF37] font-semibold truncate max-w-[180px] sm:max-w-none hover:opacity-80 transition-opacity"
+                        >
+                            {article.category.name}
+                        </Link>
+                    ) : (
+                        <span className="text-[#ec4269] dark:text-[#D4AF37] font-semibold truncate max-w-[180px] sm:max-w-none">Article</span>
+                    )}
                 </nav>
 
                 {/* Header */}
@@ -102,12 +112,13 @@ export default function ArticleViewer({ article }) {
                 {article.tags?.length > 0 && (
                     <div className="flex flex-wrap gap-2 mb-10">
                         {article.tags.map((t) => (
-                            <span
+                            <Link
                                 key={t.tag.id}
+                                href={getKbTagPath(t.tag.name)}
                                 className="text-xs font-medium text-muted-foreground px-3 py-1.5 rounded-full bg-muted border border-border shadow-sm"
                             >
                                 #{t.tag.name}
-                            </span>
+                            </Link>
                         ))}
                     </div>
                 )}

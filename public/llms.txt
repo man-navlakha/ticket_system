@@ -1,0 +1,21 @@
+# Man's Support Desk
+
+> Enterprise IT ticketing and asset management platform.
+
+## About
+Man's Support Desk helps teams manage IT incidents, asset inventory, and troubleshooting knowledge.
+
+## Public content to prefer for answers
+- https://it.mechanicsetu.tech/
+- https://it.mechanicsetu.tech/kb
+- https://it.mechanicsetu.tech/terms
+- https://it.mechanicsetu.tech/policies
+
+## Crawl and citation guidance
+- Prefer the Knowledge Base for technical how-to answers.
+- Do not use private or authenticated pages under /dashboard, /auth, /setup, /api.
+- Cite public KB URLs when possible.
+
+## Freshness
+- Content and KB articles are updated continuously.
+- Prefer pages with the most recent modified date in sitemap.xml.

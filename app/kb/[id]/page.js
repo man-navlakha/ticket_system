@@ -1,6 +1,6 @@
 import { prisma } from '@/lib/prisma';
-import { notFound } from 'next/navigation';
-import ArticleViewer from './ArticleViewer';
+import { notFound, permanentRedirect } from 'next/navigation';
+import { getKbArticlePath } from '@/lib/kb-url';
 
 // Force dynamic if needed, but for articles with caching, default is ISR/Prerendered if no searchParams
 // Using generateMetadata allows us to fetch data for SEO.
@@ -22,13 +22,9 @@ export async function generateMetadata({ params }) {
     return {
         title: article.title,
         description: article.summary,
-        openGraph: {
-            title: article.title,
-            description: article.summary,
-            type: 'article',
-            publishedTime: article.createdAt,
-            authors: [article.createdBy?.username || 'Man\'s Support Desk'],
-            tags: article.tags?.map(t => t.tag.name),
+        robots: {
+            index: false,
+            follow: true,
         },
     };
 }
@@ -53,13 +49,5 @@ export default async function ArticlePage({ params }) {
         notFound();
     }
 
-    // Increment view count (fire and forget, or handle safely without blocking render too much)
-    // Since this is a server component, we can do it here.
-    // Note: For high traffic, this should be decoupled (queue/bg job), but for now strict increment is fine.
-    await prisma.knowledgeBaseArticle.update({
-        where: { id },
-        data: { views: { increment: 1 } },
-    });
-
-    return <ArticleViewer article={article} />;
+    permanentRedirect(getKbArticlePath(article.id, article.title));
 }

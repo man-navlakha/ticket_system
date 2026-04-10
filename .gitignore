@@ -43,3 +43,9 @@ next-env.d.ts
 # superdesign
 .superdesign/
 .superdesign_init.md
+
+.commandcode/
+.claude/
+.augment/
+.agents/
+.windsurf/
