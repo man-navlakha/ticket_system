@@ -1,0 +1,73 @@
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+[IP_MCP_POST] Error [PrismaClientInitializationError]: 
+Invalid `__TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$prisma$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__["prisma"].ipMcpState.upsert()` invocation in
+D:\Projects\ticket_system\.next\dev\server\chunks\[root-of-the-server]__f3c55d16._.js:230:163
+
+  227 const reportedBy = typeof body.reportedBy === "string" ? body.reportedBy.trim() : "";
+  228 const userAgent = request.headers.get("user-agent")?.trim() || null;
+  229 try {
+→ 230     const record = await __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$prisma$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__["prisma"].ipMcpState.upsert(
+Can't reach database server at `ep-snowy-river-a4y3cs4d-pooler.us-east-1.aws.neon.tech:5432`
+
+Please make sure your database server is running at `ep-snowy-river-a4y3cs4d-pooler.us-east-1.aws.neon.tech:5432`.
+    at <unknown> (app\ip-mcp\route.js:172:48)
+    at async POST (app\ip-mcp\route.js:172:24)
+  170 |
+  171 |     try {
+> 172 |         const record = await prisma.ipMcpState.upsert({
+      |                                                ^
+  173 |             where: { key: IP_MCP_KEY },
+  174 |             update: {
+  175 |                 currentIp: ip, {
+  clientVersion: '6.19.2',
+  errorCode: undefined,
+  retryable: undefined
+}
+[IP_MCP_POST] Error [PrismaClientInitializationError]: 
+Invalid `__TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$prisma$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__["prisma"].ipMcpState.upsert()` invocation in
+D:\Projects\ticket_system\.next\dev\server\chunks\[root-of-the-server]__f3c55d16._.js:230:163
+
+  227 const reportedBy = typeof body.reportedBy === "string" ? body.reportedBy.trim() : "";
+  228 const userAgent = request.headers.get("user-agent")?.trim() || null;
+  229 try {
+→ 230     const record = await __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$prisma$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__["prisma"].ipMcpState.upsert(
+Can't reach database server at `ep-snowy-river-a4y3cs4d-pooler.us-east-1.aws.neon.tech:5432`
+
+Please make sure your database server is running at `ep-snowy-river-a4y3cs4d-pooler.us-east-1.aws.neon.tech:5432`.
+    at <unknown> (app\ip-mcp\route.js:172:48)
+    at async POST (app\ip-mcp\route.js:172:24)
+  170 |
+  171 |     try {
+> 172 |         const record = await prisma.ipMcpState.upsert({
+      |                                                ^
+  173 |             where: { key: IP_MCP_KEY },
+  174 |             update: {
+  175 |                 currentIp: ip, {
+  clientVersion: '6.19.2',
+  errorCode: undefined,
+  retryable: undefined
+}
+[IP_MCP_GET] Error [PrismaClientInitializationError]: 
+Invalid `__TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$prisma$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__["prisma"].ipMcpState.findUnique()` invocation in
+D:\Projects\ticket_system\.next\dev\server\chunks\[root-of-the-server]__f3c55d16._.js:174:163
+
+  171 }
+  172 async function GET(request) {
+  173     try {
+→ 174         const record = await __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$prisma$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__["prisma"].ipMcpState.findUnique(
+Can't reach database server at `ep-snowy-river-a4y3cs4d-pooler.us-east-1.aws.neon.tech:5432`
+
+Please make sure your database server is running at `ep-snowy-river-a4y3cs4d-pooler.us-east-1.aws.neon.tech:5432`.
+    at <unknown> (app\ip-mcp\route.js:117:48)
+    at async GET (app\ip-mcp\route.js:117:24)
+  115 | export async function GET(request) {
+  116 |     try {
+> 117 |         const record = await prisma.ipMcpState.findUnique({
+      |                                                ^
+  118 |             where: { key: IP_MCP_KEY },
+  119 |         });
+  120 | {
+  clientVersion: '6.19.2',
+  errorCode: undefined,
+  retryable: undefined
+}

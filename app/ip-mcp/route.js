@@ -6,6 +6,8 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const IP_MCP_KEY = "primary";
+const DEFAULT_MCP_PORT = 3333;
+const DEFAULT_MCP_PATH = "/mcp";
 
 function jsonResponse(payload, status = 200) {
     return NextResponse.json(payload, {
@@ -60,24 +62,68 @@ function getWriteToken(request) {
     return request.headers.get("x-ip-mcp-token")?.trim() || null;
 }
 
-function serializeRecord(record) {
+function normalizePort(value) {
+    if (value === null || value === undefined || value === "") {
+        return DEFAULT_MCP_PORT;
+    }
+
+    const port = Number.parseInt(String(value), 10);
+    if (!Number.isInteger(port) || port < 1 || port > 65535) {
+        return null;
+    }
+
+    return port;
+}
+
+function buildMcpUrl(localIp, port, explicitUrl) {
+    if (explicitUrl) {
+        return explicitUrl;
+    }
+
+    if (!localIp || !port) {
+        return null;
+    }
+
+    const host = localIp.includes(":") ? `[${localIp}]` : localIp;
+    return `http://${host}:${port}${DEFAULT_MCP_PATH}`;
+}
+
+function buildDiscoveryUrl(request) {
+    try {
+        const url = new URL(request.url);
+        return `${url.origin}${url.pathname}`;
+    } catch {
+        return null;
+    }
+}
+
+function serializeRecord(record, request) {
+    const localIp = record?.currentIp ?? null;
+    const port = record?.port ?? DEFAULT_MCP_PORT;
+    const mcpUrl = buildMcpUrl(localIp, port, null);
+    const discovery = buildDiscoveryUrl(request);
+
     return {
-        ip: record?.currentIp ?? null,
+        localIp,
+        port,
+        mcpUrl,
         reportedBy: record?.reportedBy ?? null,
+        discovery,
         sourceIp: record?.sourceIp ?? null,
         userAgent: record?.userAgent ?? null,
         lastUpdated: record?.updatedAt?.toISOString() ?? null,
         createdAt: record?.createdAt?.toISOString() ?? null,
+        ip: localIp,
     };
 }
 
-export async function GET() {
+export async function GET(request) {
     try {
         const record = await prisma.ipMcpState.findUnique({
             where: { key: IP_MCP_KEY },
         });
 
-        return jsonResponse(serializeRecord(record));
+        return jsonResponse(serializeRecord(record, request));
     } catch (error) {
         console.error("[IP_MCP_GET]", error);
         return jsonResponse({ error: "Failed to fetch IP" }, 500);
@@ -103,9 +149,14 @@ export async function POST(request) {
         return jsonResponse({ error: "Failed to read request body" }, 500);
     }
 
-    const reportedIp = typeof body.ip === "string" ? body.ip.trim() : "";
+    const reportedIp = typeof body.localIp === "string"
+        ? body.localIp.trim()
+        : typeof body.ip === "string"
+            ? body.ip.trim()
+            : "";
     const detectedIp = getRequestIp(request);
     const ip = reportedIp || detectedIp;
+    const port = normalizePort(body.port);
 
     if (!ip) {
         return jsonResponse({ error: "IP is required in body or request headers" }, 400);
@@ -113,6 +164,10 @@ export async function POST(request) {
 
     if (!isIP(ip)) {
         return jsonResponse({ error: "Invalid IP address" }, 400);
+    }
+
+    if (port === null) {
+        return jsonResponse({ error: "Invalid port" }, 400);
     }
 
     const reportedBy = typeof body.reportedBy === "string" ? body.reportedBy.trim() : "";
@@ -123,6 +178,7 @@ export async function POST(request) {
             where: { key: IP_MCP_KEY },
             update: {
                 currentIp: ip,
+                port,
                 reportedBy: reportedBy || null,
                 sourceIp: detectedIp,
                 userAgent,
@@ -130,6 +186,7 @@ export async function POST(request) {
             create: {
                 key: IP_MCP_KEY,
                 currentIp: ip,
+                port,
                 reportedBy: reportedBy || null,
                 sourceIp: detectedIp,
                 userAgent,
@@ -138,7 +195,7 @@ export async function POST(request) {
 
         return jsonResponse({
             message: "IP updated successfully",
-            ...serializeRecord(record),
+            ...serializeRecord(record, request),
         });
     } catch (error) {
         console.error("[IP_MCP_POST]", error);

@@ -462,6 +462,7 @@ model RateLimit {
 model IpMcpState {
   key        String   @id @default("primary")
   currentIp  String
+  port       Int?
   reportedBy String?
   sourceIp   String?
   userAgent  String?

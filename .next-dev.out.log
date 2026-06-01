@@ -1,0 +1,15 @@
+
+> ticket_system@0.5.0 dev
+> next dev
+
+▲ Next.js 16.1.4 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.29.142:3000
+- Environments: .env
+
+✓ Starting...
+Creating turbopack project { dir: 'D:\\Projects\\ticket_system', testMode: true }
+✓ Ready in 1720ms
+ POST /ip-mcp 500 in 6.0s (compile: 466ms, render: 5.5s)
+ POST /ip-mcp 500 in 5.2s (compile: 5ms, render: 5.2s)
+ GET /ip-mcp 500 in 5.4s (compile: 10ms, render: 5.4s)
