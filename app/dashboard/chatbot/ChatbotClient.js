@@ -6,6 +6,7 @@ import { Bot, Send, RotateCcw, Maximize2, X, CheckCheck, Loader2 } from 'lucide-
 import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
 import { useRouter } from 'next/navigation';
+import { getInventoryStatusBadgeClass, getInventoryStatusLabel } from '@/lib/inventory-status';
 
 const getCurrentTime = () => {
     return new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }).toLowerCase();
@@ -364,12 +365,8 @@ export default function ChatbotClient({ user }) {
                                                                             <td className="px-4 py-3 align-middle">{item.model}</td>
                                                                             <td className="px-4 py-3 align-middle font-mono text-xs text-muted-foreground">{item.pid}</td>
                                                                             <td className="px-4 py-3 align-middle">
-                                                                                <span className={`px-2 py-1 text-[9px] uppercase font-bold tracking-widest rounded-full ${item.status === 'ACTIVE' ? 'bg-emerald-500/10 text-emerald-500' :
-                                                                                    item.status === 'IN_STORAGE' ? 'bg-blue-500/10 text-blue-500' :
-                                                                                        item.status === 'MAINTENANCE' ? 'bg-amber-500/10 text-amber-500' :
-                                                                                            'bg-muted text-muted-foreground'
-                                                                                    }`}>
-                                                                                    {item.status}
+                                                                                <span className={`rounded-full border px-2 py-1 text-[9px] font-bold uppercase tracking-widest ${getInventoryStatusBadgeClass(item.status)}`}>
+                                                                                    {getInventoryStatusLabel(item.status)}
                                                                                 </span>
                                                                             </td>
                                                                             <td className="px-4 py-3 align-middle text-xs">{item.condition}</td>
@@ -424,7 +421,7 @@ export default function ChatbotClient({ user }) {
                                                         </div>
                                                     ) : (
                                                         <div className="py-6 text-center text-sm text-muted-foreground italic bg-muted/20 rounded-xl">
-                                                            You don't have any recent tickets.
+                                                            You don&apos;t have any recent tickets.
                                                         </div>
                                                     )}
                                                     <Link href="/dashboard/tickets" className="text-primary hover:text-primary/80 transition-colors text-xs font-bold text-center mt-2 block w-full bg-primary/10 py-2.5 rounded-xl uppercase tracking-widest no-underline">

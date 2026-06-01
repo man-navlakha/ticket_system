@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { INVENTORY_STATUS_OPTIONS } from '@/lib/inventory-status';
 
 export default function CreateInventoryForm({ users }) {
     const router = useRouter();
@@ -144,11 +145,9 @@ export default function CreateInventoryForm({ users }) {
             <Section title="Primary Metadata" description="Specify the essence and condition of this hardware item.">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
                     <InputField label="Status" name="status" type="select">
-                        <option value="ACTIVE" className="bg-background text-foreground">ACTIVE</option>
-                        <option value="MAINTENANCE" className="bg-background text-foreground">MAINTENANCE</option>
-                        <option value="RETIRED" className="bg-background text-foreground">RETIRED</option>
-                        <option value="IN_STORAGE" className="bg-background text-foreground">IN_STORAGE</option>
-                        <option value="SCRAP" className="bg-background text-foreground">SCRAP</option>
+                        {INVENTORY_STATUS_OPTIONS.map((status) => (
+                            <option key={status} value={status} className="bg-background text-foreground">{status}</option>
+                        ))}
                     </InputField>
                     <InputField label="Condition" name="condition" type="select">
                         <option value="NEW" className="bg-background text-foreground">NEW</option>

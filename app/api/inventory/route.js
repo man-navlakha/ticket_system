@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/session';
+import { normalizeInventoryStatus } from '@/lib/inventory-status';
 
 export async function GET(request) {
     const user = await getCurrentUser();
@@ -61,7 +62,7 @@ export async function POST(request) {
         const data = {
             pid: json.pid,
             type: json.type,
-            status: json.status,
+            status: normalizeInventoryStatus(json.status),
             condition: json.condition,
             department: json.department,
             location: json.location,

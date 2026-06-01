@@ -243,11 +243,16 @@ model SystemReport {
 
 enum InventoryStatus {
   ACTIVE
-  MAINTENANCE
-  RETIRED
-  LOST
+  DEACTIVE
+  DONATED
   IN_STORAGE
+  MAINTENANCE
+  MISSING
+  ON_SALE
+  REPARING
   SCRAP        // Added for broken/junk items
+  RETIRED      // Legacy value kept for backward compatibility
+  LOST         // Legacy value kept for backward compatibility
 }
 
 enum Role {
@@ -452,4 +457,14 @@ model RateLimit {
   expiresAt DateTime
 
   @@index([expiresAt])
+}
+
+model IpMcpState {
+  key        String   @id @default("primary")
+  currentIp  String
+  reportedBy String?
+  sourceIp   String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/session';
 import * as XLSX from 'xlsx';
+import { normalizeInventoryStatus } from '@/lib/inventory-status';
 
 export async function POST(request) {
     try {
@@ -17,15 +18,25 @@ export async function POST(request) {
             return NextResponse.json({ error: 'No file provided' }, { status: 400 });
         }
 
+        if (!file.name?.toLowerCase().endsWith('.csv')) {
+            return NextResponse.json({ error: 'Only CSV files are supported. Please upload a .csv file.' }, { status: 400 });
+        }
+
         const arrayBuffer = await file.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
-        const workbook = XLSX.read(buffer, { type: 'buffer' });
+        const csvText = buffer.toString('utf8').replace(/^\uFEFF/, '');
+        const workbook = XLSX.read(csvText, { type: 'string' });
         const sheetName = workbook.SheetNames[0];
         const sheet = workbook.Sheets[sheetName];
-        const data = XLSX.utils.sheet_to_json(sheet);
+        const data = XLSX.utils.sheet_to_json(sheet, { defval: '' });
 
         if (!data || data.length === 0) {
             return NextResponse.json({ error: 'No data found in file' }, { status: 400 });
+        }
+
+        const hasPidColumn = Object.keys(data[0] || {}).some((key) => normalizeColumnKey(key) === 'pid');
+        if (!hasPidColumn) {
+            return NextResponse.json({ error: 'CSV must include a PID column.' }, { status: 400 });
         }
 
         const results = {
@@ -42,8 +53,8 @@ export async function POST(request) {
             const getVal = (key) => {
                 const exact = row[key];
                 if (exact !== undefined) return exact;
-                const lowerKey = key.toLowerCase();
-                const foundKey = Object.keys(row).find(k => k.toLowerCase() === lowerKey);
+                const normalizedKey = normalizeColumnKey(key);
+                const foundKey = Object.keys(row).find((k) => normalizeColumnKey(k) === normalizedKey);
                 return foundKey ? row[foundKey] : undefined;
             };
 
@@ -65,9 +76,9 @@ export async function POST(request) {
                 if (ownershipRaw === 'C') ownershipRaw = 'COMPANY';
                 if (ownershipRaw === 'E') ownershipRaw = 'EMPLOYEE';
 
-                const type = mapEnum(getVal('Type'), ['COMPUTER', 'LAPTOP', 'DESKTOP', 'MOBILE', 'TABLET', 'PERIPHERAL', 'OTHER', 'PRINTER'], 'OTHER');
+                const type = mapEnum(getVal('Type'), ['COMPUTER', 'LAPTOP', 'DESKTOP', 'MOBILE', 'TABLET', 'PERIPHERAL', 'OTHER', 'PRINTER', 'MONITOR', 'MOUSE', 'KEYBOARD', 'HEADSET'], 'OTHER');
                 const ownership = mapEnum(ownershipRaw, ['COMPANY', 'EMPLOYEE', 'RENTED'], 'COMPANY');
-                const status = mapEnum(getVal('Status'), ['ACTIVE', 'MAINTENANCE', 'RETIRED', 'IN_STORAGE', 'SCRAP'], 'ACTIVE');
+                const status = normalizeInventoryStatus(getVal('Status'));
                 const condition = mapEnum(getVal('Condition'), ['NEW', 'EXCELLENT', 'GOOD', 'FAIR', 'POOR'], 'GOOD');
 
                 // DATES
@@ -108,11 +119,12 @@ export async function POST(request) {
                 const os = getVal('OS');
                 const storage = getVal('Storage');
                 const graphicsCard = getVal('Graphics') || getVal('GPU') || getVal('Graphics Card');
-                const password = getVal('password ') || getVal('password');
+                const password = getVal('Password') || getVal('password ') || getVal('password');
                 const vendorInvoice = getVal('Vendor Invoice') || getVal('Invoice');
                 const note = getVal('Note') || getVal('Notes');
                 const department = getVal('Department') || getVal('Dept');
                 const location = getVal('Location');
+                const warrantyType = getVal('Warranty Type');
                 const hasCharger = getTruthy(getVal('CHARGER')) || getTruthy(getVal('Charger'));
                 const hasMouse = getTruthy(getVal('MOUSE')) || getTruthy(getVal('Mouse'));
 
@@ -148,6 +160,7 @@ export async function POST(request) {
                     price: priceVal ? parseFloat(priceVal) : null,
                     vendorInvoice: vendorInvoice ? String(vendorInvoice) : null,
                     note: note ? String(note) : null,
+                    warrantyType: warrantyType ? String(warrantyType) : null,
                     userId,
                     assignedDate,
                     returnDate,
@@ -208,4 +221,11 @@ function parseExcelDate(value) {
     const date = new Date(value);
     if (!isNaN(date.getTime())) return date;
     return null;
+}
+
+function normalizeColumnKey(value) {
+    return String(value || '')
+        .replace(/\uFEFF/g, '')
+        .trim()
+        .toLowerCase();
 }

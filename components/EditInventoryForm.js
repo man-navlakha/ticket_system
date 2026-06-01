@@ -3,33 +3,23 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { INVENTORY_STATUS_OPTIONS, getInventoryStatusLabel, normalizeInventoryStatus } from '@/lib/inventory-status';
 
 export default function EditInventoryForm({ item, users }) {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
-    const [components, setComponents] = useState(item.components || ['']);
-    const addComponent = () => setComponents([...components, '']);
-    const updateComponent = (index, value) => {
-        const newComponents = [...components];
-        newComponents[index] = value;
-        setComponents(newComponents);
-    };
-    const removeComponent = (index) => {
-        const newComponents = components.filter((_, i) => i !== index);
-        setComponents(newComponents);
-    };
-
     const [systemSpecs, setSystemSpecs] = useState(() => {
         if (item.systemSpecs && typeof item.systemSpecs === 'object') {
-            return Object.entries(item.systemSpecs).map(([key, value]) => ({ key, value }));
+            return Object.entries(item.systemSpecs).map(([key, value]) => ({ key, value: String(value) }));
         }
+
         return [
             { key: 'RAM', value: '' },
             { key: 'Storage', value: '' },
             { key: 'Processor', value: '' },
-            { key: 'OS', value: '' }
+            { key: 'OS', value: '' },
         ];
     });
 
@@ -42,11 +32,6 @@ export default function EditInventoryForm({ item, users }) {
     const removeSystemSpec = (index) => {
         const newSpecs = systemSpecs.filter((_, i) => i !== index);
         setSystemSpecs(newSpecs);
-    };
-
-    const formatDate = (dateString) => {
-        if (!dateString) return '';
-        return new Date(dateString).toISOString().split('T')[0];
     };
 
     async function onDelete() {
@@ -86,6 +71,7 @@ export default function EditInventoryForm({ item, users }) {
             storage: formData.get('storage'),
             processor: formData.get('processor'),
             graphicsCard: formData.get('graphicsCard'),
+            serialNumber: formData.get('serialNumber'),
             hasCharger: formData.get('hasCharger') === 'on',
             hasMouse: formData.get('hasMouse') === 'on',
             price: formData.get('price'),
@@ -106,7 +92,7 @@ export default function EditInventoryForm({ item, users }) {
                     acc[spec.key.trim()] = spec.value.trim();
                 }
                 return acc;
-            }, {})
+            }, {}),
         };
 
         try {
@@ -126,161 +112,195 @@ export default function EditInventoryForm({ item, users }) {
     }
 
     return (
-        <form onSubmit={onSubmit} className="max-w-4xl space-y-16 pb-24">
+        <form onSubmit={onSubmit} className="space-y-14 pb-24">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+                <MetricCard label="Asset ID" value={item.pid} />
+                <MetricCard label="Linked User" value={item.user?.username || item.assignedUser || 'Unassigned'} />
+                <MetricCard label="Current Status" value={getInventoryStatusLabel(item.status)} />
+                <MetricCard label="Created" value={formatDate(item.createdAt)} />
+            </div>
+
             {error && (
-                <div className="p-4 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-sm font-medium">
+                <div aria-live="polite" className="rounded-[1.5rem] border border-destructive/20 bg-destructive/10 p-4 text-sm font-medium text-destructive shadow-sm">
                     {error}
                 </div>
             )}
 
-            {/* Section 1: Identity & Condition */}
-            <Section title="Asset Foundation" description="Core identification and quality settings.">
-                <div className="bg-card border border-border rounded-2xl p-6 mb-8 shadow-sm">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                        <StaticInfo label="Asset ID" value={item.pid} isMono />
-                        <StaticInfo label="Legacy Tag" value={item.oldTag} />
-                        <StaticInfo label="Created" value={new Date(item.createdAt).toLocaleDateString()} />
-                        <StaticInfo label="Hardware" value={`${item.brand || ''} ${item.model || ''}`} />
-                    </div>
+            <Section title="Asset Foundation" description="Core identity, lifecycle state, and ownership settings.">
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
+                    <StaticInfo label="Asset ID" value={item.pid} isMono />
+                    <StaticInfo label="Legacy Tag" value={item.oldTag} />
+                    <StaticInfo label="Created" value={formatDate(item.createdAt)} />
+                    <StaticInfo label="Hardware" value={`${item.brand || 'Unknown'} ${item.model || ''}`.trim()} />
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                    <InputField label="Asset Status" name="status" type="select" defaultValue={item.status}>
-                        <option value="ACTIVE" className="bg-background text-foreground">ACTIVE</option>
-                        <option value="MAINTENANCE" className="bg-background text-foreground">MAINTENANCE</option>
-                        <option value="RETIRED" className="bg-background text-foreground">RETIRED</option>
-                        <option value="IN_STORAGE" className="bg-background text-foreground">IN_STORAGE</option>
-                        <option value="SCRAP" className="bg-background text-foreground">SCRAP</option>
+                <div className="grid grid-cols-1 gap-x-8 gap-y-6 md:grid-cols-2">
+                    <InputField label="Asset Status" name="status" type="select" defaultValue={normalizeInventoryStatus(item.status)}>
+                        {INVENTORY_STATUS_OPTIONS.map((status) => (
+                            <option key={status} value={status}>{status}</option>
+                        ))}
                     </InputField>
                     <InputField label="Asset Condition" name="condition" type="select" defaultValue={item.condition}>
-                        <option value="NEW" className="bg-background text-foreground">NEW</option>
-                        <option value="EXCELLENT" className="bg-background text-foreground">EXCELLENT</option>
-                        <option value="GOOD" className="bg-background text-foreground">GOOD</option>
-                        <option value="FAIR" className="bg-background text-foreground">FAIR</option>
-                        <option value="POOR" className="bg-background text-foreground">POOR</option>
+                        <option value="NEW">NEW</option>
+                        <option value="EXCELLENT">EXCELLENT</option>
+                        <option value="GOOD">GOOD</option>
+                        <option value="FAIR">FAIR</option>
+                        <option value="POOR">POOR</option>
                     </InputField>
                     <InputField label="Category" name="type" type="select" defaultValue={item.type}>
-                        <option value="LAPTOP" className="bg-background text-foreground">LAPTOP</option>
-                        <option value="DESKTOP" className="bg-background text-foreground">DESKTOP</option>
-                        <option value="COMPUTER" className="bg-background text-foreground">COMPUTER</option>
-                        <option value="MOBILE" className="bg-background text-foreground">MOBILE</option>
-                        <option value="PRINTER" className="bg-background text-foreground">PRINTER</option>
-                        <option value="MONITOR" className="bg-background text-foreground">MONITOR</option>
-                        <option value="MOUSE" className="bg-background text-foreground">MOUSE</option>
-                        <option value="KEYBOARD" className="bg-background text-foreground">KEYBOARD</option>
-                        <option value="HEADSET" className="bg-background text-foreground">HEADSET</option>
-                        <option value="OTHER" className="bg-background text-foreground">OTHER</option>
+                        <option value="LAPTOP">LAPTOP</option>
+                        <option value="DESKTOP">DESKTOP</option>
+                        <option value="COMPUTER">COMPUTER</option>
+                        <option value="MOBILE">MOBILE</option>
+                        <option value="TABLET">TABLET</option>
+                        <option value="PRINTER">PRINTER</option>
+                        <option value="MONITOR">MONITOR</option>
+                        <option value="MOUSE">MOUSE</option>
+                        <option value="KEYBOARD">KEYBOARD</option>
+                        <option value="HEADSET">HEADSET</option>
+                        <option value="OTHER">OTHER</option>
                     </InputField>
                     <InputField label="Ownership" name="ownership" type="select" defaultValue={item.ownership}>
-                        <option value="COMPANY" className="bg-background text-foreground">COMPANY OWNED</option>
-                        <option value="EMPLOYEE" className="bg-background text-foreground">EMPLOYEE OWNED</option>
-                        <option value="RENTED" className="bg-background text-foreground">RENTED</option>
+                        <option value="COMPANY">COMPANY OWNED</option>
+                        <option value="EMPLOYEE">EMPLOYEE OWNED</option>
+                        <option value="RENTED">RENTED</option>
                     </InputField>
                 </div>
             </Section>
 
-            {/* Section 2: Localization & Assignment */}
-            <Section title="Localization & Assignment" description="Mapping assets to people and places.">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+            <Section title="Localization & Assignment" description="Map the asset to a person, team, and physical location.">
+                <div className="grid grid-cols-1 gap-x-8 gap-y-6 md:grid-cols-2">
                     <InputField label="Department" name="department" defaultValue={item.department} placeholder="e.g. Finance" />
                     <InputField label="Physical Location" name="location" defaultValue={item.location} placeholder="e.g. HQ Floor 3" />
                     <InputField label="System User" name="userId" type="select" defaultValue={item.userId || ''}>
-                        <option value="" className="bg-background text-foreground">-- UNLINKED --</option>
-                        {users.map(u => (
-                            <option key={u.id} value={u.id} className="bg-background text-foreground">{u.username} ({u.email.split('@')[0]})</option>
+                        <option value="">-- UNLINKED --</option>
+                        {users.map((u) => (
+                            <option key={u.id} value={u.id}>
+                                {u.username} ({u.email.split('@')[0]})
+                            </option>
                         ))}
                     </InputField>
                     <InputField label="External Assignee" name="assignedUser" defaultValue={item.assignedUser} placeholder="Manual name entry" />
+                    <InputField label="Assigned Date" name="assignedDate" type="date" defaultValue={formatDateInput(item.assignedDate)} />
+                    <InputField label="Return Date" name="returnDate" type="date" defaultValue={formatDateInput(item.returnDate)} />
                 </div>
             </Section>
 
-            {/* Section 3: Hardware specs */}
-            <Section title="Hardware Profile" description="Technical specifications and credentials.">
-                <div className="bg-card border border-border rounded-2xl p-8 space-y-8 shadow-sm">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                        <InputField label="Operating System" name="os" defaultValue={item.os} placeholder="e.g. macOS Sonoma" />
-                        <InputField label="Processor" name="processor" defaultValue={item.processor} placeholder="e.g. M2 Pro" />
-                        <InputField label="Memory (RAM)" name="ram" defaultValue={item.ram} placeholder="e.g. 16GB" />
-                        <InputField label="Storage" name="storage" defaultValue={item.storage} placeholder="e.g. 1TB" />
-                        <InputField label="Graphics" name="graphicsCard" defaultValue={item.graphicsCard} />
-                        <InputField label="Serial Number" name="serialNumber" defaultValue={item.serialNumber} />
-                        <InputField label="System Password" name="password" defaultValue={item.password} />
-                        <div className="flex gap-8 pt-4">
-                            <label className="flex items-center gap-3 cursor-pointer group">
-                                <input type="checkbox" name="hasCharger" defaultChecked={item.hasCharger} className="w-5 h-5 rounded border-border bg-input checked:bg-primary checked:border-transparent transition-all" />
-                                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest group-hover:text-foreground transition-colors">Includes Charger</span>
-                            </label>
-                            <label className="flex items-center gap-3 cursor-pointer group">
-                                <input type="checkbox" name="hasMouse" defaultChecked={item.hasMouse} className="w-5 h-5 rounded border-border bg-input checked:bg-primary checked:border-transparent transition-all" />
-                                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest group-hover:text-foreground transition-colors">Includes Mouse</span>
-                            </label>
+            <Section title="Hardware Profile" description="Technical specifications, accessories, and secure references.">
+                <div className="grid grid-cols-1 gap-x-8 gap-y-6 md:grid-cols-2">
+                    <InputField label="Brand" name="brand" defaultValue={item.brand} placeholder="e.g. Dell" />
+                    <InputField label="Model Series" name="inventoryModel" defaultValue={item.model} placeholder="e.g. Latitude 5440" />
+                    <InputField label="Operating System" name="os" defaultValue={item.os} placeholder="e.g. Windows 11 Pro" />
+                    <InputField label="Processor" name="processor" defaultValue={item.processor} placeholder="e.g. Intel Core i7" />
+                    <InputField label="Memory (RAM)" name="ram" defaultValue={item.ram} placeholder="e.g. 16GB" />
+                    <InputField label="Storage" name="storage" defaultValue={item.storage} placeholder="e.g. 1TB SSD" />
+                    <InputField label="Graphics" name="graphicsCard" defaultValue={item.graphicsCard} placeholder="e.g. Intel Iris Xe" />
+                    <InputField label="Serial Number" name="serialNumber" defaultValue={item.serialNumber} placeholder="e.g. SN123456789" />
+                    <InputField label="System Password" name="password" defaultValue={item.password} placeholder="Optional internal reference" />
+                    <div className="rounded-[1.5rem] border border-border bg-muted/20 p-5 md:col-span-2">
+                        <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-muted-foreground">Included Accessories</p>
+                        <div className="mt-4 flex flex-wrap gap-6">
+                            <CheckboxField label="Includes Charger" name="hasCharger" defaultChecked={item.hasCharger} />
+                            <CheckboxField label="Includes Mouse" name="hasMouse" defaultChecked={item.hasMouse} />
                         </div>
                     </div>
                 </div>
             </Section>
 
-            {/* Section 4: Timeline & Finance */}
-            <Section title="Operational Lifecycle" description="Procurement and financial records.">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                    <InputField label="Original Price ($)" name="price" type="number" defaultValue={item.price} />
-                    <InputField label="Vendor Invoice #" name="vendorInvoice" defaultValue={item.vendorInvoice} />
-                    <InputField label="Purchase Date" name="purchasedDate" type="date" defaultValue={formatDate(item.purchasedDate)} />
-                    <InputField label="Warranty Date" name="warrantyDate" type="date" defaultValue={formatDate(item.warrantyDate)} />
-                    <InputField label="Warranty Type" name="warrantyType" defaultValue={item.warrantyType} />
-                    <InputField label="Last Service" name="maintenanceDate" type="date" defaultValue={formatDate(item.maintenanceDate)} />
-                    <InputField label="Legacy Tag ID" name="oldTag" defaultValue={item.oldTag} />
-                    <InputField label="Legacy User Name" name="oldUser" defaultValue={item.oldUser} />
+            <Section title="Operational Lifecycle" description="Procurement, warranty, finance, and legacy references.">
+                <div className="grid grid-cols-1 gap-x-8 gap-y-6 md:grid-cols-2">
+                    <InputField label="Original Price (INR)" name="price" type="number" step="0.01" defaultValue={item.price} />
+                    <InputField label="Vendor Invoice #" name="vendorInvoice" defaultValue={item.vendorInvoice} placeholder="e.g. INV-2026-001" />
+                    <InputField label="Purchase Date" name="purchasedDate" type="date" defaultValue={formatDateInput(item.purchasedDate)} />
+                    <InputField label="Warranty Date" name="warrantyDate" type="date" defaultValue={formatDateInput(item.warrantyDate)} />
+                    <InputField label="Warranty Type" name="warrantyType" defaultValue={item.warrantyType} placeholder="e.g. Warranty" />
+                    <InputField label="Last Service" name="maintenanceDate" type="date" defaultValue={formatDateInput(item.maintenanceDate)} />
+                    <InputField label="Legacy Tag ID" name="oldTag" defaultValue={item.oldTag} placeholder="Older tracking tag" />
+                    <InputField label="Legacy User Name" name="oldUser" defaultValue={item.oldUser} placeholder="Legacy assignee" />
                 </div>
             </Section>
 
-            <Section title="System Telemetry" description="Additional logs and administrative observations.">
-                <textarea
-                    name="note"
-                    rows={4}
-                    defaultValue={item.note}
-                    placeholder="Technical logs..."
-                    className="w-full bg-input/50 border border-input rounded-2xl p-6 text-sm text-foreground focus:outline-none focus:border-ring transition-all"
-                />
-                <div className="mt-8 space-y-4">
-                    <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Custom Metadata</h4>
-                    <div className="space-y-3">
-                        {systemSpecs.map((spec, idx) => (
-                            <div key={idx} className="flex gap-2 group">
-                                <input
-                                    value={spec.key}
-                                    onChange={(e) => updateSystemSpec(idx, 'key', e.target.value)}
-                                    className="w-1/3 h-10 rounded-lg bg-input border border-input px-4 text-xs font-bold text-muted-foreground focus:border-ring transition-all outline-none"
-                                />
-                                <input
-                                    value={spec.value}
-                                    onChange={(e) => updateSystemSpec(idx, 'value', e.target.value)}
-                                    className="flex-1 h-10 rounded-lg bg-input border border-input px-4 text-xs text-foreground focus:border-ring transition-all outline-none"
-                                />
-                                <button type="button" onClick={() => removeSystemSpec(idx)} className="h-10 w-10 text-muted-foreground hover:text-destructive transition-colors">✕</button>
+            <Section title="System Telemetry" description="Long-form notes and flexible metadata for custom machine details.">
+                <div className="space-y-6">
+                    <div className="space-y-2">
+                        <label className="block text-[10px] font-bold uppercase tracking-[0.24em] text-muted-foreground">Administrative Note</label>
+                        <textarea
+                            name="note"
+                            rows={5}
+                            defaultValue={item.note}
+                            placeholder="Capture service notes, escalation context, or special handling instructions."
+                            className="w-full rounded-[1.5rem] border border-input bg-background px-5 py-4 text-sm text-foreground transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        />
+                    </div>
+
+                    <div className="space-y-4">
+                        <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                            <div className="space-y-1">
+                                <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-muted-foreground">Custom Metadata</p>
+                                <p className="text-sm text-muted-foreground">Add key-value pairs for telemetry that does not map to the standard schema.</p>
                             </div>
-                        ))}
-                        <button type="button" onClick={addSystemSpec} className="text-[10px] font-bold text-primary hover:text-primary/80 uppercase tracking-widest transition-colors">+ Append Dynamic Key</button>
+                            <button
+                                type="button"
+                                onClick={addSystemSpec}
+                                className="inline-flex h-10 items-center justify-center rounded-full border border-border bg-background px-4 text-[10px] font-bold uppercase tracking-[0.24em] text-foreground transition hover:bg-muted/50"
+                            >
+                                Add Metadata Row
+                            </button>
+                        </div>
+
+                        <div className="space-y-3">
+                            {systemSpecs.map((spec, idx) => (
+                                <div key={idx} className="grid gap-3 rounded-[1.5rem] border border-border bg-muted/20 p-4 md:grid-cols-[0.9fr_1.4fr_auto] md:items-center">
+                                    <input
+                                        value={spec.key}
+                                        onChange={(e) => updateSystemSpec(idx, 'key', e.target.value)}
+                                        className="h-11 rounded-xl border border-input bg-background px-4 text-sm font-semibold text-foreground transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                        placeholder="Key"
+                                    />
+                                    <input
+                                        value={spec.value}
+                                        onChange={(e) => updateSystemSpec(idx, 'value', e.target.value)}
+                                        className="h-11 rounded-xl border border-input bg-background px-4 text-sm text-foreground transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                        placeholder="Value"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => removeSystemSpec(idx)}
+                                        aria-label={`Remove metadata row ${idx + 1}`}
+                                        className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-border bg-background text-muted-foreground transition hover:border-destructive/20 hover:text-destructive"
+                                    >
+                                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18 18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 </div>
             </Section>
 
-            {/* Form Actions */}
-            <div className="pt-12 border-t border-border flex items-center justify-between">
+            <div className="flex flex-col gap-5 border-t border-border pt-10 sm:flex-row sm:items-center sm:justify-between">
                 <button
                     type="button"
                     onClick={onDelete}
                     disabled={loading}
-                    className="h-12 px-8 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-xs font-bold uppercase tracking-widest hover:bg-destructive hover:text-destructive-foreground transition-all"
+                    className="inline-flex h-12 items-center justify-center rounded-full border border-destructive/20 bg-destructive/10 px-8 text-xs font-bold uppercase tracking-[0.24em] text-destructive transition hover:bg-destructive hover:text-destructive-foreground disabled:cursor-not-allowed disabled:opacity-60"
                 >
                     Decommission Asset
                 </button>
-                <div className="flex gap-4">
-                    <Link href={`/dashboard/inventory/${item.id}`} className="h-12 px-8 flex items-center text-sm font-bold text-muted-foreground hover:text-foreground transition-colors uppercase tracking-widest">Discard</Link>
+                <div className="flex flex-wrap items-center gap-3">
+                    <Link
+                        href={`/dashboard/inventory/${item.id}`}
+                        className="inline-flex h-12 items-center justify-center rounded-full border border-border px-6 text-sm font-bold text-muted-foreground transition hover:bg-muted/40 hover:text-foreground"
+                    >
+                        Discard
+                    </Link>
                     <button
                         type="submit"
                         disabled={loading}
-                        className="h-12 px-10 bg-primary text-primary-foreground text-sm font-bold rounded-full hover:opacity-90 transition-all active:scale-95 disabled:opacity-50 shadow-xl"
+                        className="inline-flex h-12 items-center justify-center rounded-full bg-primary px-8 text-sm font-bold text-primary-foreground shadow-xl transition hover:opacity-90 active:scale-95 disabled:cursor-not-allowed disabled:opacity-60"
                     >
-                        {loading ? 'Committing...' : 'Confirm Changes'}
+                        {loading ? 'Saving Changes...' : 'Confirm Changes'}
                     </button>
                 </div>
             </div>
@@ -290,43 +310,92 @@ export default function EditInventoryForm({ item, users }) {
 
 function Section({ title, description, children }) {
     return (
-        <div className="space-y-6">
-            <div className="space-y-1">
-                <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-[0.3em]">{title}</h3>
-                <p className="text-sm text-muted-foreground">{description}</p>
+        <section className="rounded-[2rem] border border-border bg-card p-8 shadow-sm">
+            <div className="space-y-6">
+                <div className="space-y-2">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-muted-foreground">{title}</p>
+                    <p className="max-w-3xl text-sm leading-relaxed text-muted-foreground">{description}</p>
+                </div>
+                {children}
             </div>
-            {children}
+        </section>
+    );
+}
+
+function MetricCard({ label, value }) {
+    return (
+        <div className="rounded-[1.75rem] border border-border bg-card p-5 shadow-sm">
+            <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-muted-foreground">{label}</p>
+            <p className="mt-3 text-2xl font-bold tracking-tight text-foreground">{value || '-'}</p>
         </div>
     );
 }
 
 function StaticInfo({ label, value, isMono = false }) {
     return (
-        <div className="space-y-1">
-            <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">{label}</p>
-            <p className={`text-sm font-medium text-foreground truncate ${isMono ? 'font-mono' : ''}`}>{value || 'N/A'}</p>
+        <div className="rounded-[1.5rem] border border-border bg-muted/20 p-4">
+            <p className="text-[9px] font-bold uppercase tracking-[0.24em] text-muted-foreground">{label}</p>
+            <p className={`mt-2 break-words text-sm font-medium text-foreground ${isMono ? 'font-mono' : ''}`}>{value || 'N/A'}</p>
         </div>
     );
 }
 
-function InputField({ label, name, type = 'text', defaultValue, children }) {
-    const baseStyle = "w-full h-11 rounded-xl bg-input/50 border border-input px-4 text-sm text-foreground focus:outline-none focus:border-ring transition-all";
+function InputField({ label, name, type = 'text', defaultValue, children, placeholder, step }) {
+    const baseStyle = 'w-full h-11 rounded-xl border border-input bg-background px-4 text-sm text-foreground transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring';
 
     return (
         <div className="space-y-2">
-            <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{label}</label>
+            <label className="block text-[10px] font-bold uppercase tracking-[0.24em] text-muted-foreground">{label}</label>
             {type === 'select' ? (
                 <div className="relative">
-                    <select name={name} defaultValue={defaultValue} className={`${baseStyle} appearance-none cursor-pointer bg-background`}>
+                    <select name={name} defaultValue={defaultValue} className={`${baseStyle} appearance-none pr-10`}>
                         {children}
                     </select>
-                    <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none text-muted-foreground">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                    <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-muted-foreground">
+                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
                     </div>
                 </div>
             ) : (
-                <input name={name} type={type} defaultValue={defaultValue} className={`${baseStyle} bg-input/50`} />
+                <input
+                    name={name}
+                    type={type}
+                    defaultValue={defaultValue}
+                    placeholder={placeholder}
+                    step={step}
+                    className={baseStyle}
+                />
             )}
         </div>
     );
+}
+
+function CheckboxField({ label, name, defaultChecked }) {
+    return (
+        <label className="inline-flex cursor-pointer items-center gap-3 rounded-full border border-border bg-background px-4 py-3">
+            <input
+                type="checkbox"
+                name={name}
+                defaultChecked={defaultChecked}
+                className="h-4 w-4 rounded border-border bg-background text-foreground"
+            />
+            <span className="text-[11px] font-bold uppercase tracking-[0.22em] text-foreground">{label}</span>
+        </label>
+    );
+}
+
+function formatDate(value) {
+    if (!value) return '-';
+
+    return new Intl.DateTimeFormat('en-IN', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+    }).format(new Date(value));
+}
+
+function formatDateInput(value) {
+    if (!value) return '';
+    return new Date(value).toISOString().split('T')[0];
 }

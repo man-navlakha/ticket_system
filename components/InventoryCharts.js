@@ -1,86 +1,101 @@
 'use client';
 
 import {
-    BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell,
-    PieChart, Pie, AreaChart, Area
+    Area,
+    AreaChart,
+    Bar,
+    BarChart,
+    Cell,
+    Pie,
+    PieChart,
+    ResponsiveContainer,
+    Tooltip,
+    XAxis,
+    YAxis,
 } from 'recharts';
-
-const STATUS_COLORS = {
-    ACTIVE: '#22c55e',
-    MAINTENANCE: '#f59e0b',
-    RETIRED: '#ef4444',
-    STORAGE: '#3b82f6',
-};
+import {
+    INVENTORY_STATUS_CHART_COLORS,
+    INVENTORY_STATUS_OPTIONS,
+    getInventoryStatusLabel,
+    normalizeInventoryStatus,
+} from '@/lib/inventory-status';
 
 const PALETTE = ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#06b6d4', '#f43f5e'];
 
 const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
         return (
-            <div className="bg-card border border-border rounded-xl px-4 py-3 shadow-xl text-sm">
-                <p className="text-muted-foreground text-[10px] uppercase tracking-widest mb-1">{label || payload[0]?.name}</p>
-                <p className="text-foreground font-bold text-lg">{payload[0]?.value}</p>
+            <div className="rounded-xl border border-border bg-card px-4 py-3 text-sm shadow-xl">
+                <p className="mb-1 text-[10px] uppercase tracking-widest text-muted-foreground">{label || payload[0]?.name}</p>
+                <p className="text-lg font-bold text-foreground">{payload[0]?.value}</p>
             </div>
         );
     }
+
     return null;
 };
 
 export default function InventoryCharts({ items }) {
     const total = items.length;
 
-    // — By Status
     const statusMap = {};
-    items.forEach(i => {
-        if (i.status) statusMap[i.status] = (statusMap[i.status] || 0) + 1;
+    items.forEach((item) => {
+        if (item.status) {
+            const status = normalizeInventoryStatus(item.status);
+            statusMap[status] = (statusMap[status] || 0) + 1;
+        }
     });
-    const byStatus = Object.entries(statusMap).map(([name, value]) => ({
-        name, value, fill: STATUS_COLORS[name] || '#6b7280'
-    }));
 
-    // — By Type
+    const byStatus = INVENTORY_STATUS_OPTIONS
+        .filter((status) => statusMap[status] > 0)
+        .map((status) => ({
+            name: getInventoryStatusLabel(status),
+            value: statusMap[status],
+            fill: INVENTORY_STATUS_CHART_COLORS[status] || '#6b7280',
+        }));
+
     const typeMap = {};
-    items.forEach(i => {
-        if (i.type) typeMap[i.type] = (typeMap[i.type] || 0) + 1;
+    items.forEach((item) => {
+        if (item.type) {
+            typeMap[item.type] = (typeMap[item.type] || 0) + 1;
+        }
     });
     const byType = Object.entries(typeMap)
         .map(([name, value]) => ({ name, value }))
         .sort((a, b) => b.value - a.value);
 
-    // — By Brand
     const brandMap = {};
-    items.forEach(i => {
-        if (i.brand) brandMap[i.brand] = (brandMap[i.brand] || 0) + 1;
+    items.forEach((item) => {
+        if (item.brand) {
+            brandMap[item.brand] = (brandMap[item.brand] || 0) + 1;
+        }
     });
     const byBrand = Object.entries(brandMap)
         .map(([name, value]) => ({ name, value }))
         .sort((a, b) => b.value - a.value)
         .slice(0, 8);
 
-    // — Added per month (last 6 months)
     const now = new Date();
-    const monthlyData = Array.from({ length: 6 }, (_, i) => {
-        const d = new Date(now.getFullYear(), now.getMonth() - (5 - i), 1);
-        const label = d.toLocaleDateString('en-US', { month: 'short' });
-        const count = items.filter(item => {
+    const monthlyData = Array.from({ length: 6 }, (_, index) => {
+        const date = new Date(now.getFullYear(), now.getMonth() - (5 - index), 1);
+        const label = date.toLocaleDateString('en-US', { month: 'short' });
+        const count = items.filter((item) => {
             const created = new Date(item.createdAt);
-            return created.getMonth() === d.getMonth() && created.getFullYear() === d.getFullYear();
+            return created.getMonth() === date.getMonth() && created.getFullYear() === date.getFullYear();
         }).length;
+
         return { month: label, assets: count };
     });
 
-    // — Assigned vs Unassigned
-    const assigned = items.filter(i => i.userId || i.assignedUser).length;
+    const assigned = items.filter((item) => item.userId || item.assignedUser).length;
     const unassigned = total - assigned;
     const assignmentData = [
         { name: 'Assigned', value: assigned, fill: '#3b82f6' },
         { name: 'Unassigned', value: unassigned, fill: 'hsl(var(--muted-foreground))' },
-    ].filter(d => d.value > 0);
+    ].filter((entry) => entry.value > 0);
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-            {/* 1. Assets Added Over Time — Area Chart */}
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             <ChartCard
                 title="Asset Growth"
                 subtitle="New assets added per month (last 6 months)"
@@ -107,14 +122,16 @@ export default function InventoryCharts({ items }) {
                             axisLine={false}
                             allowDecimals={false}
                         />
-                        <Tooltip content={
-                            ({ active, payload, label }) => active && payload?.length ? (
-                                <div className="bg-card border border-border rounded-xl px-4 py-2.5 shadow-xl text-sm">
-                                    <p className="text-muted-foreground text-[10px] uppercase tracking-widest">{label}</p>
-                                    <p className="text-foreground font-bold text-base">{payload[0].value} assets added</p>
-                                </div>
-                            ) : null
-                        } />
+                        <Tooltip
+                            content={({ active, payload, label }) =>
+                                active && payload?.length ? (
+                                    <div className="rounded-xl border border-border bg-card px-4 py-2.5 text-sm shadow-xl">
+                                        <p className="text-[10px] uppercase tracking-widest text-muted-foreground">{label}</p>
+                                        <p className="text-base font-bold text-foreground">{payload[0].value} assets added</p>
+                                    </div>
+                                ) : null
+                            }
+                        />
                         <Area
                             type="monotone"
                             dataKey="assets"
@@ -128,11 +145,7 @@ export default function InventoryCharts({ items }) {
                 </ResponsiveContainer>
             </ChartCard>
 
-            {/* 2. Status Distribution — Colored Bars */}
-            <ChartCard
-                title="Status Breakdown"
-                subtitle="Asset lifecycle distribution"
-            >
+            <ChartCard title="Status Breakdown" subtitle="Asset lifecycle distribution">
                 <ResponsiveContainer width="100%" height={220}>
                     <BarChart data={byStatus} barCategoryGap="30%">
                         <XAxis
@@ -144,66 +157,64 @@ export default function InventoryCharts({ items }) {
                         <YAxis hide allowDecimals={false} />
                         <Tooltip content={<CustomTooltip />} />
                         <Bar dataKey="value" radius={[6, 6, 0, 0]} barSize={44}>
-                            {byStatus.map((entry, i) => (
-                                <Cell key={i} fill={entry.fill} fillOpacity={0.9} />
+                            {byStatus.map((entry, index) => (
+                                <Cell key={index} fill={entry.fill} fillOpacity={0.9} />
                             ))}
                         </Bar>
                     </BarChart>
                 </ResponsiveContainer>
                 <div className="flex flex-wrap gap-3 pt-1">
-                    {byStatus.map(s => (
-                        <div key={s.name} className="flex items-center gap-1.5">
-                            <div className="w-2 h-2 rounded-full" style={{ background: s.fill }} />
-                            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{s.name}</span>
-                            <span className="text-[10px] font-bold text-foreground">{s.value}</span>
+                    {byStatus.map((status) => (
+                        <div key={status.name} className="flex items-center gap-1.5">
+                            <div className="h-2 w-2 rounded-full" style={{ background: status.fill }} />
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{status.name}</span>
+                            <span className="text-[10px] font-bold text-foreground">{status.value}</span>
                         </div>
                     ))}
                 </div>
             </ChartCard>
 
-            {/* 3. Assignment — Donut */}
-            <ChartCard
-                title="Assignment Rate"
-                subtitle="Assigned vs unassigned assets"
-            >
+            <ChartCard title="Assignment Rate" subtitle="Assigned vs unassigned assets">
                 <div className="flex items-center gap-6">
                     <div className="relative">
                         <ResponsiveContainer width={160} height={160}>
                             <PieChart>
                                 <Pie
                                     data={assignmentData}
-                                    cx="50%" cy="50%"
-                                    innerRadius={50} outerRadius={72}
+                                    cx="50%"
+                                    cy="50%"
+                                    innerRadius={50}
+                                    outerRadius={72}
                                     paddingAngle={3}
                                     dataKey="value"
                                     strokeWidth={0}
                                 >
-                                    {assignmentData.map((entry, i) => (
-                                        <Cell key={i} fill={entry.fill} />
+                                    {assignmentData.map((entry, index) => (
+                                        <Cell key={index} fill={entry.fill} />
                                     ))}
                                 </Pie>
                                 <Tooltip content={<CustomTooltip />} />
                             </PieChart>
                         </ResponsiveContainer>
-                        {/* Center label */}
-                        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                        <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
                             <span className="text-2xl font-bold text-foreground">
                                 {total > 0 ? Math.round((assigned / total) * 100) : 0}%
                             </span>
-                            <span className="text-[9px] text-muted-foreground font-bold uppercase tracking-widest">in use</span>
+                            <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">in use</span>
                         </div>
                     </div>
+
                     <div className="flex-1 space-y-4">
-                        {assignmentData.map(a => (
-                            <div key={a.name}>
-                                <div className="flex justify-between items-center mb-1.5">
-                                    <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">{a.name}</span>
-                                    <span className="text-sm font-bold text-foreground">{a.value}</span>
+                        {assignmentData.map((entry) => (
+                            <div key={entry.name}>
+                                <div className="mb-1.5 flex items-center justify-between">
+                                    <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">{entry.name}</span>
+                                    <span className="text-sm font-bold text-foreground">{entry.value}</span>
                                 </div>
-                                <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                                <div className="h-1.5 overflow-hidden rounded-full bg-muted">
                                     <div
                                         className="h-full rounded-full transition-all duration-700"
-                                        style={{ width: `${(a.value / total) * 100 || 0}%`, background: a.fill }}
+                                        style={{ width: `${(entry.value / total) * 100 || 0}%`, background: entry.fill }}
                                     />
                                 </div>
                             </div>
@@ -212,11 +223,7 @@ export default function InventoryCharts({ items }) {
                 </div>
             </ChartCard>
 
-            {/* 4. By Type — Horizontal Bars */}
-            <ChartCard
-                title="Asset Types"
-                subtitle="Distribution by hardware category"
-            >
+            <ChartCard title="Asset Types" subtitle="Distribution by hardware category">
                 <ResponsiveContainer width="100%" height={220}>
                     <BarChart data={byType} layout="vertical" barCategoryGap="20%">
                         <XAxis type="number" hide allowDecimals={false} />
@@ -227,23 +234,19 @@ export default function InventoryCharts({ items }) {
                             tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10, fontWeight: 600 }}
                             tickLine={false}
                             axisLine={false}
-                            tickFormatter={v => v.charAt(0) + v.slice(1).toLowerCase()}
+                            tickFormatter={(value) => value.charAt(0) + value.slice(1).toLowerCase()}
                         />
                         <Tooltip content={<CustomTooltip />} />
                         <Bar dataKey="value" radius={[0, 6, 6, 0]} barSize={16}>
-                            {byType.map((_, i) => (
-                                <Cell key={i} fill={PALETTE[i % PALETTE.length]} fillOpacity={0.85} />
+                            {byType.map((_, index) => (
+                                <Cell key={index} fill={PALETTE[index % PALETTE.length]} fillOpacity={0.85} />
                             ))}
                         </Bar>
                     </BarChart>
                 </ResponsiveContainer>
             </ChartCard>
 
-            {/* 5. By Brand — Vertical Bars */}
-            <ChartCard
-                title="Top Brands"
-                subtitle="Most common hardware vendors"
-            >
+            <ChartCard title="Top Brands" subtitle="Most common hardware vendors">
                 <ResponsiveContainer width="100%" height={220}>
                     <BarChart data={byBrand} barCategoryGap="25%">
                         <XAxis
@@ -255,28 +258,27 @@ export default function InventoryCharts({ items }) {
                         <YAxis hide allowDecimals={false} />
                         <Tooltip content={<CustomTooltip />} />
                         <Bar dataKey="value" radius={[6, 6, 0, 0]} barSize={32}>
-                            {byBrand.map((_, i) => (
-                                <Cell key={i} fill={PALETTE[i % PALETTE.length]} fillOpacity={0.85} />
+                            {byBrand.map((_, index) => (
+                                <Cell key={index} fill={PALETTE[index % PALETTE.length]} fillOpacity={0.85} />
                             ))}
                         </Bar>
                     </BarChart>
                 </ResponsiveContainer>
             </ChartCard>
-
         </div>
     );
 }
 
 function ChartCard({ title, subtitle, badge, children, className = '' }) {
     return (
-        <div className={`p-6 rounded-2xl bg-card border border-border space-y-5 hover:border-foreground/10 transition-colors ${className}`}>
+        <div className={`space-y-5 rounded-2xl border border-border bg-card p-6 transition-colors hover:border-foreground/10 ${className}`}>
             <div className="flex items-start justify-between gap-4">
-                <div className="space-y-0.5 min-w-0">
+                <div className="min-w-0 space-y-0.5">
                     <h3 className="text-base font-bold tracking-tight text-foreground">{title}</h3>
-                    <p className="text-[11px] text-muted-foreground font-medium">{subtitle}</p>
+                    <p className="text-[11px] font-medium text-muted-foreground">{subtitle}</p>
                 </div>
                 {badge && (
-                    <span className="shrink-0 text-[10px] font-bold uppercase tracking-widest bg-muted text-muted-foreground px-2.5 py-1 rounded-full border border-border">
+                    <span className="shrink-0 rounded-full border border-border bg-muted px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
                         {badge}
                     </span>
                 )}

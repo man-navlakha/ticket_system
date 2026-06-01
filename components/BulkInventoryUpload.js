@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 export default function BulkInventoryUpload() {
@@ -14,6 +15,12 @@ export default function BulkInventoryUpload() {
         const file = e.target.files[0];
         if (!file) return;
 
+        if (!file.name?.toLowerCase().endsWith('.csv')) {
+            setResult({ success: 0, failed: 0, errors: ['Please select a .csv file only.'] });
+            if (fileInputRef.current) fileInputRef.current.value = '';
+            return;
+        }
+
         setUploading(true);
         setResult(null);
 
@@ -26,12 +33,26 @@ export default function BulkInventoryUpload() {
                 body: formData
             });
             const data = await res.json();
-            setResult(data);
+
+            if (!res.ok) {
+                setResult({
+                    success: 0,
+                    failed: 0,
+                    errors: [data.error || 'Upload failed. Please review the CSV and try again.']
+                });
+                return;
+            }
+
+            setResult({
+                success: data.success || 0,
+                failed: data.failed || 0,
+                errors: data.errors || []
+            });
             if (res.ok && data.success > 0) {
                 router.refresh();
             }
         } catch (error) {
-            setResult({ errors: ['Network or server error during upload.'] });
+            setResult({ success: 0, failed: 0, errors: ['Network or server error during upload.'] });
         } finally {
             setUploading(false);
             if (fileInputRef.current) fileInputRef.current.value = '';
@@ -40,12 +61,30 @@ export default function BulkInventoryUpload() {
 
     return (
         <>
-            <button
-                onClick={() => setIsOpen(true)}
-                className="inline-flex items-center justify-center h-10 px-5 rounded-lg bg-muted border border-border text-foreground text-sm font-bold hover:bg-muted/80 transition-all active:scale-95 shadow-sm"
-            >
-                Bulk Upload
-            </button>
+            <div className="flex flex-wrap items-center gap-3">
+                <Link
+                    href="/api/inventory/bulk/sample"
+                    prefetch={false}
+                    download
+                    className="inline-flex items-center justify-center h-10 px-4 rounded-lg bg-background border border-border text-foreground text-sm font-bold hover:bg-muted/50 transition-all active:scale-95 shadow-sm"
+                >
+                    Sample CSV
+                </Link>
+                <Link
+                    href="/api/inventory/export"
+                    prefetch={false}
+                    download
+                    className="inline-flex items-center justify-center h-10 px-4 rounded-lg bg-muted border border-border text-foreground text-sm font-bold hover:bg-muted/80 transition-all active:scale-95 shadow-sm"
+                >
+                    Export CSV
+                </Link>
+                <button
+                    onClick={() => setIsOpen(true)}
+                    className="inline-flex items-center justify-center h-10 px-5 rounded-lg bg-muted border border-border text-foreground text-sm font-bold hover:bg-muted/80 transition-all active:scale-95 shadow-sm"
+                >
+                    Import CSV
+                </button>
+            </div>
 
             {isOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md p-4 animate-in fade-in duration-200">
@@ -53,8 +92,8 @@ export default function BulkInventoryUpload() {
                         {/* Header */}
                         <div className="p-6 border-b border-border flex justify-between items-center bg-muted/30">
                             <div>
-                                <h2 className="text-xl font-bold text-foreground">Bulk Inventory Upload</h2>
-                                <p className="text-sm text-muted-foreground mt-1">Upload an Excel (.xlsx) file to add multiple items.</p>
+                                <h2 className="text-xl font-bold text-foreground">Bulk Inventory Import</h2>
+                                <p className="text-sm text-muted-foreground mt-1">Upload a CSV file to add or update multiple inventory records.</p>
                             </div>
                             <button
                                 onClick={() => setIsOpen(false)}
@@ -75,10 +114,29 @@ export default function BulkInventoryUpload() {
                                 </p>
                                 <ul className="list-disc pl-5 space-y-1 text-blue-600/80 dark:text-blue-200/80">
                                     <li>Required: <b>PID</b> (Unique ID)</li>
-                                    <li>Optional: Type (Computer, Laptop), Status, Ownership, Brand, Model, Price</li>
+                                    <li>Optional: Type, Status, Condition, Ownership, Brand, Model, and pricing fields</li>
                                     <li>Dates: Purchased Date, Warranty Date, Assigned Date (Format: YYYY-MM-DD)</li>
-                                    <li>Assign User: <b>Assigned To User Email</b> (Must match system email)</li>
+                                    <li>Assign User: <b>Assigned To User Email</b> should match a user email when possible</li>
+                                    <li>Existing PID values are updated, new PID values are created</li>
                                 </ul>
+                                <div className="flex flex-wrap gap-3 pt-2">
+                                    <Link
+                                        href="/api/inventory/bulk/sample"
+                                        prefetch={false}
+                                        download
+                                        className="inline-flex items-center justify-center rounded-full border border-blue-500/20 bg-white/70 px-4 py-2 text-xs font-bold uppercase tracking-widest text-blue-700 transition hover:bg-white dark:bg-blue-950/30 dark:text-blue-100"
+                                    >
+                                        Download Sample CSV
+                                    </Link>
+                                    <Link
+                                        href="/api/inventory/export"
+                                        prefetch={false}
+                                        download
+                                        className="inline-flex items-center justify-center rounded-full border border-blue-500/20 bg-white/70 px-4 py-2 text-xs font-bold uppercase tracking-widest text-blue-700 transition hover:bg-white dark:bg-blue-950/30 dark:text-blue-100"
+                                    >
+                                        Export Current Inventory
+                                    </Link>
+                                </div>
                             </div>
 
                             {/* Upload Area */}
@@ -92,13 +150,13 @@ export default function BulkInventoryUpload() {
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                                         </svg>
                                     </div>
-                                    <p className="text-foreground font-medium">Click to select Excel file</p>
-                                    <p className="text-muted-foreground text-sm mt-1">.xlsx or .xls files only</p>
+                                    <p className="text-foreground font-medium">Click to select CSV file</p>
+                                    <p className="text-muted-foreground text-sm mt-1">.csv files only</p>
                                     <input
                                         type="file"
                                         ref={fileInputRef}
                                         className="hidden"
-                                        accept=".xlsx, .xls"
+                                        accept=".csv,text/csv"
                                         onChange={handleUpload}
                                     />
                                 </div>
@@ -113,7 +171,7 @@ export default function BulkInventoryUpload() {
                                     </div>
                                     <div>
                                         <h3 className="text-foreground font-bold">Processing File...</h3>
-                                        <p className="text-muted-foreground text-sm">Parsing rows and updating database.</p>
+                                        <p className="text-muted-foreground text-sm">Validating CSV rows and updating the inventory database.</p>
                                     </div>
                                 </div>
                             )}

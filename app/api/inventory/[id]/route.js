@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/session';
+import { normalizeInventoryStatus } from '@/lib/inventory-status';
 
 export async function GET(request, { params }) {
     const user = await getCurrentUser();
@@ -65,7 +66,7 @@ export async function PUT(request, { params }) {
         if (json.price !== undefined) data.price = json.price ? parseFloat(json.price) : null;
         if (json.vendorInvoice !== undefined) data.vendorInvoice = json.vendorInvoice;
         if (json.warrantyType !== undefined) data.warrantyType = json.warrantyType;
-        if (json.status !== undefined) data.status = json.status;
+        if (json.status !== undefined) data.status = normalizeInventoryStatus(json.status);
         if (json.systemSpecs !== undefined) data.systemSpecs = json.systemSpecs;
         if (json.note !== undefined) data.note = json.note;
 

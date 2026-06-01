@@ -1,21 +1,25 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import InventoryActions from './InventoryActions';
 import { Monitor, Printer, Mouse, Keyboard, Headset, HardDrive, Tablet, Phone, Laptop, ChevronDown, Check, Calendar } from 'lucide-react';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
+import { getInventoryStatusBadgeClass, getInventoryStatusLabel, INVENTORY_STATUS_OPTIONS, normalizeInventoryStatus } from '@/lib/inventory-status';
 
 export default function InventorySearch({ items, users, userRole }) {
     const router = useRouter();
     const [searchQuery, setSearchQuery] = useState('');
     const [statusFilter, setStatusFilter] = useState('ALL');
     const [typeFilter, setTypeFilter] = useState('ALL');
+    const [selectedIds, setSelectedIds] = useState([]);
+    const [isBulkDeleting, setIsBulkDeleting] = useState(false);
 
     const statuses = useMemo(() => {
-        const unique = [...new Set(items.map(item => item.status).filter(Boolean))];
-        return unique.sort();
+        return INVENTORY_STATUS_OPTIONS.filter((status) =>
+            items.some((item) => normalizeInventoryStatus(item.status) === status)
+        );
     }, [items]);
 
     const types = useMemo(() => {
@@ -34,11 +38,12 @@ export default function InventorySearch({ items, users, userRole }) {
                 item.location?.toLowerCase().includes(query) ||
                 item.type?.toLowerCase().includes(query) ||
                 item.status?.toLowerCase().includes(query) ||
+                getInventoryStatusLabel(item.status).toLowerCase().includes(query) ||
                 item.brand?.toLowerCase().includes(query) ||
                 item.model?.toLowerCase().includes(query) ||
                 item.user?.username?.toLowerCase().includes(query);
 
-            const matchesStatus = statusFilter === 'ALL' || item.status === statusFilter;
+            const matchesStatus = statusFilter === 'ALL' || normalizeInventoryStatus(item.status) === statusFilter;
             const matchesType = typeFilter === 'ALL' || item.type === typeFilter;
 
             return matchesSearch && matchesStatus && matchesType;
@@ -51,7 +56,61 @@ export default function InventorySearch({ items, users, userRole }) {
         setTypeFilter('ALL');
     };
 
-    const isAdmin = userRole === 'ADMIN' || userRole === 'AGENT';
+    const canManage = userRole === 'ADMIN' || userRole === 'AGENT';
+    const canBulkDelete = userRole === 'ADMIN';
+    const selectedCount = selectedIds.length;
+    const filteredIds = filteredItems.map((item) => item.id);
+    const allFilteredSelected = filteredIds.length > 0 && filteredIds.every((id) => selectedIds.includes(id));
+
+    useEffect(() => {
+        setSelectedIds((current) => current.filter((id) => items.some((item) => item.id === id)));
+    }, [items]);
+
+    const toggleSelection = (id) => {
+        setSelectedIds((current) => (
+            current.includes(id) ? current.filter((value) => value !== id) : [...current, id]
+        ));
+    };
+
+    const toggleSelectAllFiltered = () => {
+        setSelectedIds((current) => {
+            if (allFilteredSelected) {
+                return current.filter((id) => !filteredIds.includes(id));
+            }
+
+            return [...new Set([...current, ...filteredIds])];
+        });
+    };
+
+    const clearSelection = () => {
+        setSelectedIds([]);
+    };
+
+    const handleBulkDelete = async () => {
+        if (!canBulkDelete || selectedIds.length === 0) return;
+        if (!confirm(`Delete ${selectedIds.length} selected assets? This action cannot be undone.`)) return;
+
+        setIsBulkDeleting(true);
+        try {
+            const res = await fetch('/api/inventory/bulk/delete', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ids: selectedIds }),
+            });
+
+            if (!res.ok) {
+                const data = await res.json().catch(() => ({}));
+                throw new Error(data.error || 'Failed to delete selected assets');
+            }
+
+            clearSelection();
+            router.refresh();
+        } catch (error) {
+            alert(error.message || 'Failed to delete selected assets');
+        } finally {
+            setIsBulkDeleting(false);
+        }
+    };
 
     return (
         <div className="flex flex-col h-full">
@@ -60,7 +119,8 @@ export default function InventorySearch({ items, users, userRole }) {
                 <div className="relative group max-w-md">
                     <input
                         type="text"
-                        placeholder="Search by PID, brand, model, user, serial..."
+                        aria-label="Search inventory assets"
+                        placeholder="Search by PID, brand, model, user, or serial number"
                         className="w-full h-11 bg-input/50 border border-input rounded-xl px-4 pr-10 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-ring transition-all font-medium"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
@@ -77,8 +137,8 @@ export default function InventorySearch({ items, users, userRole }) {
                         <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.3em]">Filters:</span>
                         <div className="flex flex-wrap gap-2">
                             {searchQuery && <FilterTag label={`Scope: ${searchQuery}`} onClear={() => setSearchQuery('')} />}
-                            {statusFilter !== 'ALL' && <FilterTag label={`Status: ${statusFilter}`} onClear={() => setStatusFilter('ALL')} />}
-                            {typeFilter !== 'ALL' && <FilterTag label={`Type: ${typeFilter}`} onClear={() => setTypeFilter('ALL')} />}
+                            {statusFilter !== 'ALL' && <FilterTag label={`Status: ${getInventoryStatusLabel(statusFilter)}`} onClear={() => setStatusFilter('ALL')} />}
+                            {typeFilter !== 'ALL' && <FilterTag label={`Type: ${formatEnumLabel(typeFilter)}`} onClear={() => setTypeFilter('ALL')} />}
                         </div>
                         <button
                             onClick={clearFilters}
@@ -88,12 +148,67 @@ export default function InventorySearch({ items, users, userRole }) {
                         </button>
                     </div>
                 )}
+
+                {canManage && (
+                    <div className="flex flex-col gap-3 rounded-2xl border border-border bg-muted/20 px-4 py-3 md:flex-row md:items-center md:justify-between">
+                        <div className="flex flex-wrap items-center gap-3 text-[11px] font-semibold text-muted-foreground">
+                            <label className="inline-flex items-center gap-2 cursor-pointer">
+                                <input
+                                    type="checkbox"
+                                    className="h-4 w-4 rounded border-border bg-background text-foreground"
+                                    checked={allFilteredSelected}
+                                    onChange={toggleSelectAllFiltered}
+                                    disabled={filteredIds.length === 0}
+                                />
+                                <span>Select all visible rows</span>
+                            </label>
+                            <span className="rounded-full border border-border bg-background px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-foreground">
+                                {selectedCount} selected
+                            </span>
+                        </div>
+
+                        <div className="flex flex-wrap items-center gap-2">
+                            <button
+                                type="button"
+                                onClick={clearSelection}
+                                disabled={selectedCount === 0}
+                                className="inline-flex items-center justify-center rounded-full border border-border px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground transition hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                                Clear Selection
+                            </button>
+                            {canBulkDelete && (
+                                <button
+                                    type="button"
+                                    onClick={handleBulkDelete}
+                                    disabled={selectedCount === 0 || isBulkDeleting}
+                                    className="inline-flex items-center justify-center rounded-full bg-red-500 px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-white transition hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-50"
+                                >
+                                    {isBulkDeleting ? 'Deleting...' : `Delete ${selectedCount || ''}`.trim()}
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                )}
             </div>
             {/* Table Area */}
             <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                     <thead>
                         <tr className="border-b border-border bg-muted/30">
+                            {canManage && (
+                                <th className="w-16 px-6 py-4">
+                                    <div className="flex justify-center">
+                                        <input
+                                            type="checkbox"
+                                            className="h-4 w-4 rounded border-border bg-background text-foreground"
+                                            checked={allFilteredSelected}
+                                            onChange={toggleSelectAllFiltered}
+                                            disabled={filteredIds.length === 0}
+                                            aria-label="Select all visible assets"
+                                        />
+                                    </div>
+                                </th>
+                            )}
                             <th className="px-8 py-4 text-[10px] font-black text-muted-foreground uppercase tracking-widest">Asset ID</th>
                             <th className="px-8 py-4">
                                 <HeaderFilter
@@ -109,6 +224,7 @@ export default function InventorySearch({ items, users, userRole }) {
                                     value={statusFilter}
                                     onChange={setStatusFilter}
                                     options={statuses}
+                                    formatOptionLabel={getInventoryStatusLabel}
                                 />
                             </th>
                             <th className="px-8 py-4 text-[10px] font-black text-muted-foreground uppercase tracking-widest">Assigned To</th>
@@ -117,7 +233,20 @@ export default function InventorySearch({ items, users, userRole }) {
                     </thead>
                     <tbody className="divide-y divide-border">
                         {filteredItems.map((item) => (
-                            <tr key={item.id} className="hover:bg-muted/20 transition-colors group">
+                            <tr key={item.id} className={`transition-colors group ${selectedIds.includes(item.id) ? 'bg-primary/5' : 'hover:bg-muted/20'}`}>
+                                {canManage && (
+                                    <td className="px-6 py-6">
+                                        <div className="flex justify-center">
+                                            <input
+                                                type="checkbox"
+                                                className="h-4 w-4 rounded border-border bg-background text-foreground"
+                                                checked={selectedIds.includes(item.id)}
+                                                onChange={() => toggleSelection(item.id)}
+                                                aria-label={`Select asset ${item.pid}`}
+                                            />
+                                        </div>
+                                    </td>
+                                )}
                                 <td className="px-8 py-6">
                                     <div className="flex flex-col gap-0.5">
                                         <span className="text-foreground font-mono text-xs font-bold">{item.pid}</span>
@@ -178,9 +307,10 @@ export default function InventorySearch({ items, users, userRole }) {
                                     )}
                                 </td>
                                 <td className="px-8 py-6 text-right">
-                                    <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <div className="flex items-center justify-end gap-2">
                                         <Link
                                             href={`/dashboard/inventory/${item.id}`}
+                                            aria-label={`View asset ${item.pid}`}
                                             className="h-8 w-8 rounded-lg bg-muted border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-all"
                                             title="View Details"
                                         >
@@ -189,9 +319,10 @@ export default function InventorySearch({ items, users, userRole }) {
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                             </svg>
                                         </Link>
-                                        {isAdmin && (
+                                        {canManage && (
                                             <Link
                                                 href={`/dashboard/inventory/${item.id}/edit`}
+                                                aria-label={`Edit asset ${item.pid}`}
                                                 className="h-8 w-8 rounded-lg bg-muted border border-border flex items-center justify-center text-muted-foreground hover:text-green-500 hover:bg-green-500/10 transition-all"
                                                 title="Edit Asset"
                                             >
@@ -200,15 +331,15 @@ export default function InventorySearch({ items, users, userRole }) {
                                                 </svg>
                                             </Link>
                                         )}
-                                        {isAdmin && (
-                                            <InventoryActions item={item} users={users} userRole={userRole} />
+                                        {canManage && (
+                                            <InventoryActions item={item} />
                                         )}
                                     </div>
                                 </td>
                             </tr>
                         ))}
                         {filteredItems.length === 0 && (
-                            <tr><td colSpan={5} className="p-12 text-center text-[10px] font-bold text-muted-foreground uppercase tracking-widest italic">No assets match the current filters.</td></tr>
+                            <tr><td colSpan={canManage ? 6 : 5} className="p-12 text-center text-[10px] font-bold text-muted-foreground uppercase tracking-widest italic">No assets match the current filters.</td></tr>
                         )}
                     </tbody>
                 </table>
@@ -229,22 +360,16 @@ export default function InventorySearch({ items, users, userRole }) {
 }
 
 function StatusBadge({ status }) {
-    const colors = {
-        ACTIVE: 'bg-green-500/10 text-green-500 border-green-500/20',
-        MAINTENANCE: 'bg-amber-500/10 text-amber-500 border-amber-500/20',
-        RETIRED: 'bg-red-500/10 text-red-500 border-red-500/20',
-        STORAGE: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
-    };
-
     return (
-        <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider border ${colors[status] || 'bg-muted text-muted-foreground border-border'}`}>
-            {status?.replace('_', ' ')}
+        <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider border ${getInventoryStatusBadgeClass(status)}`}>
+            {getInventoryStatusLabel(status)}
         </span>
     );
 }
 
-function HeaderFilter({ label, value, onChange, options }) {
-    const selectedLabel = value === 'ALL' ? label : value;
+function HeaderFilter({ label, value, onChange, options, formatOptionLabel }) {
+    const labelFormatter = formatOptionLabel || formatEnumLabel;
+    const selectedLabel = value === 'ALL' ? label : labelFormatter(value);
 
     return (
         <DropdownMenu.Root>
@@ -283,7 +408,7 @@ function HeaderFilter({ label, value, onChange, options }) {
                             onClick={() => onChange(opt)}
                             className={`w-full text-left px-3 py-2 rounded-lg text-[11px] font-semibold flex items-center justify-between transition-all cursor-pointer outline-none group ${value === opt ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'}`}
                         >
-                            <span>{opt.replace('_', ' ')}</span>
+                            <span>{labelFormatter(opt)}</span>
                             {value === opt && <Check className="w-3 h-3" />}
                         </DropdownMenu.Item>
                     ))}
@@ -291,6 +416,10 @@ function HeaderFilter({ label, value, onChange, options }) {
             </DropdownMenu.Portal>
         </DropdownMenu.Root>
     );
+}
+
+function formatEnumLabel(value) {
+    return String(value || '').replace(/_/g, ' ');
 }
 
 function FilterTag({ label, onClear }) {
