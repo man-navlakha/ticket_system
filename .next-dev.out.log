@@ -13,3 +13,5 @@ Creating turbopack project { dir: 'D:\\Projects\\ticket_system', testMode: true 
  POST /ip-mcp 500 in 6.0s (compile: 466ms, render: 5.5s)
  POST /ip-mcp 500 in 5.2s (compile: 5ms, render: 5.2s)
  GET /ip-mcp 500 in 5.4s (compile: 10ms, render: 5.4s)
+ POST /ip-mcp 200 in 5.5s (compile: 117ms, render: 5.4s)
+ GET /ip-mcp 200 in 6.1s (compile: 5ms, render: 6.1s)
