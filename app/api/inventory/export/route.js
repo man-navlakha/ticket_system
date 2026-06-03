@@ -19,7 +19,13 @@ export async function GET() {
                 select: {
                     id: true,
                     username: true,
+                    firstName: true,
+                    lastName: true,
                     email: true,
+                    phoneNumber: true,
+                    department: true,
+                    location: true,
+                    role: true,
                 },
             },
         },

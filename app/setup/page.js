@@ -2,9 +2,9 @@
 
 import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import Image from 'next/image';
 import Link from 'next/link';
 import { ThemeToggle } from '@/components/theme-toggle';
+import ThemeLogo from '@/components/ThemeLogo';
 import { Eye, EyeOff, Loader2, CheckCircle2, XCircle, ChevronDown } from 'lucide-react';
 
 // ── Department options ─────────────────────────────────────────────────────────
@@ -164,7 +164,7 @@ function SetupForm() {
                 )}
 
                 <div className="space-y-4">
-                    <InputField label="Workspace Identity" name="username" placeholder="Display Name / Handle" type="text" required />
+                    <InputField label="Username" name="username" placeholder="e.g. mannavlakha" type="text" required />
                     <InputField label="Phone Number" name="phoneNumber" placeholder="+91 98765 43210" type="tel" required />
 
                     {/* Department */}
@@ -244,15 +244,10 @@ export default function SetupAccountPage() {
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[500px] bg-blue-500/10 dark:bg-blue-500/5 blur-[120px] rounded-full -z-10 pointer-events-none" />
             <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-[#ec4269]/10 dark:bg-[#D4AF37]/5 blur-[100px] rounded-full -z-10 pointer-events-none" />
 
-            {/* Header */}
+            {/* Header — Excellent Publicity branding, identical to landing page */}
             <header className="w-full px-6 py-5 flex items-center justify-between relative z-10">
-                <Link href="/" className="flex items-center gap-3 group">
-                    <div className="p-2 bg-background/80 backdrop-blur rounded-xl border border-border shadow-sm group-hover:border-[#ec4269]/40 dark:group-hover:border-[#D4AF37]/40 transition-colors">
-                        <Image src="/logo_my.png" alt="Logo" width={28} height={28} priority />
-                    </div>
-                    <span className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground group-hover:text-foreground transition-colors hidden sm:block">
-                        MAN&apos;S SUPPORT DESK
-                    </span>
+                <Link href="/" className="flex items-center hover:opacity-80 transition-opacity">
+                    <ThemeLogo />
                 </Link>
                 <ThemeToggle />
             </header>

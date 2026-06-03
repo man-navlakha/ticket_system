@@ -4,7 +4,7 @@ import { useState, useRef } from 'react';
 import {
     Camera, Send, Loader2, ChevronDown, ChevronUp, ShieldCheck,
     Mail, Phone, User, Laptop2, MapPin, Building2, CheckCircle2, AlertCircle,
-    RotateCcw, QrCode, Sparkles,
+    RotateCcw, QrCode, Sparkles, KeyRound, CheckCircle,
 } from 'lucide-react';
 
 /**
@@ -33,6 +33,11 @@ export default function ReportClient({ initial }) {
     const [code, setCode] = useState('');
     const [revealedPerson, setRevealedPerson] = useState(null);
     const [revealError, setRevealError] = useState('');
+
+    // Activation state — for PENDING assignees who want their setup link emailed.
+    const [activateStep, setActivateStep] = useState('idle'); // idle | sending | sent
+    const [activateError, setActivateError] = useState('');
+    const [activateTarget, setActivateTarget] = useState('');
 
     const { device, person } = initial;
     const deviceTitle = [device.brand, device.model].filter(Boolean).join(' ');
@@ -109,6 +114,25 @@ export default function ReportClient({ initial }) {
         } catch (err) {
             setRevealStep('idle');
             setRevealError(err.message);
+        }
+    }
+
+    async function requestActivation() {
+        setActivateError('');
+        setActivateStep('sending');
+        try {
+            const r = await fetch('/api/quick-report/send-activation', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ pid: device.pid }),
+            });
+            const j = await r.json();
+            if (!r.ok) throw new Error(j.error || 'Could not send the activation link.');
+            setActivateTarget(j.maskedEmail || person.emailMasked || '');
+            setActivateStep('sent');
+        } catch (err) {
+            setActivateStep('idle');
+            setActivateError(err.message);
         }
     }
 
@@ -338,29 +362,37 @@ export default function ReportClient({ initial }) {
                                     )}
                                 </div>
 
-                                {!person.hasContact ? (
+                                {!person.hasAny ? (
                                     <p className="text-xs text-muted-foreground">
-                                        This device is not linked to a user.
+                                        This device is not assigned to anyone yet.
                                     </p>
                                 ) : (
                                     <ul className="info-list">
-                                        <Row
-                                            icon={<User className="w-3.5 h-3.5" />}
-                                            label="Name"
-                                            value={revealedPerson?.name || person.nameMasked || '—'}
-                                        />
-                                        <Row
-                                            icon={<Mail className="w-3.5 h-3.5" />}
-                                            label="Email"
-                                            value={revealedPerson?.email || person.emailMasked || '—'}
-                                            mono
-                                        />
-                                        <Row
-                                            icon={<Phone className="w-3.5 h-3.5" />}
-                                            label="Phone"
-                                            value={revealedPerson?.phone || person.phoneMasked || '—'}
-                                            mono
-                                        />
+                                        {/* Show every row that has SOMETHING — even if only
+                                            the name is known and email/phone are missing. */}
+                                        {person.hasName && (
+                                            <Row
+                                                icon={<User className="w-3.5 h-3.5" />}
+                                                label="Name"
+                                                value={revealedPerson?.name || person.nameMasked}
+                                            />
+                                        )}
+                                        {person.hasEmail && (
+                                            <Row
+                                                icon={<Mail className="w-3.5 h-3.5" />}
+                                                label="Email"
+                                                value={revealedPerson?.email || person.emailMasked}
+                                                mono
+                                            />
+                                        )}
+                                        {person.hasPhone && (
+                                            <Row
+                                                icon={<Phone className="w-3.5 h-3.5" />}
+                                                label="Phone"
+                                                value={revealedPerson?.phone || person.phoneMasked}
+                                                mono
+                                            />
+                                        )}
                                         {(revealedPerson?.department || device.department) && (
                                             <Row
                                                 icon={<Building2 className="w-3.5 h-3.5" />}
@@ -378,7 +410,80 @@ export default function ReportClient({ initial }) {
                                     </ul>
                                 )}
 
-                                {person.hasContact && revealStep !== 'revealed' && (
+                                {/* "No email on file" hint when we know who but can't OTP-reveal */}
+                                {person.hasAny && !person.canReveal && (
+                                    <p className="mt-3 text-[11px] text-muted-foreground leading-relaxed">
+                                        No email is on file for this person — full contact details
+                                        can&apos;t be revealed automatically. The IT team will reach
+                                        out directly.
+                                    </p>
+                                )}
+
+                                {/*
+                                  Activation CTA — visible when the assigned user is PENDING
+                                  (account created but not yet activated). The button emails the
+                                  setup link to the user's own address. Useful when a fresh hire
+                                  scans their own laptop QR and realises they never finished setup.
+                                */}
+                                {person.canActivate && (
+                                    <div className="mt-4 pt-4 border-t border-border">
+                                        {activateStep === 'sent' ? (
+                                            <div className="flex items-start gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3">
+                                                <CheckCircle className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" />
+                                                <div className="space-y-1">
+                                                    <p className="text-xs font-semibold text-foreground">
+                                                        Activation link sent
+                                                    </p>
+                                                    <p className="text-[11px] text-muted-foreground leading-relaxed">
+                                                        Check{' '}
+                                                        <span className="font-mono text-foreground">
+                                                            {activateTarget}
+                                                        </span>{' '}
+                                                        — the setup link expires in 24 hours.
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <>
+                                                <div className="flex items-start gap-2.5 mb-3">
+                                                    <span className="mt-0.5 inline-flex items-center gap-1 rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest text-amber-600 dark:text-amber-400">
+                                                        Pending
+                                                    </span>
+                                                    <p className="text-[11px] text-muted-foreground leading-relaxed">
+                                                        This account hasn&apos;t been activated yet. If you&apos;re the
+                                                        assigned person, we can email you a fresh setup link.
+                                                    </p>
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    onClick={requestActivation}
+                                                    disabled={activateStep === 'sending'}
+                                                    className="reveal-btn"
+                                                >
+                                                    {activateStep === 'sending' ? (
+                                                        <>
+                                                            <Loader2 className="w-3 h-3 animate-spin" />
+                                                            Sending link…
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <KeyRound className="w-4 h-4" />
+                                                            Activate this account
+                                                        </>
+                                                    )}
+                                                </button>
+                                                {activateError && (
+                                                    <p className="mt-2 text-[11px] text-destructive flex items-center gap-1.5">
+                                                        <AlertCircle className="w-3 h-3" />
+                                                        {activateError}
+                                                    </p>
+                                                )}
+                                            </>
+                                        )}
+                                    </div>
+                                )}
+
+                                {person.canReveal && revealStep !== 'revealed' && (
                                     <div className="mt-5 pt-5 border-t border-border">
                                         {revealStep === 'idle' && (
                                             <>

@@ -53,7 +53,10 @@ export async function POST(request) {
         const email = item.user?.email;
         if (!email) {
             return NextResponse.json(
-                { error: 'This device is not linked to a user email — full details cannot be revealed.' },
+                {
+                    error:
+                        'This device is not linked to a user account yet. You can still file the report without revealing personal details.',
+                },
                 { status: 409 },
             );
         }

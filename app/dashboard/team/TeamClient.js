@@ -3,9 +3,13 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ChevronDown, Check, Users, MailOpen, UserRoundX, Inbox, Download, Search } from 'lucide-react';
+import {
+    ChevronDown, Check, Users, MailOpen, UserRoundX, Inbox, Download, Search,
+    MoreVertical, Link2, ShieldCheck, ShieldOff, Trash2, Copy,
+} from 'lucide-react';
 import { toast } from 'sonner';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
+import BulkTeamUpload from '@/components/BulkTeamUpload';
 
 const DEPT_LABELS = {
     accounts: 'Accounts',
@@ -126,6 +130,63 @@ export default function TeamClient({ user, initialUsers = [], initialRequests = 
         }
     };
 
+    // Change a user's status (ACTIVE / SUSPENDED / PENDING).
+    const handleSetStatus = async (id, nextStatus) => {
+        const verb =
+            nextStatus === 'ACTIVE' ? 'activate' : nextStatus === 'SUSPENDED' ? 'suspend' : 'set as pending';
+        if (!confirm(`Are you sure you want to ${verb} this user?`)) return;
+        setLoading(true);
+        try {
+            const res = await fetch(`/api/admin/users/${id}/status`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: nextStatus }),
+            });
+            const data = await res.json();
+            if (!res.ok) {
+                toast.error(data.error || 'Could not change status.');
+                return;
+            }
+            setUsers((curr) => curr.map((u) => (u.id === id ? { ...u, status: nextStatus } : u)));
+            toast.success(
+                nextStatus === 'ACTIVE'
+                    ? 'Account activated.'
+                    : nextStatus === 'SUSPENDED'
+                        ? 'Account suspended.'
+                        : 'Status updated.',
+            );
+        } catch (err) {
+            toast.error('Network error while updating status.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Generate a fresh invite + copy the setup link to clipboard for sharing.
+    const handleResendInvite = async (id) => {
+        setLoading(true);
+        try {
+            const res = await fetch(`/api/admin/users/${id}/resend-invite`, { method: 'POST' });
+            const data = await res.json();
+            if (!res.ok) {
+                toast.error(data.error || 'Could not generate invite.');
+                return;
+            }
+            // Update row to PENDING locally — the server moved them there.
+            setUsers((curr) => curr.map((u) => (u.id === id ? { ...u, status: 'PENDING' } : u)));
+            try {
+                await navigator.clipboard.writeText(data.inviteLink);
+                toast.success('Invite link copied to clipboard. Email sent too.');
+            } catch {
+                toast.success(`Invite sent. Link: ${data.inviteLink}`);
+            }
+        } catch (err) {
+            toast.error('Network error while sending invite.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const filteredUsers = users.filter(u => {
         const query = search.toLowerCase().trim();
         const matchesSearch = !query ||
@@ -140,31 +201,24 @@ export default function TeamClient({ user, initialUsers = [], initialRequests = 
 
     const isFiltersActive = search || roleFilter !== 'ALL' || statusFilter !== 'ALL';
 
-    const handleExport = () => {
-        const headers = ['Username', 'Email', 'Role', 'Status', 'Joined Date', 'Tickets Count', 'Inventory Count'];
-        const csvContent = [
-            headers.join(','),
-            ...filteredUsers.map(u =>
-                [
-                    u.username,
-                    u.email,
-                    u.role,
-                    u.status,
-                    u.createdAt ? new Date(u.createdAt).toLocaleDateString() : 'N/A',
-                    u._count?.tickets || 0,
-                    u._count?.inventory || 0
-                ].map(val => `"${val === undefined || val === null ? '' : val}"`).join(',')
-            )
-        ].join('\n');
-
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `team_export_${new Date().toISOString().split('T')[0]}.csv`;
-        a.click();
-        URL.revokeObjectURL(url);
-        toast.success('Data exported successfully.');
+    const handleExport = async () => {
+        // Hit the server-side endpoint so the CSV roundtrips with the
+        // /api/team/bulk importer — same columns, including Phone /
+        // Department / Location / Linked Device PIDs.
+        try {
+            const res = await fetch('/api/team/export');
+            if (!res.ok) throw new Error('Export failed');
+            const blob = await res.blob();
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `team-export-${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+            toast.success('Team data exported.');
+        } catch (err) {
+            toast.error(err.message || 'Could not export.');
+        }
     };
 
     return (
@@ -182,7 +236,8 @@ export default function TeamClient({ user, initialUsers = [], initialRequests = 
                         <h1 className="text-4xl md:text-5xl font-bold tracking-tighter text-foreground">Team Management</h1>
                     </div>
                     {activeTab === 'members' && (
-                        <div className="flex items-center gap-4">
+                        <div className="flex flex-wrap items-center gap-3">
+                            <BulkTeamUpload />
                             <button
                                 onClick={handleExport}
                                 className="h-10 px-5 bg-foreground text-background rounded-full text-sm font-semibold hover:opacity-90 transition-all flex items-center gap-2 shadow-lg shadow-black/5 active:scale-95 whitespace-nowrap"
@@ -290,7 +345,7 @@ export default function TeamClient({ user, initialUsers = [], initialRequests = 
                                                         </div>
                                                         <div className="space-y-1">
                                                             <p className="text-sm font-bold text-foreground">No personnel found</p>
-                                                            <p className="text-xs text-muted-foreground">We couldn't find any team members matching your specific criteria.</p>
+                                                            <p className="text-xs text-muted-foreground">We couldn&apos;t find any team members matching your specific criteria.</p>
                                                         </div>
                                                         {isFiltersActive ? (
                                                             <button
@@ -343,12 +398,14 @@ export default function TeamClient({ user, initialUsers = [], initialRequests = 
                                                             >
                                                                 Profile
                                                             </Link>
-                                                            <button
-                                                                onClick={() => handleAction(u.id, null, 'user-delete')}
-                                                                className="h-8 px-3 rounded-lg bg-red-500/10 text-red-500 text-[10px] font-bold uppercase tracking-wider border border-red-500/20 opacity-0 group-hover:opacity-100 hover:bg-red-500 hover:text-white transition-all active:scale-95"
-                                                            >
-                                                                Revoke
-                                                            </button>
+                                                            <UserRowActions
+                                                                u={u}
+                                                                isSelf={u.id === user?.id}
+                                                                disabled={loading}
+                                                                onSetStatus={handleSetStatus}
+                                                                onResend={handleResendInvite}
+                                                                onDelete={() => handleAction(u.id, null, 'user-delete')}
+                                                            />
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -499,6 +556,84 @@ function StatusIndicator({ status }) {
             <div className={`w-1.5 h-1.5 rounded-full ${active ? 'bg-green-500' : status === 'PENDING' ? 'bg-amber-500 animate-pulse' : 'bg-red-500'}`} />
             <span className={`text-[10px] font-bold uppercase tracking-wider ${active ? 'text-green-500' : status === 'PENDING' ? 'text-amber-500' : 'text-red-500'}`}>{status}</span>
         </div>
+    );
+}
+
+/**
+ * Per-row actions menu shown on hover.
+ *   - Activate         → ACTIVE      (visible unless user is already ACTIVE)
+ *   - Suspend          → SUSPENDED   (visible unless user is already SUSPENDED or is self)
+ *   - Resend / Share   → fresh invite token + copy setup link to clipboard
+ *   - Delete           → existing destructive action
+ */
+function UserRowActions({ u, isSelf, disabled, onSetStatus, onResend, onDelete }) {
+    return (
+        <DropdownMenu.Root>
+            <DropdownMenu.Trigger asChild>
+                <button
+                    type="button"
+                    disabled={disabled}
+                    aria-label="More actions"
+                    className="h-8 w-8 rounded-lg border border-border bg-card text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100 focus:opacity-100 active:scale-95 disabled:opacity-30"
+                >
+                    <MoreVertical className="w-4 h-4" />
+                </button>
+            </DropdownMenu.Trigger>
+            <DropdownMenu.Portal>
+                <DropdownMenu.Content
+                    align="end"
+                    sideOffset={6}
+                    className="min-w-[220px] rounded-xl border border-border bg-card shadow-2xl p-1 animate-in fade-in slide-in-from-top-2 z-50"
+                >
+                    {/* Resend / share invite — most useful for PENDING + SUSPENDED */}
+                    <DropdownMenu.Item
+                        onSelect={() => onResend(u.id)}
+                        className="flex items-center gap-2.5 px-3 py-2 text-sm text-foreground rounded-md cursor-pointer outline-none hover:bg-muted/60 data-[highlighted]:bg-muted/60"
+                    >
+                        <Link2 className="w-3.5 h-3.5 text-blue-500" />
+                        <span className="flex-1">Resend &amp; copy invite link</span>
+                        <Copy className="w-3 h-3 text-muted-foreground" />
+                    </DropdownMenu.Item>
+
+                    <DropdownMenu.Separator className="h-px bg-border/50 my-1 mx-2" />
+
+                    {/* Activate */}
+                    {u.status !== 'ACTIVE' && (
+                        <DropdownMenu.Item
+                            onSelect={() => onSetStatus(u.id, 'ACTIVE')}
+                            className="flex items-center gap-2.5 px-3 py-2 text-sm text-foreground rounded-md cursor-pointer outline-none hover:bg-muted/60 data-[highlighted]:bg-muted/60"
+                        >
+                            <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
+                            Activate account
+                        </DropdownMenu.Item>
+                    )}
+
+                    {/* Suspend — never on self */}
+                    {!isSelf && u.status !== 'SUSPENDED' && (
+                        <DropdownMenu.Item
+                            onSelect={() => onSetStatus(u.id, 'SUSPENDED')}
+                            className="flex items-center gap-2.5 px-3 py-2 text-sm text-amber-600 dark:text-amber-400 rounded-md cursor-pointer outline-none hover:bg-amber-500/10 data-[highlighted]:bg-amber-500/10"
+                        >
+                            <ShieldOff className="w-3.5 h-3.5" />
+                            Suspend account
+                        </DropdownMenu.Item>
+                    )}
+
+                    {!isSelf && (
+                        <>
+                            <DropdownMenu.Separator className="h-px bg-border/50 my-1 mx-2" />
+                            <DropdownMenu.Item
+                                onSelect={onDelete}
+                                className="flex items-center gap-2.5 px-3 py-2 text-sm text-red-600 dark:text-red-400 rounded-md cursor-pointer outline-none hover:bg-red-500/10 data-[highlighted]:bg-red-500/10"
+                            >
+                                <Trash2 className="w-3.5 h-3.5" />
+                                Delete user
+                            </DropdownMenu.Item>
+                        </>
+                    )}
+                </DropdownMenu.Content>
+            </DropdownMenu.Portal>
+        </DropdownMenu.Root>
     );
 }
 

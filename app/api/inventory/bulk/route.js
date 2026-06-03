@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/session';
 import * as XLSX from 'xlsx';
 import { normalizeInventoryStatus } from '@/lib/inventory-status';
+import { resolveNameFromRow } from '@/lib/user';
 
 export async function POST(request) {
     try {
@@ -88,29 +89,114 @@ export async function POST(request) {
                 const returnDate = parseExcelDate(getVal('Return Date'));
                 const maintenanceDate = parseExcelDate(getVal('Maintenance Date'));
 
+                // ============================================================
                 // USER ASSIGNMENT
-                let userId = undefined;
-                const userIdentifier = getVal('Assigned To User Email') || getVal('Assigned User') || getVal('Email');
+                //
+                // Behavior:
+                //   - If "Assigned To User Email" is provided and a User with
+                //     that email doesn't exist yet, AUTO-CREATE a PENDING user
+                //     using the supplied Phone / Department / Location / Role
+                //     / Name. The user can complete signup later via invite.
+                //   - If the user already exists, fill in any of those fields
+                //     that are currently empty (we never overwrite values).
+                //   - If only a name is supplied (no email), store as free-text
+                //     in InventoryItem.assignedUser (the legacy path).
+                // ============================================================
+                const emailRaw = getVal('Assigned To User Email') || getVal('Email');
+                const { firstName, lastName, derivedUsername } = resolveNameFromRow({
+                    firstName: getVal('Assigned User First Name') || getVal('First Name'),
+                    lastName: getVal('Assigned User Last Name') || getVal('Last Name'),
+                    singleName:
+                        getVal('Assigned User') ||
+                        getVal('Assigned User Name') ||
+                        getVal('Name'),
+                });
+                const nameRaw = derivedUsername;
+                const phoneRaw = getVal('Assigned User Phone') || getVal('Phone') || getVal('Phone Number');
+                const userDeptRaw = getVal('Assigned User Department');
+                const userLocRaw = getVal('Assigned User Location');
+                const userRoleRaw = getVal('Assigned User Role') || 'USER';
 
-                if (userIdentifier && String(userIdentifier).trim() !== '-' && String(userIdentifier).trim().length > 1) {
-                    const identifier = String(userIdentifier).trim();
+                const cleanedEmail = emailRaw ? String(emailRaw).trim().toLowerCase() : '';
+                const cleanedName = nameRaw ? String(nameRaw).trim() : '';
+                const cleanedPhone = phoneRaw ? String(phoneRaw).trim() : '';
+                const cleanedUserDept = userDeptRaw ? String(userDeptRaw).trim() : '';
+                const cleanedUserLoc = userLocRaw ? String(userLocRaw).trim() : '';
+                const cleanedRole = mapEnum(userRoleRaw, ['USER', 'AGENT', 'ADMIN'], 'USER');
+
+                let userId = undefined;
+                let assignedUserString = null;
+
+                const looksLikeEmail = cleanedEmail.includes('@') && cleanedEmail.length > 3;
+
+                if (looksLikeEmail) {
+                    // Try to find existing user (case-insensitive on email)
                     const assignedUser = await prisma.user.findFirst({
-                        where: {
-                            OR: [
-                                { email: { equals: identifier, mode: 'insensitive' } },
-                                { username: { equals: identifier, mode: 'insensitive' } }
-                            ]
-                        }
+                        where: { email: { equals: cleanedEmail, mode: 'insensitive' } },
                     });
+
                     if (assignedUser) {
                         userId = assignedUser.id;
+                        // Enrich missing fields without overwriting existing ones
+                        const patch = {};
+                        if (!assignedUser.firstName && firstName) patch.firstName = firstName;
+                        if (!assignedUser.lastName && lastName) patch.lastName = lastName;
+                        if (!assignedUser.username && cleanedName) patch.username = cleanedName;
+                        if (!assignedUser.phoneNumber && cleanedPhone) patch.phoneNumber = cleanedPhone;
+                        if (!assignedUser.department && cleanedUserDept) patch.department = cleanedUserDept;
+                        if (!assignedUser.location && cleanedUserLoc) patch.location = cleanedUserLoc;
+                        if (Object.keys(patch).length > 0) {
+                            try {
+                                await prisma.user.update({ where: { id: assignedUser.id }, data: patch });
+                            } catch (enrichErr) {
+                                // Likely a unique-constraint on username — non-fatal.
+                                console.warn(`User enrich failed for ${cleanedEmail}:`, enrichErr.message);
+                            }
+                        }
+                    } else {
+                        // Auto-create a PENDING user
+                        try {
+                            const created = await prisma.user.create({
+                                data: {
+                                    email: cleanedEmail,
+                                    username: cleanedName || null,
+                                    firstName: firstName || null,
+                                    lastName: lastName || null,
+                                    password: null,
+                                    role: cleanedRole,
+                                    status: 'PENDING',
+                                    phoneNumber: cleanedPhone || null,
+                                    department: cleanedUserDept || null,
+                                    location: cleanedUserLoc || null,
+                                },
+                            });
+                            userId = created.id;
+                        } catch (createErr) {
+                            // Unique-conflict on username most likely — retry without it
+                            if (createErr.code === 'P2002' && cleanedName) {
+                                const created = await prisma.user.create({
+                                    data: {
+                                        email: cleanedEmail,
+                                        username: null,
+                                        firstName: firstName || null,
+                                        lastName: lastName || null,
+                                        password: null,
+                                        role: cleanedRole,
+                                        status: 'PENDING',
+                                        phoneNumber: cleanedPhone || null,
+                                        department: cleanedUserDept || null,
+                                        location: cleanedUserLoc || null,
+                                    },
+                                });
+                                userId = created.id;
+                            } else {
+                                console.warn(`Could not auto-create user ${cleanedEmail}:`, createErr.message);
+                            }
+                        }
                     }
-                }
-
-                let assignedUserString = null;
-                const rawUserStr = String(userIdentifier || '').trim();
-                if (!userId && rawUserStr.length > 0 && rawUserStr !== '-') {
-                    assignedUserString = rawUserStr;
+                } else if (cleanedName) {
+                    // No email → store as free-text on the inventory row
+                    assignedUserString = cleanedName;
                 }
 
                 // HARDWARE SPECS (Top-level fields)

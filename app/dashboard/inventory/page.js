@@ -7,6 +7,7 @@ import UserInventoryLink from "@/components/UserInventoryLink";
 import InventorySearch from "@/components/InventorySearch";
 import BulkInventoryUpload from "@/components/BulkInventoryUpload";
 import InventoryIntelligenceSection from "@/components/InventoryIntelligenceSection";
+import HealLinksButton from "@/components/HealLinksButton";
 
 export const dynamic = "force-dynamic";
 export const metadata = {
@@ -105,6 +106,7 @@ export default async function InventoryPage() {
                         {(user.role === "ADMIN" || user.role === "AGENT") && (
                             <div className="flex flex-wrap items-center gap-3">
                                 <BulkInventoryUpload />
+                                <HealLinksButton />
                                 <Link
                                     href="/dashboard/inventory/print-qr?all=1"
                                     title="Print QR stickers for every device"

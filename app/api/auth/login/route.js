@@ -30,7 +30,10 @@ export async function POST(req) {
         }
 
         if (user.status === 'SUSPENDED') {
-            return NextResponse.json({ error: 'Your account has been suspended. Please contact support.' }, { status: 403 });
+            return NextResponse.json(
+                { error: 'Please contact support because your account was suspended.' },
+                { status: 403 },
+            );
         }
 
         // Password might be null for PENDING users
