@@ -4,10 +4,13 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { X, ChevronLeft, ChevronRight, Sparkles, Compass } from 'lucide-react';
 
-const TOUR_DONE_KEY = 'ts-first-tour-done-v2';
-const TOUR_STEP_KEY = 'ts-first-tour-step-v2';
-const TOUR_ACTIVE_KEY = 'ts-first-tour-active-v2';
+const TOUR_DONE_KEY = 'ts-first-tour-done-v3';
+const TOUR_STEP_KEY = 'ts-first-tour-step-v3';
+const TOUR_ACTIVE_KEY = 'ts-first-tour-active-v3';
+const TOUR_VARIANT_KEY = 'ts-first-tour-variant-v3';
 export const TOUR_START_EVENT = 'ts-start-tour';
+
+const MOBILE_BREAKPOINT_PX = 768; // matches Tailwind `md`
 
 /**
  * Each step:
@@ -16,27 +19,9 @@ export const TOUR_START_EVENT = 'ts-start-tour';
  *  - title, body: copy
  *  - placement: 'center' | 'auto' (default 'auto' = follow target)
  */
-const STEPS = [
-    // 1. Welcome (any /dashboard page)
-    {
-        path: '/dashboard',
-        target: null,
-        placement: 'center',
-        title: 'Welcome — let me show you around 👋',
-        body:
-            "This guided tour walks you through the whole system in ~90 seconds. We will visit every important screen and explain each field. You can skip any time.",
-    },
 
-    // 2. New Ticket button on dashboard
-    {
-        path: '/dashboard',
-        target: '[data-tour="create-ticket"]',
-        title: 'Step 1 · Start a new ticket',
-        body:
-            "When something breaks, click 'New Ticket' here. We'll take you to the request form next — click Next to continue.",
-    },
-
-    // 3-10. Create-ticket page — walk through each field
+// Shared form-walkthrough steps (same on mobile + desktop — the form is responsive)
+const CREATE_FORM_STEPS = [
     {
         path: '/dashboard/create',
         target: '[data-tour="classification"]',
@@ -76,8 +61,10 @@ const STEPS = [
         path: '/dashboard/create',
         target: '[data-tour="attachments"]',
         title: 'Attachments & Screenshots — fastest help',
-        body:
+        bodyDesktop:
             "A screenshot is worth a thousand words. Press PrtScn on your keyboard, click the box, and Ctrl+V to paste. You can also attach PDFs.",
+        bodyMobile:
+            "Tap the box to attach a photo from your gallery — or take a fresh one with the camera. PDFs work too.",
     },
     {
         path: '/dashboard/create',
@@ -91,10 +78,32 @@ const STEPS = [
         target: '[data-tour="cancel-send"]',
         title: 'Cancel or Send',
         body:
-            "When ready, click 'Send request'. You'll be redirected to the dashboard and the ticket ID appears in your list. Click Cancel if you changed your mind.",
+            "When ready, tap 'Send request'. You'll be redirected to the dashboard and the ticket ID appears in your list. Tap Cancel if you changed your mind.",
     },
+];
 
-    // 11. Tickets list page — explain
+// =============================================================================
+// DESKTOP TOUR — relies on the Sidebar (hidden on mobile)
+// =============================================================================
+const STEPS_DESKTOP = [
+    {
+        path: '/dashboard',
+        target: null,
+        placement: 'center',
+        title: 'Welcome — let me show you around 👋',
+        body:
+            "This guided tour walks you through the whole system in ~90 seconds. We'll visit every important screen and explain each field. You can skip any time.",
+    },
+    {
+        path: '/dashboard',
+        target: '[data-tour="create-ticket"]',
+        title: 'Step 1 · Start a new ticket',
+        body:
+            "When something breaks, click 'New Ticket' here. We'll take you to the request form next — click Next or the highlighted button to continue.",
+    },
+    // Create form walkthrough
+    ...CREATE_FORM_STEPS,
+    // Tickets list
     {
         path: '/dashboard/tickets',
         target: '[data-tour="tickets-header"]',
@@ -116,8 +125,7 @@ const STEPS = [
         body:
             "Each row shows the ticket ID, summary, status (Open / In Progress / Resolved / Closed), and priority. Click a row to open it.",
     },
-
-    // 14-15. Inventory
+    // Inventory
     {
         path: '/dashboard/inventory',
         target: '[data-tour="inventory-hero"]',
@@ -132,8 +140,7 @@ const STEPS = [
         body:
             "Search by serial / brand / owner. Click any asset to see its full history, related tickets, and maintenance logs. Link an asset to a ticket from this screen.",
     },
-
-    // 16. Knowledge Base
+    // Knowledge Base
     {
         path: '/dashboard/knowledge-base',
         target: '[data-tour="kb-page"]',
@@ -141,22 +148,126 @@ const STEPS = [
         body:
             "Before raising a ticket, search here. Common fixes (WiFi reset, password reset, VPN setup, printer config) are documented step-by-step.",
     },
-
-    // 17. Done
     {
         path: '/dashboard',
         target: null,
         placement: 'center',
         title: "You're all set 🎉",
         body:
-            "That's the whole product. You can replay this tour anytime from the sidebar (Help & Support → Start tour). Need anything else? WhatsApp, email, or just raise a ticket.",
+            "That's the whole product. You can replay this tour anytime from the sidebar (Start guided tour, bottom-left). Need anything else? WhatsApp, email, or just raise a ticket.",
     },
 ];
 
-function readStep() {
+// =============================================================================
+// MOBILE TOUR — relies on the bottom bar (Home / Assets / FAB)
+// =============================================================================
+const STEPS_MOBILE = [
+    {
+        path: '/dashboard',
+        target: null,
+        placement: 'center',
+        title: 'Welcome — quick tour 👋',
+        body:
+            "I'll walk you through the app in about a minute. Every important button gets highlighted — tap it (or tap Next) to keep moving. You can skip any time.",
+    },
+    {
+        path: '/dashboard',
+        target: '[data-tour="mobile-home"]',
+        title: 'Home — your dashboard',
+        body:
+            "Tap the Home icon at any time to come back to this screen — your tickets, stats, and recent activity all live here.",
+    },
+    {
+        path: '/dashboard',
+        target: '[data-tour="mobile-create-fab"]',
+        title: 'The + button — raise a ticket',
+        body:
+            "Tap the big + in the centre of the bottom bar to start a new ticket. We'll take you to the request form next.",
+    },
+    // Create form walkthrough — same field-by-field as desktop, but with mobile-friendly copy on attachments
+    ...CREATE_FORM_STEPS,
+    // Tickets — no bottom-nav target, just explain after arriving
+    {
+        path: '/dashboard/tickets',
+        target: '[data-tour="tickets-header"]',
+        title: 'All Tickets — your inbox',
+        body:
+            "Every ticket you've raised lives here. Status updates live. Tap any row to open the conversation with the agent.",
+    },
+    {
+        path: '/dashboard/tickets',
+        target: '[data-tour="tickets-search"]',
+        title: 'Search & filter',
+        body:
+            "Search by title or ticket ID. Filters narrow it down by status (Open / Resolved) and priority.",
+    },
+    // Inventory — highlight the mobile Assets bottom-nav icon, then the page itself
+    {
+        path: '/dashboard',
+        target: '[data-tour="mobile-inventory"]',
+        title: 'Assets — your devices',
+        body:
+            "Tap the Assets icon to see every laptop, monitor, and peripheral assigned to you. Next, we'll open it.",
+    },
+    {
+        path: '/dashboard/inventory',
+        target: '[data-tour="inventory-hero"]',
+        title: 'Inventory page',
+        body:
+            "Track assignments and warranty status. From here you can link an asset to a ticket so the agent has full context.",
+    },
+    {
+        path: '/dashboard/inventory',
+        target: '[data-tour="inventory-register"]',
+        title: 'Asset register',
+        body:
+            "Scroll to find any tracked device. Tap a row to see its full history — past tickets, maintenance logs, and owner.",
+    },
+    // Knowledge Base
+    {
+        path: '/dashboard/knowledge-base',
+        target: '[data-tour="kb-page"]',
+        title: 'Knowledge Base — fix it yourself',
+        body:
+            "Before raising a ticket, check here. Common fixes (WiFi, password, VPN, printer) are documented step-by-step — usually faster than waiting.",
+    },
+    {
+        path: '/dashboard',
+        target: null,
+        placement: 'center',
+        title: "You're all set 🎉",
+        body:
+            "That's the whole app. Replay this tour anytime — open the side menu (top-left logo) → Start guided tour. Or just tap the + and raise a ticket.",
+    },
+];
+
+function isMobileViewport() {
+    if (typeof window === 'undefined') return false;
+    try {
+        return window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT_PX - 1}px)`).matches;
+    } catch {
+        return window.innerWidth < MOBILE_BREAKPOINT_PX;
+    }
+}
+
+function readStoredVariant() {
+    try {
+        return window.localStorage.getItem(TOUR_VARIANT_KEY) || null;
+    } catch {
+        return null;
+    }
+}
+
+function writeStoredVariant(v) {
+    try {
+        window.localStorage.setItem(TOUR_VARIANT_KEY, v);
+    } catch { }
+}
+
+function readStep(stepsLen) {
     try {
         const n = parseInt(window.localStorage.getItem(TOUR_STEP_KEY) || '0', 10);
-        return Number.isFinite(n) ? Math.max(0, Math.min(n, STEPS.length - 1)) : 0;
+        return Number.isFinite(n) ? Math.max(0, Math.min(n, stepsLen - 1)) : 0;
     } catch {
         return 0;
     }
@@ -195,46 +306,54 @@ export default function FirstTimeTour() {
     const [step, setStep] = useState(0);
     const [rect, setRect] = useState(null);
     const [resolvedForStep, setResolvedForStep] = useState(-1);
+    // 'mobile' | 'desktop' — locked when the tour starts; if the viewport flips
+    // mid-tour, we restart from step 0 with the new variant.
+    const [variant, setVariant] = useState(null);
     const pollRef = useRef(null);
+
+    // Pick the right step array for this variant.
+    const steps = variant === 'mobile' ? STEPS_MOBILE : STEPS_DESKTOP;
 
     // First load: decide whether to auto-open the tour
     useEffect(() => {
         if (typeof window === 'undefined') return;
-        const startNow = () => {
-            setStep(readStep());
+        const detected = isMobileViewport() ? 'mobile' : 'desktop';
+        const stored = readStoredVariant();
+
+        const startNow = (v) => {
+            const useVariant = v || stored || detected;
+            const stepsForVariant = useVariant === 'mobile' ? STEPS_MOBILE : STEPS_DESKTOP;
+            // If the stored variant doesn't match the current viewport, restart at 0
+            const stepIdx = stored && stored !== detected ? 0 : readStep(stepsForVariant.length);
+            setVariant(useVariant);
+            writeStoredVariant(useVariant);
+            setStep(stepIdx);
+            writeStep(stepIdx);
             setActive(true);
             setOpen(true);
         };
+
         if (isActive()) {
             // resume across page navigations
             startNow();
             return;
         }
         if (!isDone()) {
-            const t = setTimeout(startNow, 700);
+            const t = setTimeout(() => startNow(), 700);
             return () => clearTimeout(t);
         }
-        // Listen for manual restart
-        const handler = () => {
-            try {
-                window.localStorage.removeItem(TOUR_DONE_KEY);
-                window.localStorage.setItem(TOUR_STEP_KEY, '0');
-            } catch { }
-            setStep(0);
-            setActive(true);
-            setOpen(true);
-        };
-        window.addEventListener(TOUR_START_EVENT, handler);
-        return () => window.removeEventListener(TOUR_START_EVENT, handler);
     }, []);
 
-    // Listen for manual restart even while tour is already mounted/closed
+    // Listen for manual restart (works whether tour is already open or closed)
     useEffect(() => {
         const handler = () => {
             try {
                 window.localStorage.removeItem(TOUR_DONE_KEY);
                 window.localStorage.setItem(TOUR_STEP_KEY, '0');
             } catch { }
+            const v = isMobileViewport() ? 'mobile' : 'desktop';
+            writeStoredVariant(v);
+            setVariant(v);
             setStep(0);
             setActive(true);
             setOpen(true);
@@ -243,7 +362,32 @@ export default function FirstTimeTour() {
         return () => window.removeEventListener(TOUR_START_EVENT, handler);
     }, []);
 
-    const current = STEPS[step];
+    // Watch viewport — if it crosses the breakpoint while the tour is open,
+    // restart from step 0 with the variant that matches the new layout.
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT_PX - 1}px)`);
+        const handler = (e) => {
+            if (!open) return;
+            const nextVariant = e.matches ? 'mobile' : 'desktop';
+            if (nextVariant === variant) return;
+            writeStoredVariant(nextVariant);
+            setVariant(nextVariant);
+            setStep(0);
+            writeStep(0);
+            setResolvedForStep(-1);
+            setRect(null);
+        };
+        try {
+            mql.addEventListener('change', handler);
+            return () => mql.removeEventListener('change', handler);
+        } catch {
+            mql.addListener(handler);
+            return () => mql.removeListener(handler);
+        }
+    }, [open, variant]);
+
+    const current = steps[step];
 
     // When step or pathname changes: navigate if needed, then wait for target to appear
     useEffect(() => {
@@ -356,14 +500,14 @@ export default function FirstTimeTour() {
     }, []);
 
     const next = useCallback(() => {
-        if (step >= STEPS.length - 1) {
+        if (step >= steps.length - 1) {
             dismiss();
             return;
         }
         const n = step + 1;
         writeStep(n);
         setStep(n);
-    }, [step, dismiss]);
+    }, [step, steps.length, dismiss]);
 
     const back = useCallback(() => {
         const n = Math.max(0, step - 1);
@@ -373,15 +517,40 @@ export default function FirstTimeTour() {
 
     if (!open || !current) return null;
 
-    const pct = Math.round(((step + 1) / STEPS.length) * 100);
+    const pct = Math.round(((step + 1) / steps.length) * 100);
     const useCenter = current.placement === 'center' || !rect;
+
+    // Resolve copy: a step can have a single `body` OR variant-specific `bodyMobile`/`bodyDesktop`.
+    const bodyText =
+        (variant === 'mobile' ? current.bodyMobile : current.bodyDesktop) || current.body || '';
 
     // Card position: try to place near the target, otherwise center
     let cardStyle = {};
     if (useCenter) {
-        cardStyle = { left: '50%', bottom: '6%', transform: 'translateX(-50%)' };
+        cardStyle =
+            variant === 'mobile'
+                ? { left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }
+                : { left: '50%', bottom: '6%', transform: 'translateX(-50%)' };
+    } else if (variant === 'mobile') {
+        // On mobile, always center horizontally and place above/below the target —
+        // the target itself is usually small and near the bottom (FAB) or top.
+        const spaceBelow = window.innerHeight - (rect.top + rect.height);
+        const cardH = 260;
+        if (spaceBelow > cardH + 16) {
+            cardStyle = {
+                top: rect.top + rect.height + 12,
+                left: '50%',
+                transform: 'translateX(-50%)',
+            };
+        } else {
+            cardStyle = {
+                bottom: window.innerHeight - rect.top + 12,
+                left: '50%',
+                transform: 'translateX(-50%)',
+            };
+        }
     } else {
-        // Position card below the highlight, or above if no room
+        // Desktop: place below the highlight, or above if no room
         const spaceBelow = window.innerHeight - (rect.top + rect.height);
         const cardH = 240;
         if (spaceBelow > cardH + 24) {
@@ -391,7 +560,6 @@ export default function FirstTimeTour() {
                 maxWidth: 440,
             };
         } else {
-            // place above
             cardStyle = {
                 bottom: window.innerHeight - rect.top + 16,
                 left: Math.max(16, Math.min(rect.left, window.innerWidth - 460)),
@@ -400,48 +568,87 @@ export default function FirstTimeTour() {
         }
     }
 
+    // Geometry for the 4 backdrop-blur panels around the highlight rect.
+    // Padding makes the "hole" slightly larger than the target so the ring fits.
+    const HOLE_PAD = 6;
+    const holeTop = rect ? Math.max(0, rect.top - HOLE_PAD) : 0;
+    const holeLeft = rect ? Math.max(0, rect.left - HOLE_PAD) : 0;
+    const holeRight = rect ? rect.left + rect.width + HOLE_PAD : 0;
+    const holeBottom = rect ? rect.top + rect.height + HOLE_PAD : 0;
+    const panelClass =
+        'absolute bg-black/55 backdrop-blur-sm pointer-events-auto cursor-default transition-all duration-300';
+
     return (
         <div className="fixed inset-0 z-[80] pointer-events-none">
             {/*
               Two modes:
-              (a) No target rect → render a normal full-screen dimmer behind the card.
-              (b) Target rect exists → render NO full-screen dimmer; the ring's
-                  massive box-shadow does ALL the dimming, naturally cutting a hole
-                  around the target so it stays at full brightness ("spotlight").
+              (a) No target rect → render a single full-screen blurred dim panel.
+              (b) Target rect exists → render 4 blurred panels around the hole
+                  (top / bottom / left / right) so the spotlighted target stays
+                  crisp and bright while EVERYTHING else is dimmed AND blurred.
 
-              The dimmer never dismisses on click — only the X and Skip do.
+              None of the panels dismiss on click — only the X and Skip do.
             */}
             {!rect && (
                 <div
-                    className="absolute inset-0 bg-black/65 pointer-events-auto transition-opacity cursor-default"
+                    className="absolute inset-0 bg-black/65 backdrop-blur-md pointer-events-auto transition-opacity cursor-default"
                     aria-hidden="true"
                 />
             )}
 
-            {/* Highlight ring + spotlight cutout */}
             {rect && (
                 <>
-                    {/*
-                      The visible ring AND the spotlight cutout are the same div.
-                      box-shadow with a massive spread fills the rest of the viewport
-                      with a dim color, while the element's own bounds (which are
-                      transparent) leave the target underneath at full brightness.
-                    */}
+                    {/* Top panel */}
+                    <div
+                        className={panelClass}
+                        style={{ top: 0, left: 0, right: 0, height: holeTop }}
+                        aria-hidden="true"
+                    />
+                    {/* Bottom panel */}
+                    <div
+                        className={panelClass}
+                        style={{ top: holeBottom, left: 0, right: 0, bottom: 0 }}
+                        aria-hidden="true"
+                    />
+                    {/* Left panel */}
+                    <div
+                        className={panelClass}
+                        style={{
+                            top: holeTop,
+                            left: 0,
+                            width: holeLeft,
+                            height: holeBottom - holeTop,
+                        }}
+                        aria-hidden="true"
+                    />
+                    {/* Right panel */}
+                    <div
+                        className={panelClass}
+                        style={{
+                            top: holeTop,
+                            left: holeRight,
+                            right: 0,
+                            height: holeBottom - holeTop,
+                        }}
+                        aria-hidden="true"
+                    />
+
+                    {/* Highlight ring (purely decorative, no dim) */}
                     <div
                         className="absolute rounded-xl ring-4 ring-[#ec4269] dark:ring-[#D4AF37] ring-offset-2 ring-offset-transparent transition-all duration-300 pointer-events-none"
                         style={{
-                            top: rect.top - 6,
-                            left: rect.left - 6,
-                            width: rect.width + 12,
-                            height: rect.height + 12,
-                            boxShadow: '0 0 0 9999px rgba(0,0,0,0.65)',
+                            top: rect.top - HOLE_PAD,
+                            left: rect.left - HOLE_PAD,
+                            width: rect.width + HOLE_PAD * 2,
+                            height: rect.height + HOLE_PAD * 2,
                             background: 'transparent',
                         }}
                     />
+
                     {/*
                       Click-to-advance overlay above the highlighted target.
                       Transparent button — clicking the visible target advances
-                      the tour instead of bouncing off the dimmer.
+                      the tour instead of bouncing off the dim panels.
                     */}
                     <button
                         type="button"
@@ -450,10 +657,10 @@ export default function FirstTimeTour() {
                         title="Click to continue"
                         className="absolute rounded-xl pointer-events-auto bg-transparent border-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#ec4269] dark:focus:ring-[#D4AF37]"
                         style={{
-                            top: rect.top - 6,
-                            left: rect.left - 6,
-                            width: rect.width + 12,
-                            height: rect.height + 12,
+                            top: rect.top - HOLE_PAD,
+                            left: rect.left - HOLE_PAD,
+                            width: rect.width + HOLE_PAD * 2,
+                            height: rect.height + HOLE_PAD * 2,
                         }}
                     />
                 </>
@@ -467,7 +674,10 @@ export default function FirstTimeTour() {
                 <div className="flex items-center justify-between mb-3">
                     <div className="inline-flex items-center gap-2 rounded-full border border-border bg-muted/50 px-2.5 py-1 text-[10px] font-medium text-muted-foreground uppercase tracking-widest">
                         <Sparkles className="w-3 h-3 text-emerald-500" />
-                        Step {step + 1} of {STEPS.length}
+                        Step {step + 1} of {steps.length}
+                        <span className="ml-1 opacity-60 normal-case tracking-normal text-[9px]">
+                            · {variant === 'mobile' ? 'mobile' : 'desktop'}
+                        </span>
                     </div>
                     <button
                         type="button"
@@ -482,7 +692,7 @@ export default function FirstTimeTour() {
                 <h3 className="text-base sm:text-lg font-semibold text-foreground mb-2">
                     {current.title}
                 </h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{current.body}</p>
+                <p className="text-sm text-muted-foreground leading-relaxed">{bodyText}</p>
 
                 {waiting && (
                     <div className="mt-3 text-[11px] text-muted-foreground inline-flex items-center gap-2">
@@ -528,8 +738,8 @@ export default function FirstTimeTour() {
                             disabled={waiting}
                             className="inline-flex items-center gap-1 px-4 py-2 rounded-full text-xs font-semibold bg-[#ec4269] dark:bg-[#D4AF37] text-white dark:text-zinc-900 hover:opacity-90 transition-opacity disabled:opacity-50"
                         >
-                            {step === STEPS.length - 1 ? 'Finish' : 'Next'}
-                            {step !== STEPS.length - 1 && <ChevronRight className="w-3 h-3" />}
+                            {step === steps.length - 1 ? 'Finish' : 'Next'}
+                            {step !== steps.length - 1 && <ChevronRight className="w-3 h-3" />}
                         </button>
                     </div>
                 </div>
