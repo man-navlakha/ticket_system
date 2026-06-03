@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/session';
+import { getBaseUrl } from '@/lib/get-base-url';
 import crypto from 'crypto';
 
 export async function POST(request) {
@@ -45,7 +46,8 @@ export async function POST(request) {
         });
 
         // 5. Send Email via Zoho Mail
-        const inviteLink = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/setup?token=${inviteToken}`;
+        const baseUrl = getBaseUrl(request);
+        const inviteLink = `${baseUrl}/setup?token=${inviteToken}`;
 
         try {
             const { sendInviteEmail } = await import('@/lib/email');

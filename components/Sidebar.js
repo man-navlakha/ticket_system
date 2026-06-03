@@ -169,7 +169,7 @@ export default function Sidebar({ user }) {
     return (
         <>
             {/* Desktop Sidebar */}
-            <aside className="hidden md:flex flex-col w-[280px] min-h-screen bg-background border-r border-border sticky top-0 h-screen overflow-y-auto z-50 no-scrollbar transition-colors duration-300">
+            <aside data-print-hide className="hidden md:flex flex-col w-[280px] min-h-screen bg-background border-r border-border sticky top-0 h-screen overflow-y-auto z-50 no-scrollbar transition-colors duration-300">
                 {/* Brand Header */}
                 <div className="flex items-center gap-3 px-6 h-16 border-b border-border shrink-0 bg-background/50 backdrop-blur-md sticky top-0 z-10">
                     <Link href="/dashboard" className="flex items-center group hover:opacity-80 transition-opacity">

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/session';
 import { sendNewTicketNotification } from '@/lib/email';
+import { getBaseUrl } from '@/lib/get-base-url';
 import { rateLimit } from '@/lib/rate-limit';
 
 export async function GET(request) {
@@ -165,6 +166,12 @@ export async function POST(request) {
         });
 
         if (notifyAgents) {
+            // Capture the public origin from the live request BEFORE the async
+            // block runs — the request object is no longer guaranteed valid
+            // once we've returned the response. This is what makes the
+            // "View Ticket" link in the email point to the real domain.
+            const baseUrl = getBaseUrl(request);
+
             // 🚨 Notify Agents & Admins (Asynchronously)
             (async () => {
                 try {
@@ -187,7 +194,7 @@ export async function POST(request) {
                         };
 
                         for (const person of staff) {
-                            await sendNewTicketNotification(person.email, notificationData);
+                            await sendNewTicketNotification(person.email, notificationData, baseUrl);
                         }
                     }
                 } catch (notifyError) {

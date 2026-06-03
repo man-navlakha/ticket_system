@@ -41,7 +41,7 @@ export default function DashboardNav({ user }) {
     return (
         <>
             {/* Desktop Header */}
-            <header className="sticky top-4 z-50 hidden md:block px-4 transition-colors duration-300">
+            <header data-print-hide className="sticky top-4 z-50 hidden md:block px-4 transition-colors duration-300">
                 <div className="mx-auto w-full max-w-6xl rounded-2xl border border-border bg-background/80 backdrop-blur-xl shadow-2xl">
                     <div className="flex h-16 items-center justify-end px-6">
 
@@ -56,7 +56,7 @@ export default function DashboardNav({ user }) {
             </header>
 
             {/* Mobile Header (Logo Only) */}
-            <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-xl md:hidden transition-colors duration-300">
+            <header data-print-hide className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-xl md:hidden transition-colors duration-300">
                 <div className="flex h-14 items-center justify-between px-4">
                     <Link href="/dashboard" className="flex items-center gap-2 text-lg font-bold">
                         <Image
@@ -73,7 +73,7 @@ export default function DashboardNav({ user }) {
             </header>
 
             {/* Mobile Bottom Nav */}
-            <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#0a0a0a] border-t border-white/10 pb-safe">
+            <nav data-print-hide className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#0a0a0a] border-t border-white/10 pb-safe">
                 <div className="flex items-center justify-around h-16 px-2 relative">
 
                     {/* Home */}

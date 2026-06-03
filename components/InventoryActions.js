@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { Printer } from 'lucide-react';
 
 export default function InventoryActions({ item }) {
     const router = useRouter();
@@ -31,6 +33,15 @@ export default function InventoryActions({ item }) {
 
     return (
         <div className="flex items-center gap-3">
+            <Link
+                href={`/dashboard/inventory/print-qr?id=${item.id}`}
+                title="Print QR sticker"
+                aria-label={`Print QR sticker for ${item.pid}`}
+                className="inline-flex h-8 items-center gap-1.5 rounded-full border border-border bg-card px-3 text-xs font-semibold text-foreground transition hover:bg-muted"
+            >
+                <Printer className="h-3.5 w-3.5" />
+                Print QR
+            </Link>
             <button
                 onClick={handleDelete}
                 disabled={isDeleting}

@@ -106,6 +106,16 @@ export default async function InventoryPage() {
                             <div className="flex flex-wrap items-center gap-3">
                                 <BulkInventoryUpload />
                                 <Link
+                                    href="/dashboard/inventory/print-qr?all=1"
+                                    title="Print QR stickers for every device"
+                                    className="inline-flex h-11 items-center gap-2 rounded-full border border-border bg-card px-5 text-sm font-semibold text-foreground transition hover:bg-muted"
+                                >
+                                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M6 9V4h12v5M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v6H6z" />
+                                    </svg>
+                                    Print all QR
+                                </Link>
+                                <Link
                                     href="/dashboard/inventory/create"
                                     className="inline-flex h-11 items-center gap-2 rounded-full bg-foreground px-5 text-sm font-bold text-background shadow-lg transition hover:opacity-90 active:scale-[0.98]"
                                 >

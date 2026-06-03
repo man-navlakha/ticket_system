@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/session';
+import { getBaseUrl } from '@/lib/get-base-url';
 import crypto from 'crypto';
 import { sendInviteEmail } from '@/lib/email';
 
@@ -24,7 +25,7 @@ export async function POST(request) {
             failed: []
         };
 
-        const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+        const appUrl = getBaseUrl(request);
 
         // Process invites sequentially to maintain stability
         for (const email of emails) {

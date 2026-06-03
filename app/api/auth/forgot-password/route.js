@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import crypto from 'crypto';
 import { sendPasswordResetEmail } from '@/lib/email';
+import { getBaseUrl } from '@/lib/get-base-url';
 
 export async function POST(req) {
     try {
@@ -32,8 +33,9 @@ export async function POST(req) {
             },
         });
 
-        // Construct reset link
-        const origin = req.nextUrl.origin;
+        // Construct reset link using the public origin the request actually
+        // hit (X-Forwarded-Proto + X-Forwarded-Host on Vercel / nginx).
+        const origin = getBaseUrl(req);
         const resetLink = `${origin}/auth/new-password?token=${resetToken}`;
 
         // Send the email
