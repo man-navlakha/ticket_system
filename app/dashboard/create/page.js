@@ -1,26 +1,35 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, Suspense, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { Laptop, Cloud, Plug } from 'lucide-react';
+import { Laptop, Cloud, Plug, Clipboard, Camera, X } from 'lucide-react';
 
 function CreateTicketForm() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const preSelectedId = searchParams.get('inventoryId');
+    const prefillType = searchParams.get('type');
+    const prefillTitle = searchParams.get('title') || '';
+    const prefillDescription = searchParams.get('description') || '';
+    const prefillPriority = searchParams.get('priority') || 'MEDIUM';
+    const prefillTemplate = searchParams.get('template') || '';
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [inventory, setInventory] = useState([]);
-    const [issueType, setIssueType] = useState('inventory');
+    const [issueType, setIssueType] = useState(
+        ['inventory', 'email', 'personal'].includes(prefillType) ? prefillType : 'inventory'
+    );
 
     const [selectedItem, setSelectedItem] = useState(null);
     const [selectedComponent, setSelectedComponent] = useState('');
     const [customProduct, setCustomProduct] = useState('');
 
-    const [title, setTitle] = useState('');
-    const [description, setDescription] = useState('');
+    const [title, setTitle] = useState(prefillTitle);
+    const [description, setDescription] = useState(prefillDescription);
+    const [pastedFiles, setPastedFiles] = useState([]);
+    const fileInputRef = useRef(null);
 
     useEffect(() => {
         fetchInventory();
@@ -60,7 +69,8 @@ function CreateTicketForm() {
 
         const formData = new FormData(e.currentTarget);
         let attachmentUrls = [];
-        const files = formData.getAll('attachment').filter(f => f.size > 0);
+        const filesFromInput = formData.getAll('attachment').filter(f => f.size > 0);
+        const files = [...filesFromInput, ...pastedFiles];
         const notifyAgents = formData.get('notifyAgents') === 'on';
 
         if (files.length > 0) {
@@ -132,6 +142,18 @@ function CreateTicketForm() {
             </div>
 
             <form onSubmit={onSubmit} className="max-w-4xl space-y-16 pb-24">
+                {prefillTemplate && (
+                    <div className="p-4 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-sm flex items-start gap-3">
+                        <span className="text-lg leading-none">✨</span>
+                        <div>
+                            <div className="font-semibold">Template applied</div>
+                            <div className="text-xs opacity-80">
+                                We pre-filled the form for you. Edit anything that doesn&apos;t fit, then submit.
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 {error && (
                     <div className="p-4 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-sm font-medium">
                         {error}
@@ -139,7 +161,7 @@ function CreateTicketForm() {
                 )}
 
                 {/* Step 1: Issue Classification */}
-                <div className="space-y-6">
+                <div data-tour="classification" className="space-y-6">
                     <div className="space-y-1">
                         <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-[0.3em]">Classification</h3>
                         <p className="text-sm text-foreground/80">Identify the nature of your technical challenge.</p>
@@ -172,7 +194,7 @@ function CreateTicketForm() {
 
                 {/* Device Selection Overlay */}
                 {issueType === 'inventory' && inventory.length > 0 && (
-                    <div className="bg-muted/30 border border-border rounded-[2rem] p-8 space-y-8 animate-in zoom-in-95 duration-300">
+                    <div data-tour="target-asset" className="bg-muted/30 border border-border rounded-[2rem] p-8 space-y-8 animate-in zoom-in-95 duration-300">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                             <InputField label="Target Asset" name="inventoryId" type="select"
                                 value={selectedItem?.id || ''}
@@ -209,7 +231,7 @@ function CreateTicketForm() {
                 )}
 
                 {issueType === 'personal' && (
-                    <div className="bg-muted/30 border border-border rounded-[2rem] p-8 animate-in zoom-in-95 duration-300">
+                    <div data-tour="target-asset" className="bg-muted/30 border border-border rounded-[2rem] p-8 animate-in zoom-in-95 duration-300">
                         <InputField label="Asset or Service Description" name="customProduct"
                             required value={customProduct} onChange={(e) => setCustomProduct(e.target.value)}
                             placeholder="e.g. Conference Room A Display, Remote VPN"
@@ -226,23 +248,25 @@ function CreateTicketForm() {
 
                     <div className="space-y-6">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div className="md:col-span-2">
+                            <div data-tour="summary" className="md:col-span-2">
                                 <InputField label="Summary" name="title" value={title}
                                     onChange={(e) => setTitle(e.target.value)} required
                                     placeholder="Brief nature of the operational failure"
                                 />
                             </div>
-                            <InputField label="Operational Priority" name="priority" type="select"
-                                defaultValue="MEDIUM"
-                            >
-                                <option value="LOW" className="bg-background text-foreground">LOW — NON-CRITICAL</option>
-                                <option value="MEDIUM" className="bg-background text-foreground">MEDIUM — STANDARD</option>
-                                <option value="HIGH" className="bg-background text-foreground">HIGH — URGENT</option>
-                            </InputField>
+                            <div data-tour="priority">
+                                <InputField label="Operational Priority" name="priority" type="select"
+                                    defaultValue={prefillPriority}
+                                >
+                                    <option value="LOW" className="bg-background text-foreground">LOW — NON-CRITICAL</option>
+                                    <option value="MEDIUM" className="bg-background text-foreground">MEDIUM — STANDARD</option>
+                                    <option value="HIGH" className="bg-background text-foreground">HIGH — URGENT</option>
+                                </InputField>
+                            </div>
                         </div>
 
 
-                        <div className="space-y-2">
+                        <div data-tour="description" className="space-y-2">
                             <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-widest">In-Depth Description</label>
                             <textarea
                                 value={description}
@@ -255,23 +279,92 @@ function CreateTicketForm() {
                         </div>
 
                         {/* File Upload */}
-                        <div className="space-y-2">
-                            <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Evidence Uploads</label>
-                            <div className="relative group">
-                                <input
-                                    type="file"
-                                    name="attachment"
-                                    multiple
-                                    className="w-full h-14 bg-input/50 border border-border rounded-xl px-4 text-xs text-muted-foreground file:mr-4 file:py-1.5 file:px-4 file:rounded-full file:border-0 file:text-[10px] file:font-bold file:bg-foreground file:text-background hover:file:bg-foreground/90 transition-all cursor-pointer flex items-center pt-3.5"
-                                />
-                                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[10px] font-bold text-muted-foreground group-hover:text-foreground transition-colors uppercase tracking-widest">
-                                    MAX 5MB / PDF, JPG, PNG
+                        <div data-tour="attachments" className="space-y-3">
+                            <div className="flex items-center justify-between gap-3 flex-wrap">
+                                <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Attachments / Screenshots</label>
+                                <PasteHint />
+                            </div>
+                            <div
+                                onPaste={(e) => {
+                                    const items = e.clipboardData?.items;
+                                    if (!items) return;
+                                    const imgs = [];
+                                    for (const it of items) {
+                                        if (it.kind === 'file' && it.type.startsWith('image/')) {
+                                            const f = it.getAsFile();
+                                            if (f) {
+                                                imgs.push(new File([f], `screenshot-${Date.now()}.${(f.type.split('/')[1] || 'png')}`, { type: f.type }));
+                                            }
+                                        }
+                                    }
+                                    if (imgs.length) {
+                                        e.preventDefault();
+                                        setPastedFiles(prev => [...prev, ...imgs]);
+                                    }
+                                }}
+                                tabIndex={0}
+                                role="region"
+                                aria-label="Attach files or paste a screenshot"
+                                className="space-y-3 rounded-xl border border-dashed border-border bg-input/30 p-4 focus-within:border-primary/50 focus-within:bg-input/40 transition-colors outline-none"
+                            >
+                                <div className="relative group">
+                                    <input
+                                        ref={fileInputRef}
+                                        type="file"
+                                        name="attachment"
+                                        multiple
+                                        accept="image/*,application/pdf"
+                                        className="w-full h-12 bg-background border border-border rounded-lg px-4 text-xs text-muted-foreground file:mr-4 file:py-1.5 file:px-4 file:rounded-full file:border-0 file:text-[10px] file:font-bold file:bg-foreground file:text-background hover:file:bg-foreground/90 transition-all cursor-pointer flex items-center pt-3"
+                                    />
+                                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[10px] font-bold text-muted-foreground group-hover:text-foreground transition-colors uppercase tracking-widest">
+                                        MAX 5MB / PDF, JPG, PNG
+                                    </div>
                                 </div>
+
+                                <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
+                                    <Clipboard className="w-3.5 h-3.5 shrink-0" />
+                                    <span>
+                                        <strong className="text-foreground">Press PrtScn</strong> on your keyboard,
+                                        then click here and press <kbd className="px-1.5 py-0.5 rounded border border-border bg-muted font-mono text-[10px]">Ctrl</kbd>
+                                        +<kbd className="px-1.5 py-0.5 rounded border border-border bg-muted font-mono text-[10px]">V</kbd> to paste a screenshot.
+                                    </span>
+                                </div>
+
+                                {pastedFiles.length > 0 && (
+                                    <div className="flex flex-wrap gap-2 pt-1">
+                                        {pastedFiles.map((f, i) => {
+                                            const url = URL.createObjectURL(f);
+                                            return (
+                                                <div key={i} className="relative group/p">
+                                                    {f.type.startsWith('image/') ? (
+                                                        <img
+                                                            src={url}
+                                                            alt={`Pasted screenshot ${i + 1}`}
+                                                            className="w-20 h-20 object-cover rounded-lg border border-border"
+                                                        />
+                                                    ) : (
+                                                        <div className="w-20 h-20 rounded-lg border border-border bg-muted flex items-center justify-center text-[10px] text-muted-foreground p-1 text-center break-all">
+                                                            {f.name}
+                                                        </div>
+                                                    )}
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setPastedFiles(prev => prev.filter((_, idx) => idx !== i))}
+                                                        aria-label={`Remove ${f.name}`}
+                                                        className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-foreground text-background flex items-center justify-center opacity-0 group-hover/p:opacity-100 transition-opacity"
+                                                    >
+                                                        <X className="w-3 h-3" />
+                                                    </button>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                )}
                             </div>
                         </div>
 
                         {/* Options */}
-                        <div className="space-y-2 pt-2">
+                        <div data-tour="notify" className="space-y-2 pt-2">
                             <label className="flex items-center gap-3 cursor-pointer group w-max">
                                 <div className="relative flex items-center justify-center">
                                     <input
@@ -291,7 +384,7 @@ function CreateTicketForm() {
                 </div>
 
                 {/* Submittal */}
-                <div className="pt-12 border-t border-border flex items-center justify-between">
+                <div data-tour="cancel-send" className="pt-12 border-t border-border flex items-center justify-between">
                     <p className="text-[11px] text-muted-foreground max-w-sm font-medium italic">
                         Standard response time is 4-6 business hours.
                     </p>
@@ -308,6 +401,15 @@ function CreateTicketForm() {
                 </div>
             </form>
         </div>
+    );
+}
+
+function PasteHint() {
+    return (
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-[10px] font-medium text-emerald-700 dark:text-emerald-400">
+            <Camera className="w-3 h-3" />
+            Paste screenshots with Ctrl+V
+        </span>
     );
 }
 

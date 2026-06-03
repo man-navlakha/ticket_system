@@ -7,6 +7,7 @@ import { useState } from 'react';
 import LogoutButton from './LogoutButton';
 import { ThemeToggle } from './theme-toggle';
 import ThemeLogo from './ThemeLogo';
+import StartTourButton from './StartTourButton';
 
 export default function Sidebar({ user }) {
     const pathname = usePathname();
@@ -214,24 +215,38 @@ export default function Sidebar({ user }) {
                                                 {openSubMenu[item.id] && (
                                                     <div className="relative pl-6 mt-1 space-y-0.5">
                                                         <div className="absolute left-[21px] top-0 bottom-0 w-px bg-border" />
-                                                        {item.subItems.map((subItem) => (
-                                                            <Link
-                                                                key={subItem.href}
-                                                                href={subItem.href}
-                                                                className={`block pl-6 pr-3 py-1.5 text-[13px] rounded-r-md border-l-2 border-transparent transition-colors ${isSubActive(subItem.href)
-                                                                    ? 'text-foreground border-foreground bg-muted/50 font-medium'
-                                                                    : 'text-muted-foreground hover:text-foreground hover:border-foreground/20'
-                                                                    }`}
-                                                            >
-                                                                {subItem.label}
-                                                            </Link>
-                                                        ))}
+                                                        {item.subItems.map((subItem) => {
+                                                            const subTourId =
+                                                                subItem.href === '/dashboard/tickets'
+                                                                    ? 'all-tickets-link'
+                                                                    : subItem.href === '/dashboard/inventory'
+                                                                        ? 'all-assets-link'
+                                                                        : undefined;
+                                                            return (
+                                                                <Link
+                                                                    key={subItem.href}
+                                                                    href={subItem.href}
+                                                                    data-tour={subTourId}
+                                                                    className={`block pl-6 pr-3 py-1.5 text-[13px] rounded-r-md border-l-2 border-transparent transition-colors ${isSubActive(subItem.href)
+                                                                        ? 'text-foreground border-foreground bg-muted/50 font-medium'
+                                                                        : 'text-muted-foreground hover:text-foreground hover:border-foreground/20'
+                                                                        }`}
+                                                                >
+                                                                    {subItem.label}
+                                                                </Link>
+                                                            );
+                                                        })}
                                                     </div>
                                                 )}
                                             </>
                                         ) : (
                                             <Link
                                                 href={item.href}
+                                                data-tour={
+                                                    item.href === '/dashboard/knowledge-base'
+                                                        ? 'kb-link'
+                                                        : undefined
+                                                }
                                                 className={`flex items-center gap-3 px-3 py-2 text-sm rounded-md transition-all duration-200 group ${isActive(item.href)
                                                     ? 'text-foreground bg-muted/50 font-medium'
                                                     : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
@@ -250,6 +265,7 @@ export default function Sidebar({ user }) {
 
                 {/* User Profile */}
                 <div className="p-4 border-t border-border bg-background sticky bottom-0 space-y-3">
+                    <StartTourButton />
                     <div className="flex items-center justify-between px-1">
                         <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">Theme</span>
                         <ThemeToggle />
@@ -283,6 +299,7 @@ export default function Sidebar({ user }) {
                     </Link>
 
                     <Link
+                        data-tour="inventory"
                         href="/dashboard/inventory"
                         className={`flex flex-col items-center justify-center p-2 rounded-xl transition-all w-16 group ${isActive('/dashboard/inventory') ? 'text-foreground' : 'text-muted-foreground'}`}
                     >

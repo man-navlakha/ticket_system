@@ -70,7 +70,7 @@ function KBContent() {
     };
 
     return (
-        <div className="space-y-12 animate-in fade-in duration-500">
+        <div data-tour="kb-page" className="space-y-12 animate-in fade-in duration-500">
             {/* Minimal Header */}
             <div className="space-y-4">
                 <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-widest">
@@ -170,7 +170,7 @@ function KBContent() {
             <div className="pt-12 border-t border-border">
                 <div className="flex flex-col md:flex-row items-center justify-between gap-6 p-8 rounded-2xl bg-gradient-to-r from-blue-500/10 to-transparent border border-blue-500/20">
                     <div>
-                        <h4 className="text-foreground font-bold text-lg mb-1">Didn't find what you need?</h4>
+                        <h4 className="text-foreground font-bold text-lg mb-1">Didn&apos;t find what you need?</h4>
                         <p className="text-sm text-muted-foreground">Collaborate with our community or request a new article.</p>
                     </div>
                     <Link href="/dashboard/knowledge-base/create" className="px-6 py-2.5 bg-foreground text-background rounded-lg text-sm font-bold shadow-lg hover:bg-foreground/90 transition-colors whitespace-nowrap">

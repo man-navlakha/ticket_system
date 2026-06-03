@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { ThemeToggle } from './theme-toggle';
 import { Menu, X } from 'lucide-react';
 import ThemeLogo from './ThemeLogo';
+import SimpleViewToggle from './SimpleViewToggle';
 
 export default function LandingNav() {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -25,6 +26,7 @@ export default function LandingNav() {
 
                     {/* Desktop Actions */}
                     <div className="hidden md:flex items-center gap-6">
+                        <SimpleViewToggle compact />
                         <ThemeToggle />
                         <Link href="/kb" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
                             Knowledge Base
@@ -55,7 +57,9 @@ export default function LandingNav() {
             {isMobileMenuOpen && (
                 <div className="md:hidden border-t border-border bg-background px-4 py-4 shadow-lg transition-all animate-in fade-in slide-in-from-top-3">
                     <div className="flex flex-col gap-4">
-
+                        <div className="flex justify-center">
+                            <SimpleViewToggle />
+                        </div>
                         <Link
                             href="/kb"
                             onClick={() => setIsMobileMenuOpen(false)}

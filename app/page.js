@@ -5,6 +5,9 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import LandingNav from '@/components/LandingNav';
 import Footer from '@/components/Footer';
+import StarterCard from '@/components/StarterCard';
+import FallbackChannels from '@/components/FallbackChannels';
+import { useSimpleView } from '@/components/SimpleViewToggle';
 import dynamic from 'next/dynamic';
 
 const FloatingLines = dynamic(() => import('@/components/FloatingLines'), { ssr: false });
@@ -15,6 +18,7 @@ const ShelvingUnit = dynamic(() => import('lucide-react').then(mod => mod.Shelvi
 
 export default function Home() {
   const router = useRouter();
+  const simple = useSimpleView();
   const [searchTicket, setSearchTicket] = useState('');
   const [ticketData, setTicketData] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -133,30 +137,32 @@ export default function Home() {
               {/* Heading */}
               <div className="space-y-4">
                 <h1 className="text-5xl sm:text-6xl lg:text-7xl font-light tracking-tight text-foreground drop-shadow-sm">
-                  Enterprise Support Hub
+                  {simple ? 'Get IT help, fast.' : 'Enterprise Support Hub'}
                 </h1>
                 <span className="text-lg sm:text-xl text-muted-foreground font-light max-w-3xl mx-auto leading-relaxed">
 
                 </span>
                 <p className="text-lg sm:text-xl text-muted-foreground font-light max-w-3xl mx-auto leading-relaxed">
-                  Unified ticket management, inventory tracking, and team collaboration built for enterprise-grade support.
+                  {simple
+                    ? 'Tell us what is wrong. We will fix it and keep you posted — by email, WhatsApp, or right here.'
+                    : 'Unified ticket management, inventory tracking, and team collaboration built for enterprise-grade support.'}
                 </p>
               </div>
 
               {/* CTA Buttons */}
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
                 <Link
-                  href="/dashboard"
+                  href="/dashboard/create"
                   className="px-8 py-3 rounded-full bg-[#ec4269] dark:bg-[#D4AF37] text-white dark:text-zinc-900 font-semibold text-sm hover:opacity-90 hover:scale-105 transition-all outline-none ring-2 ring-[#ec4269]/50 ring-offset-2 ring-offset-background shadow-lg shadow-[#ec4269]/20"
                 >
-                  Access Dashboard
+                  {simple ? 'Report a problem' : 'Raise a new ticket'}
                 </Link>
-                <button
-                  onClick={() => document.getElementById('request-access')?.scrollIntoView({ behavior: 'smooth' })}
+                <Link
+                  href="/dashboard"
                   className="px-8 py-3 rounded-full border border-border text-foreground font-medium text-sm hover:bg-muted transition-colors"
                 >
-                  Request Access
-                </button>
+                  {simple ? 'Open my dashboard' : 'Access Dashboard'}
+                </Link>
               </div>
             </div>
           </div>
@@ -182,22 +188,40 @@ export default function Home() {
           </div>
         </section>
 
+        {/* New here? Start here + sample templates */}
+        <StarterCard simple={simple} />
+
         {/* Quick Ticket Lookup - Vercel Style */}
         <section className="py-24 px-4 border-b border-border bg-background relative overflow-hidden">
           {/* Background grid pattern */}
           <div className="absolute inset-0 bg-[linear-gradient(to_right,var(--color-border)_1px,transparent_1px),linear-gradient(to_bottom,var(--color-border)_1px,transparent_1px)] bg-[size:24px_24px] opacity-[0.05]"></div>
 
           <div className="max-w-3xl mx-auto relative z-10 text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-foreground mb-8">Track Ticket Status</h2>
+            <h2 className="text-3xl font-bold tracking-tight text-foreground mb-3">
+              {simple ? 'Check a request you already made' : 'Track Ticket Status'}
+            </h2>
+            <p className="text-sm text-muted-foreground mb-8">
+              {simple
+                ? 'Paste your ticket number below. No login needed.'
+                : "Don't have an ID yet?"}{' '}
+              <Link
+                href="/dashboard/create"
+                className="underline underline-offset-4 text-foreground hover:text-[#ec4269] dark:hover:text-[#D4AF37] transition-colors"
+              >
+                {simple ? "I don't have one — start a new ticket" : 'Create a new ticket →'}
+              </Link>
+            </p>
             <form onSubmit={handleSearch} className="relative max-w-lg mx-auto transform transition-all">
               <div className="relative group">
                 <div className="absolute -inset-0.5 bg-gradient-to-r from-pink-600 to-purple-600 rounded-lg blur opacity-20 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
                 <div className="relative flex items-center bg-background rounded-lg border border-border p-1">
                   <input
+                    id="track-ticket-input"
                     type="text"
-                    placeholder="Enter ticket ID (e.g., ticket-123...)"
+                    placeholder={simple ? 'Paste your ticket number here' : 'Enter ticket ID (e.g., ticket-123...)'}
                     value={searchTicket}
                     onChange={(e) => setSearchTicket(e.target.value)}
+                    aria-label="Ticket ID"
                     className="flex-1 bg-transparent px-4 py-3 text-foreground placeholder:text-muted-foreground focus:outline-none text-sm font-mono"
                   />
                   <button
@@ -280,9 +304,13 @@ export default function Home() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                     </svg>
                   </div>
-                  <h3 className="text-xl font-semibold text-[#ec4269] dark:text-[#D4AF37] mb-3">AI Auto-Triage</h3>
+                  <h3 className="text-xl font-semibold text-[#ec4269] dark:text-[#D4AF37] mb-3">
+                    {simple ? 'We sort it for you' : 'AI Auto-Triage'}
+                  </h3>
                   <p className="text-muted-foreground text-sm leading-relaxed">
-                    Our AI instantly reads your ticket, assigns priority, category, and smart tags — no manual sorting needed.
+                    {simple
+                      ? 'You do not have to pick a category. The system figures out who can help and how urgent it is.'
+                      : 'Our AI instantly reads your ticket, assigns priority, category, and smart tags — no manual sorting needed.'}
                   </p>
                 </div>
               </div>
@@ -314,13 +342,17 @@ export default function Home() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </div>
-                  <h3 className="text-xl font-semibold text-foreground mb-3">Track &amp; Get Resolved</h3>
+                  <h3 className="text-xl font-semibold text-foreground mb-3">
+                    {simple ? 'Track it and get it fixed' : 'Track & Get Resolved'}
+                  </h3>
                   <p className="text-muted-foreground leading-relaxed max-w-md">
-                    Use your ticket ID to check live status at any time — even without logging in. Get notified when your issue is resolved.
+                    {simple
+                      ? 'Use your ticket number to see the status any time — even without logging in. You will get an email when it is fixed.'
+                      : 'Use your ticket ID to check live status at any time — even without logging in. Get notified when your issue is resolved.'}
                   </p>
                   <div className="mt-6 inline-flex items-center gap-2 text-xs text-muted-foreground border border-border rounded-full px-4 py-1.5">
                     <span className="relative flex h-2 w-2"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400/50 opacity-75" /><span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" /></span>
-                    SLA-tracked · Real-time updates
+                    {simple ? 'On-time response · Live updates' : 'SLA-tracked · Real-time updates'}
                   </div>
                 </div>
               </div>
@@ -390,6 +422,9 @@ export default function Home() {
             </div>
           </div>
         </section>
+
+        {/* WhatsApp / Email / Phone fallback + video walkthrough */}
+        <FallbackChannels simple={simple} />
 
         {/* Request Access - Vercel Style: Minimal Form */}
         <section id="request-access" className="py-32 px-4 border-t border-border bg-background relative">
