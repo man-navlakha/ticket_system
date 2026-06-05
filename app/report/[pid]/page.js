@@ -124,7 +124,14 @@ export default async function PublicReportPage({ params }) {
     const personEmail = item.user?.email || null;
     const personPhone = item.user?.phoneNumber || null;
 
+    const commonProblems = await prisma.commonProblem.findMany({
+        where: { active: true },
+        orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
+        select: { id: true, label: true },
+    });
+
     const data = {
+        commonProblems,
         device: {
             pid: item.pid,
             type: item.type,

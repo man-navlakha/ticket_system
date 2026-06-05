@@ -17,20 +17,8 @@ import {
  *   1. The form (textarea + photo button + send)
  *   2. The expandable details card (masked, with OTP reveal)
  */
-const COMMON_PROBLEMS = [
-    'Outlook not working',
-    'Laptop not working',
-    'Email not receiving',
-    'CRM not working',
-    'Laptop not charging',
-    'Internet / Wi-Fi not working',
-    'Printer not working',
-    'Screen flickering',
-    'System running slow',
-    'Software not opening',
-];
-
 export default function ReportClient({ initial }) {
+    const commonProblems = Array.isArray(initial.commonProblems) ? initial.commonProblems : [];
     const [problem, setProblem] = useState('');
     const [description, setDescription] = useState('');
     const [files, setFiles] = useState([]);
@@ -251,8 +239,8 @@ export default function ReportClient({ initial }) {
                             aria-label="Pick a common problem"
                         >
                             <option value="">Pick a problem…</option>
-                            {COMMON_PROBLEMS.map((p) => (
-                                <option key={p} value={p}>{p}</option>
+                            {commonProblems.map((p) => (
+                                <option key={p.id} value={p.label}>{p.label}</option>
                             ))}
                             <option value="Other">Other (type your own)</option>
                         </select>
