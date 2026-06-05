@@ -9,7 +9,7 @@ export const metadata = {
     title: "Workspace Overview | Dashboard",
     description: "Your personalized IT support dashboard. Track active tickets, view performance stats, and manage recent activity.",
     openGraph: {
-        title: "Workspace Overview | Man's Support Desk",
+        title: "Workspace Overview | Excellent IT",
         description: "Executive dashboard for enterprise IT management.",
     }
 };

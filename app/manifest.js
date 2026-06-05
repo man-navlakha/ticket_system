@@ -1,6 +1,6 @@
 export default function manifest() {
     return {
-        name: "Man's Support Desk",
+        name: "Excellent IT",
         short_name: "SupportLink",
         description: "Enterprise IT support ticketing system",
         start_url: "/",

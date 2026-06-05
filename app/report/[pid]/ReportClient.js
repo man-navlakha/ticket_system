@@ -17,7 +17,21 @@ import {
  *   1. The form (textarea + photo button + send)
  *   2. The expandable details card (masked, with OTP reveal)
  */
+const COMMON_PROBLEMS = [
+    'Outlook not working',
+    'Laptop not working',
+    'Email not receiving',
+    'CRM not working',
+    'Laptop not charging',
+    'Internet / Wi-Fi not working',
+    'Printer not working',
+    'Screen flickering',
+    'System running slow',
+    'Software not opening',
+];
+
 export default function ReportClient({ initial }) {
+    const [problem, setProblem] = useState('');
     const [description, setDescription] = useState('');
     const [files, setFiles] = useState([]);
     const [uploading, setUploading] = useState(false);
@@ -71,8 +85,11 @@ export default function ReportClient({ initial }) {
 
     async function onSubmit(e) {
         e.preventDefault();
-        if (!description.trim()) {
-            setError('Please describe what is wrong.');
+        const finalDescription = problem === 'Other'
+            ? description.trim()
+            : (problem ? (description.trim() ? `${problem} — ${description.trim()}` : problem) : description.trim());
+        if (!finalDescription) {
+            setError('Please pick a problem or describe what is wrong.');
             return;
         }
         setError('');
@@ -85,7 +102,7 @@ export default function ReportClient({ initial }) {
             const res = await fetch('/api/quick-report', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ pid: device.pid, description, attachmentUrls }),
+                body: JSON.stringify({ pid: device.pid, description: finalDescription, attachmentUrls }),
             });
             const j = await res.json();
             if (!res.ok) throw new Error(j.error || 'Could not submit.');
@@ -183,7 +200,7 @@ export default function ReportClient({ initial }) {
                         </div>
                         <button
                             type="button"
-                            onClick={() => { setSuccessId(null); setDescription(''); setFiles([]); }}
+                            onClick={() => { setSuccessId(null); setProblem(''); setDescription(''); setFiles([]); }}
                             className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
                         >
                             <RotateCcw className="w-3.5 h-3.5" /> Report another issue
@@ -202,21 +219,11 @@ export default function ReportClient({ initial }) {
                 {/* Hero */}
                 <header className="space-y-4">
                     <div className="flex items-center justify-between">
-                        <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5 text-[11px] font-medium text-muted-foreground">
-                            <span className="relative flex h-1.5 w-1.5">
-                                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400/70 opacity-75" />
-                                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                            </span>
-                            Quick report
-                        </div>
-                        <div className="inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
-                            <QrCode className="w-3 h-3" />
-                            Scanned
-                        </div>
+                        
                     </div>
 
                     <h1 className="display-heading text-[2.25rem] sm:text-5xl leading-[1.05]">
-                        What&apos;s wrong with <span className="accent">this device</span>?
+                        What&apos;s wrong with this device?
                     </h1>
 
                     <div className="device-card">
@@ -234,18 +241,38 @@ export default function ReportClient({ initial }) {
                             <span className="form-label-step">01</span>
                             <span className="form-label-text">Tell us what happened</span>
                         </div>
-                        <textarea
-                            value={description}
-                            onChange={(e) => setDescription(e.target.value)}
-                            rows={5}
-                            required
-                            placeholder="e.g. The screen flickers every few seconds and goes black when I plug in the charger."
-                            className="form-textarea"
-                            maxLength={4000}
-                        />
-                        <div className="text-[10px] text-muted-foreground text-right">
-                            {description.length}/4000
-                        </div>
+                        <select
+                            value={problem}
+                            onChange={(e) => {
+                                setProblem(e.target.value);
+                                if (e.target.value !== 'Other') setDescription('');
+                            }}
+                            className="form-select"
+                            aria-label="Pick a common problem"
+                        >
+                            <option value="">Pick a problem…</option>
+                            {COMMON_PROBLEMS.map((p) => (
+                                <option key={p} value={p}>{p}</option>
+                            ))}
+                            <option value="Other">Other (type your own)</option>
+                        </select>
+                        {problem === 'Other' && (
+                            <>
+                                <textarea
+                                    value={description}
+                                    onChange={(e) => setDescription(e.target.value)}
+                                    rows={5}
+                                    required
+                                    placeholder="e.g. The screen flickers every few seconds and goes black when I plug in the charger."
+                                    className="form-textarea"
+                                    maxLength={4000}
+                                    autoFocus
+                                />
+                                <div className="text-[10px] text-muted-foreground text-right">
+                                    {description.length}/4000
+                                </div>
+                            </>
+                        )}
                     </div>
 
                     <div className="space-y-3">
@@ -300,7 +327,7 @@ export default function ReportClient({ initial }) {
 
                     <button
                         type="submit"
-                        disabled={submitting || !description.trim()}
+                        disabled={submitting || (!problem || (problem === 'Other' && !description.trim()))}
                         className="submit-btn"
                     >
                         {submitting ? (
@@ -564,7 +591,7 @@ export default function ReportClient({ initial }) {
 
                 <p className="text-[11px] text-muted-foreground text-center leading-relaxed">
                     <Sparkles className="inline w-3 h-3 mr-1 align-text-bottom text-emerald-500" />
-                    Personal details stay hidden by default. Only the IT team and the assigned person can fully reveal them.
+                    Team Excellent Publicity -&nbsp; Man Navlakha
                 </p>
             </main>
 
@@ -684,6 +711,34 @@ function ReportShellStyle() {
                 text-transform: uppercase;
                 letter-spacing: 0.18em;
                 color: var(--color-foreground);
+            }
+
+            .form-select {
+                width: 100%;
+                border-radius: 999px;
+                border: 1px solid var(--color-border);
+                background: var(--color-card);
+                padding: 0.625rem 2.5rem 0.625rem 1.125rem;
+                font-size: 0.85rem;
+                font-weight: 500;
+                font-family: inherit;
+                color: var(--color-foreground);
+                outline: none;
+                cursor: pointer;
+                appearance: none;
+                -webkit-appearance: none;
+                background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+                background-repeat: no-repeat;
+                background-position: right 1.125rem center;
+                transition: border-color 0.15s, box-shadow 0.15s;
+            }
+            .form-select:focus {
+                border-color: rgba(236, 66, 105, 0.4);
+                box-shadow: 0 0 0 4px rgba(236, 66, 105, 0.08);
+            }
+            .dark .form-select:focus {
+                border-color: rgba(212, 175, 55, 0.5);
+                box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.10);
             }
 
             .form-textarea {

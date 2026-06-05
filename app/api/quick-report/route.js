@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { sendNewTicketNotification } from '@/lib/email';
+import { sendNewTicketNotification, sendTicketConfirmationToReporter } from '@/lib/email';
 import { getBaseUrl } from '@/lib/get-base-url';
 import { rateLimit } from '@/lib/rate-limit';
 
@@ -111,8 +111,12 @@ export async function POST(request) {
             },
         });
 
-        // Notify agents (best-effort, fire & forget)
+        // Notify agents + reporter (best-effort, fire & forget). All further
+        // conversation happens over email — IT updates ticket status manually
+        // in the dashboard for now.
         const baseUrl = getBaseUrl(request);
+        const reporterEmail = item.user?.email || null;
+        const itInbox = process.env.ZOHO_EMAIL || null;
         (async () => {
             try {
                 const staff = await prisma.user.findMany({
@@ -127,13 +131,29 @@ export async function POST(request) {
                             title: ticket.title,
                             description: ticket.description,
                             priority: ticket.priority,
-                            userEmail: item.user?.email || '(device unassigned — see ticket body)',
+                            userEmail: reporterEmail || '(device unassigned — see ticket body)',
                             userName:
                                 item.user?.username ||
                                 item.assignedUser ||
                                 (item.user ? item.user.email : 'Anonymous scan'),
                         },
                         baseUrl,
+                        reporterEmail || undefined, // Reply-To → reporter, so IT can just hit Reply
+                    );
+                }
+
+                // Confirm to the reporter (assigned user). Reply-To points at
+                // the IT inbox so their reply lands with IT directly.
+                if (reporterEmail) {
+                    await sendTicketConfirmationToReporter(
+                        reporterEmail,
+                        {
+                            id: ticket.id,
+                            title: ticket.title,
+                            description: cleanedDescription,
+                            priority: ticket.priority,
+                        },
+                        itInbox || undefined,
                     );
                 }
             } catch (err) {

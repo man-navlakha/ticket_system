@@ -86,7 +86,7 @@ export default function Home() {
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'SoftwareApplication',
-    name: "Man's Support Desk",
+    name: "Excellent IT",
     image: "https://it.excellentpublicity.com/favicon.png",
     description: "Enterprise IT support ticketing system with integrated inventory management and automation.",
     applicationCategory: "BusinessApplication",

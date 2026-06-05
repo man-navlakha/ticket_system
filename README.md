@@ -1,4 +1,4 @@
-# 🎟️ Man's Support Desk
+# 🎟️ Excellent IT
 
 A high-performance, enterprise-grade support infrastructure built with **Next.js 15**, **Prisma**, and **PostgreSQL**. Designed with the sleek **Vercel Aesthetic**, this system streamlines hardware support and asset management for modern teams.
 

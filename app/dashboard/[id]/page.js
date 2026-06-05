@@ -24,7 +24,7 @@ export async function generateMetadata({ params }) {
 
     return {
         title: `Ticket: ${ticket.title}`,
-        description: `Status: ${ticket.status} | Priority: ${ticket.priority} - Enterprise IT support ticket in Man's Support Desk workspace.`,
+        description: `Status: ${ticket.status} | Priority: ${ticket.priority} - Enterprise IT support ticket in Excellent IT workspace.`,
         openGraph: {
             title: ticket.title,
             description: `IT Support Ticket #${id.slice(0, 8)}`,

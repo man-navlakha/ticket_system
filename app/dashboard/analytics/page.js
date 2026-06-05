@@ -8,7 +8,7 @@ export const metadata = {
     title: "Analytics & System Health",
     description: "View real-time system metrics, asset distribution charts, and team performance analytics for your IT workspace.",
     openGraph: {
-        title: "Analytics & System Health | Man's Support Desk",
+        title: "Analytics & System Health | Excellent IT",
         description: "Visualize your entire IT infrastructure performance in one place.",
     }
 };

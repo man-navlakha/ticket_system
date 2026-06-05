@@ -7,7 +7,7 @@ export const metadata = {
     title: "Help & Support Center",
     description: "Get assistance with your IT issues. Browse frequently asked questions, contact support staff, and find quick links for your workspace.",
     openGraph: {
-        title: "Support Center | Man's Support Desk",
+        title: "Support Center | Excellent IT",
         description: "Professional IT support and assistance hub.",
     }
 };

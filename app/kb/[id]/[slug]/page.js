@@ -50,7 +50,7 @@ export async function generateMetadata({ params }) {
             type: 'article',
             publishedTime: article.createdAt,
             modifiedTime: article.updatedAt,
-            authors: [article.createdBy?.username || "Man's Support Desk"],
+            authors: [article.createdBy?.username || "Excellent IT"],
             tags: article.tags?.map((t) => t.tag.name),
         },
         twitter: {
@@ -106,11 +106,11 @@ export default async function ArticleSlugPage({ params }) {
             dateModified: article.updatedAt,
             author: {
                 '@type': 'Person',
-                name: article.createdBy?.username || "Man's Support Desk",
+                name: article.createdBy?.username || "Excellent IT",
             },
             publisher: {
                 '@type': 'Organization',
-                name: "Man's Support Desk",
+                name: "Excellent IT",
                 url: baseUrl,
             },
             mainEntityOfPage: {

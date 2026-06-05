@@ -14,7 +14,7 @@ export const metadata = {
     title: "Hardware Inventory & Asset Management",
     description: "Track and manage enterprise hardware assets. Real-time visibility into laptop assignments, warranty status, and lifecycle management.",
     openGraph: {
-        title: "Hardware Inventory | Man's Support Desk",
+        title: "Hardware Inventory | Excellent IT",
         description: "Enterprise-grade asset management for modern IT teams.",
     },
 };
