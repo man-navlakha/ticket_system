@@ -3,7 +3,7 @@ import LandingNav from '@/components/LandingNav';
 import Footer from '@/components/Footer';
 
 export const metadata = {
-    title: 'Knowledge Base | Man\'s Support Desk',
+    title: 'Knowledge Base | Excellent IT',
     description: 'Guides, troubleshooting tips, and references to help you resolve issues and manage your assets effectively.',
 };
 

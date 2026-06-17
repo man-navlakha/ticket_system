@@ -56,9 +56,11 @@ Create a `.env` file in the root directory:
 DATABASE_URL="postgresql://..."
 NEXTAUTH_SECRET="your-secret-key"
 
-# Email Configuration (Zoho)
-ZOHO_EMAIL="your-email@zohomail.in"
-ZOHO_PASSWORD="your-app-password"
+# Email Configuration (Gmail / Google Workspace)
+# Create an App Password at https://myaccount.google.com/apppasswords
+# (2-Step Verification must be enabled on the Google account.)
+GMAIL_USER="you@yourdomain.com"
+GMAIL_APP_PASSWORD="your-16-char-app-password"
 
 NEXT_PUBLIC_APP_URL="http://localhost:3000"
 ```
@@ -84,7 +86,7 @@ This project is pre-configured for **Netlify**. Follow these steps:
 2. **Connect your repo** to Netlify.
 3. **Environment Variables**: In Netlify UI, go to *Site Settings > Build & deploy > Environment variables* and add:
    - `DATABASE_URL` (From Neon or your DB provider)
-   - `ZOHO_EMAIL` & `ZOHO_PASSWORD`
+   - `GMAIL_USER` & `GMAIL_APP_PASSWORD`
    - `NEXT_PUBLIC_APP_URL` (Set this to `https://it.excellentpublicity.com/`)
    - `NEXTAUTH_SECRET` (A random secure string)
 4. **Build Settings**: Netlify will automatically use the `netlify.toml` settings:

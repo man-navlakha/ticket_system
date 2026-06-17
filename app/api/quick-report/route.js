@@ -116,7 +116,7 @@ export async function POST(request) {
         // in the dashboard for now.
         const baseUrl = getBaseUrl(request);
         const reporterEmail = item.user?.email || null;
-        const itInbox = process.env.ZOHO_EMAIL || null;
+        const itInbox = process.env.GMAIL_USER || null;
         (async () => {
             try {
                 const staff = await prisma.user.findMany({
