@@ -6,6 +6,7 @@ import {
     Mail, Phone, User, Laptop2, MapPin, Building2, CheckCircle2, AlertCircle,
     RotateCcw, QrCode, Sparkles, KeyRound, CheckCircle,
 } from 'lucide-react';
+import EmailSignatureCta from '@/components/EmailSignatureCta';
 
 /**
  * /report/[pid] — public scan landing page
@@ -26,6 +27,7 @@ export default function ReportClient({ initial }) {
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState('');
     const [successId, setSuccessId] = useState(null);
+    const [successTrackUrl, setSuccessTrackUrl] = useState('');
     const fileRef = useRef(null);
 
     // Accordion + reveal state
@@ -95,6 +97,7 @@ export default function ReportClient({ initial }) {
             const j = await res.json();
             if (!res.ok) throw new Error(j.error || 'Could not submit.');
             setSuccessId(j.ticketId);
+            setSuccessTrackUrl(j.trackUrl || '');
         } catch (err) {
             setError(err.message);
         } finally {
@@ -179,16 +182,27 @@ export default function ReportClient({ initial }) {
                                 Your report just landed with the IT team. You&apos;ll hear back by email or WhatsApp shortly.
                             </p>
                         </div>
-                        <div className="rounded-3xl border border-border bg-card p-6 text-left space-y-2">
+                        <div className="rounded-3xl border border-border bg-card p-6 text-left space-y-3">
                             <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Ticket ID</div>
                             <div className="font-mono text-sm break-all leading-relaxed">{successId}</div>
-                            <div className="text-[11px] text-muted-foreground pt-2 border-t border-border mt-3">
-                                Save this ID — paste it on the homepage to check status any time.
-                            </div>
+                            {successTrackUrl && (
+                                <>
+                                    <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground pt-2 border-t border-border">Track this ticket</div>
+                                    <a
+                                        href={successTrackUrl}
+                                        className="font-mono text-xs break-all leading-relaxed text-primary underline underline-offset-2"
+                                    >
+                                        {successTrackUrl}
+                                    </a>
+                                    <div className="text-[11px] text-muted-foreground pt-2 border-t border-border">
+                                        Open this link any time to see live status — no login needed. Log in for full details.
+                                    </div>
+                                </>
+                            )}
                         </div>
                         <button
                             type="button"
-                            onClick={() => { setSuccessId(null); setProblem(''); setDescription(''); setFiles([]); }}
+                            onClick={() => { setSuccessId(null); setSuccessTrackUrl(''); setProblem(''); setDescription(''); setFiles([]); }}
                             className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
                         >
                             <RotateCcw className="w-3.5 h-3.5" /> Report another issue
@@ -576,6 +590,14 @@ export default function ReportClient({ initial }) {
                         </div>
                     )}
                 </section>
+
+                {/* Employee email signature shortcut */}
+                <EmailSignatureCta
+                    pid={device.pid}
+                    emailMasked={person.emailMasked}
+                    hasEmail={person.hasEmail}
+                    signatureSlug={person.signatureSlug}
+                />
 
                 <p className="text-[11px] text-muted-foreground text-center leading-relaxed">
                     <Sparkles className="inline w-3 h-3 mr-1 align-text-bottom text-emerald-500" />

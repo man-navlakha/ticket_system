@@ -70,7 +70,7 @@ function KBContent() {
     };
 
     return (
-        <div data-tour="kb-page" className="space-y-12 animate-in fade-in duration-500">
+        <div className="space-y-12 animate-in fade-in duration-500">
             {/* Minimal Header */}
             <div className="space-y-4">
                 <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-widest">

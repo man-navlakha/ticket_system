@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { sendNewTicketNotification, sendTicketConfirmationToReporter } from '@/lib/email';
 import { getBaseUrl } from '@/lib/get-base-url';
 import { rateLimit } from '@/lib/rate-limit';
+import { newShareToken } from '@/lib/share-token';
 
 /**
  * POST /api/quick-report
@@ -108,6 +109,7 @@ export async function POST(request) {
                 inventoryItemId: item.id,
                 productName: `${item.brand || ''} ${item.model || ''} (${item.pid})`.trim(),
                 attachmentUrls: safeAttachments,
+                shareToken: newShareToken(),
             },
         });
 
@@ -152,6 +154,7 @@ export async function POST(request) {
                             title: ticket.title,
                             description: cleanedDescription,
                             priority: ticket.priority,
+                            trackUrl: `${baseUrl}/track/${ticket.shareToken}`,
                         },
                         itInbox || undefined,
                     );
@@ -164,7 +167,8 @@ export async function POST(request) {
         return NextResponse.json({
             ok: true,
             ticketId: ticket.id,
-            trackUrl: `${baseUrl}/?ticket=${ticket.id}`,
+            shareToken: ticket.shareToken,
+            trackUrl: `${baseUrl}/track/${ticket.shareToken}`,
         });
     } catch (err) {
         console.error('quick-report error:', err);

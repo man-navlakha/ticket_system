@@ -74,7 +74,7 @@ export default async function InventoryPage() {
 
     return (
         <div className="space-y-12 animate-in fade-in duration-700">
-            <section data-tour="inventory-hero" className="relative overflow-hidden rounded-[2rem] border border-border bg-card px-8 py-8 shadow-sm">
+            <section className="relative overflow-hidden rounded-[2rem] border border-border bg-card px-8 py-8 shadow-sm">
                 <div className="absolute inset-y-0 right-0 w-80 bg-gradient-to-l from-foreground/[0.04] to-transparent" />
                 <div className="absolute -right-16 top-0 h-48 w-48 rounded-full bg-foreground/[0.05] blur-3xl" />
 
@@ -150,7 +150,7 @@ export default async function InventoryPage() {
                 <InventoryIntelligenceSection items={serializedItems} />
             )}
 
-            <section data-tour="inventory-register" className="space-y-5">
+            <section className="space-y-5">
                 <SectionHeading
                     eyebrow="Registry"
                     title="Asset register"

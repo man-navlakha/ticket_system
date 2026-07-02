@@ -60,7 +60,7 @@ export default function TicketsClient({ user, tickets }) {
             <div className="max-w-7xl mx-auto space-y-10 animate-in fade-in duration-700 pb-16">
 
                 {/* Header */}
-                <div data-tour="tickets-header" className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 pt-8">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 pt-8">
                     <div className="space-y-1">
                         <div className="flex items-center gap-3 mb-2">
                             <div className="w-8 h-8 rounded-full bg-primary/10 border border-border flex items-center justify-center text-[10px] font-bold text-primary">
@@ -82,7 +82,7 @@ export default function TicketsClient({ user, tickets }) {
                 </div>
 
                 {/* Search & Filters */}
-                <div data-tour="tickets-search" className="flex flex-col gap-4">
+                <div className="flex flex-col gap-4">
                     <div className="relative group max-w-md">
                         <input
                             type="text"
@@ -121,7 +121,7 @@ export default function TicketsClient({ user, tickets }) {
                 </div>
 
                 {/* Tickets Table */}
-                <div data-tour="tickets-table" className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                     <div className="rounded-2xl border border-border bg-card/50 overflow-hidden shadow-sm">
                         <div className="overflow-x-auto">
                             <table className="w-full text-left border-collapse">

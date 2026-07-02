@@ -4,6 +4,7 @@ import { getCurrentUser } from '@/lib/session';
 import { sendNewTicketNotification } from '@/lib/email';
 import { getBaseUrl } from '@/lib/get-base-url';
 import { rateLimit } from '@/lib/rate-limit';
+import { newShareToken } from '@/lib/share-token';
 
 export async function GET(request) {
     const user = await getCurrentUser();
@@ -132,6 +133,7 @@ export async function POST(request) {
                 productName: productName || null,
                 componentName: componentName || null,
                 attachmentUrls: attachmentUrls || [],
+                shareToken: newShareToken(),
                 categoryId: finalCategoryId,
                 aiSuggestedPriority,
                 aiSuggestedCategoryId,

@@ -1,7 +1,16 @@
 import { prisma } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
 import { maskEmail, maskName, maskPhone } from '@/lib/mask';
+import { SIGNATURES } from '@/lib/email-signatures';
 import ReportClient from './ReportClient';
+
+// Same rule the signature list was generated with, so a person's name maps to
+// their /email-signature/[slug] page.
+function signatureSlugFor(name) {
+    if (!name) return null;
+    const slug = String(name).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    return SIGNATURES.some((p) => p.slug === slug) ? slug : null;
+}
 
 export const dynamic = 'force-dynamic';
 
@@ -163,6 +172,8 @@ export default async function PublicReportPage({ params }) {
             // True when the linked user has not yet set a password — they
             // can request a fresh activation link to their own email.
             canActivate: Boolean(personEmail) && item.user?.status === 'PENDING',
+            // Direct link to this person's email-signature page (null if no match).
+            signatureSlug: signatureSlugFor(personName),
         },
     };
 

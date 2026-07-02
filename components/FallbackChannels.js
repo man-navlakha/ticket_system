@@ -130,7 +130,7 @@ export default function FallbackChannels({ simple = false }) {
                                 {simple ? 'Watch how to raise a ticket' : 'See it work in 30 seconds'}
                             </h3>
                             <p className="text-sm text-muted-foreground">
-                                A quick tour — create, attach, track. No reading required.
+                                Quick overview: create, attach, track. No reading required.
                             </p>
                         </div>
                     </button>

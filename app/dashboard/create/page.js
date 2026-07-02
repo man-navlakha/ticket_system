@@ -161,7 +161,7 @@ function CreateTicketForm() {
                 )}
 
                 {/* Step 1: Issue Classification */}
-                <div data-tour="classification" className="space-y-6">
+                <div className="space-y-6">
                     <div className="space-y-1">
                         <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-[0.3em]">Classification</h3>
                         <p className="text-sm text-foreground/80">Identify the nature of your technical challenge.</p>
@@ -194,7 +194,7 @@ function CreateTicketForm() {
 
                 {/* Device Selection Overlay */}
                 {issueType === 'inventory' && inventory.length > 0 && (
-                    <div data-tour="target-asset" className="bg-muted/30 border border-border rounded-[2rem] p-8 space-y-8 animate-in zoom-in-95 duration-300">
+                    <div className="bg-muted/30 border border-border rounded-[2rem] p-8 space-y-8 animate-in zoom-in-95 duration-300">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                             <InputField label="Target Asset" name="inventoryId" type="select"
                                 value={selectedItem?.id || ''}
@@ -231,7 +231,7 @@ function CreateTicketForm() {
                 )}
 
                 {issueType === 'personal' && (
-                    <div data-tour="target-asset" className="bg-muted/30 border border-border rounded-[2rem] p-8 animate-in zoom-in-95 duration-300">
+                    <div className="bg-muted/30 border border-border rounded-[2rem] p-8 animate-in zoom-in-95 duration-300">
                         <InputField label="Asset or Service Description" name="customProduct"
                             required value={customProduct} onChange={(e) => setCustomProduct(e.target.value)}
                             placeholder="e.g. Conference Room A Display, Remote VPN"
@@ -248,13 +248,13 @@ function CreateTicketForm() {
 
                     <div className="space-y-6">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div data-tour="summary" className="md:col-span-2">
+                            <div className="md:col-span-2">
                                 <InputField label="Summary" name="title" value={title}
                                     onChange={(e) => setTitle(e.target.value)} required
                                     placeholder="Brief nature of the operational failure"
                                 />
                             </div>
-                            <div data-tour="priority">
+                            <div>
                                 <InputField label="Operational Priority" name="priority" type="select"
                                     defaultValue={prefillPriority}
                                 >
@@ -266,7 +266,7 @@ function CreateTicketForm() {
                         </div>
 
 
-                        <div data-tour="description" className="space-y-2">
+                        <div className="space-y-2">
                             <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-widest">In-Depth Description</label>
                             <textarea
                                 value={description}
@@ -279,7 +279,7 @@ function CreateTicketForm() {
                         </div>
 
                         {/* File Upload */}
-                        <div data-tour="attachments" className="space-y-3">
+                        <div className="space-y-3">
                             <div className="flex items-center justify-between gap-3 flex-wrap">
                                 <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Attachments / Screenshots</label>
                                 <PasteHint />
@@ -364,7 +364,7 @@ function CreateTicketForm() {
                         </div>
 
                         {/* Options */}
-                        <div data-tour="notify" className="space-y-2 pt-2">
+                        <div className="space-y-2 pt-2">
                             <label className="flex items-center gap-3 cursor-pointer group w-max">
                                 <div className="relative flex items-center justify-center">
                                     <input
@@ -384,7 +384,7 @@ function CreateTicketForm() {
                 </div>
 
                 {/* Submittal */}
-                <div data-tour="cancel-send" className="pt-12 border-t border-border flex items-center justify-between">
+                <div className="pt-12 border-t border-border flex items-center justify-between">
                     <p className="text-[11px] text-muted-foreground max-w-sm font-medium italic">
                         Standard response time is 4-6 business hours.
                     </p>

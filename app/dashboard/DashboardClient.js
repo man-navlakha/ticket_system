@@ -112,11 +112,10 @@ export default function DashboardClient({ user, tickets, stats, analyticsStats }
                         <h1 className="text-4xl md:text-5xl font-bold tracking-tighter text-foreground">Dashboard</h1>
                     </div>
                     <div className="flex items-center gap-4">
-                        <div data-tour="search" className="w-full md:w-auto">
+                        <div className="w-full md:w-auto">
                             <DashboardSearch className="w-full md:w-80" />
                         </div>
                         <Link
-                            data-tour="create-ticket"
                             href="/dashboard/create"
                             className="h-10 px-5 bg-foreground text-background rounded-full text-sm font-semibold hover:opacity-90 transition-all flex items-center gap-2 shadow-lg shadow-black/5 active:scale-95 whitespace-nowrap"
                         >
