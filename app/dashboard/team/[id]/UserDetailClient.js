@@ -24,11 +24,40 @@ const DEPARTMENTS = [
 
 const DEPT_LABEL = (v) => DEPARTMENTS.find(d => d.value === v)?.label || v;
 
-export default function UserDetailClient({ currentUser, targetUser }) {
+export default function UserDetailClient({ currentUser, targetUser, signatures = [], suggestedSlug = null }) {
     const router = useRouter();
     const [isEditing, setIsEditing] = useState(false);
     const [loading, setLoading] = useState(false);
     const [activeTab, setActiveTab] = useState('tickets');
+
+    // Email-signature assignment
+    const [sigSlug, setSigSlug] = useState(targetUser.signatureSlug || '');
+    const [sigSaving, setSigSaving] = useState(false);
+    const selectedSig = signatures.find((s) => s.slug === sigSlug) || null;
+    const sigImg = selectedSig ? `/${encodeURI(`Email Signature/${selectedSig.file}`)}` : null;
+    const suggestedSig = suggestedSlug ? signatures.find((s) => s.slug === suggestedSlug) : null;
+
+    const saveSignature = async () => {
+        setSigSaving(true);
+        try {
+            const res = await fetch('/api/admin/users/update', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId: targetUser.id, signatureSlug: sigSlug }),
+            });
+            const data = await res.json();
+            if (res.ok) {
+                toast.success(sigSlug ? 'Email signature assigned.' : 'Email signature cleared.');
+                router.refresh();
+            } else {
+                toast.error(data.error || 'Failed to save signature.');
+            }
+        } catch {
+            toast.error('An unexpected error occurred.');
+        } finally {
+            setSigSaving(false);
+        }
+    };
 
     const [form, setForm] = useState({
         username: targetUser.username || '',
@@ -232,6 +261,71 @@ export default function UserDetailClient({ currentUser, targetUser }) {
                         )}
                     </div>
                 )}
+
+                {/* Email Signature assignment */}
+                <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
+                    <div className="flex items-center justify-between mb-1">
+                        <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">Email Signature</h3>
+                        {targetUser.signatureSlug ? (
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-500 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded">Assigned</span>
+                        ) : (
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground bg-muted/60 border border-border px-2 py-0.5 rounded">None</span>
+                        )}
+                    </div>
+                    <p className="text-xs text-muted-foreground mb-4">
+                        Pick this member&apos;s signature. It powers their <code className="text-[11px]">/email-signature</code> page and the QR &ldquo;Email me the link&rdquo; button.
+                    </p>
+
+                    <div className="flex flex-col sm:flex-row gap-3">
+                        <select
+                            value={sigSlug}
+                            onChange={(e) => setSigSlug(e.target.value)}
+                            className="flex-1 bg-background border border-border rounded-xl px-4 h-11 text-sm text-foreground focus:outline-none focus:border-foreground/30 transition-all"
+                        >
+                            <option value="">— No signature —</option>
+                            {signatures.map((s) => (
+                                <option key={s.slug} value={s.slug}>{s.name}</option>
+                            ))}
+                        </select>
+                        <button
+                            type="button"
+                            onClick={saveSignature}
+                            disabled={sigSaving || sigSlug === (targetUser.signatureSlug || '')}
+                            className="h-11 px-5 bg-primary text-primary-foreground rounded-xl text-sm font-semibold hover:opacity-90 transition-all flex items-center justify-center gap-2 disabled:opacity-40"
+                        >
+                            {sigSaving ? 'Saving…' : 'Save'}
+                            <Save className="w-4 h-4" />
+                        </button>
+                    </div>
+
+                    {/* Suggestion when nothing is assigned yet */}
+                    {!targetUser.signatureSlug && suggestedSig && sigSlug !== suggestedSig.slug && (
+                        <button
+                            type="button"
+                            onClick={() => setSigSlug(suggestedSig.slug)}
+                            className="mt-3 text-xs text-blue-500 hover:underline"
+                        >
+                            Suggested match: <b>{suggestedSig.name}</b> — click to use
+                        </button>
+                    )}
+
+                    {/* Preview of the selected signature */}
+                    {selectedSig && (
+                        <div className="mt-4 space-y-2">
+                            <div className="overflow-x-auto rounded-xl border border-dashed border-border bg-background p-3">
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img src={sigImg} alt={selectedSig.name} style={{ display: 'block', width: 500, maxWidth: '100%' }} />
+                            </div>
+                            <Link
+                                href={`/email-signature/${selectedSig.slug}`}
+                                target="_blank"
+                                className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                            >
+                                Open signature page: /email-signature/{selectedSig.slug} ↗
+                            </Link>
+                        </div>
+                    )}
+                </div>
 
                 {/* Content Tabs */}
                 <div className="flex items-center gap-6 border-b border-border pb-px overflow-x-auto no-scrollbar">

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/session';
+import { SIGNATURES } from '@/lib/email-signatures';
 
 export async function PUT(req) {
     const user = await getCurrentUser();
@@ -11,7 +12,7 @@ export async function PUT(req) {
     }
 
     try {
-        const { userId, username, email, role, status, phoneNumber, department, location } = await req.json();
+        const { userId, username, email, role, status, phoneNumber, department, location, signatureSlug } = await req.json();
 
         if (!userId) {
             return NextResponse.json({ error: 'Missing user ID' }, { status: 400 });
@@ -62,6 +63,17 @@ export async function PUT(req) {
 
         if (location !== undefined) {
             dataToUpdate.location = location;
+        }
+
+        if (signatureSlug !== undefined) {
+            // Empty string clears the assignment; otherwise it must be a real slug.
+            if (!signatureSlug) {
+                dataToUpdate.signatureSlug = null;
+            } else if (SIGNATURES.some((s) => s.slug === signatureSlug)) {
+                dataToUpdate.signatureSlug = signatureSlug;
+            } else {
+                return NextResponse.json({ error: 'Unknown email signature.' }, { status: 400 });
+            }
         }
 
         const updatedUser = await prisma.user.update({

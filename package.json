@@ -4,6 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "gen:signatures": "node scripts/gen-signatures.mjs",
+    "prebuild": "node scripts/gen-signatures.mjs",
     "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint",

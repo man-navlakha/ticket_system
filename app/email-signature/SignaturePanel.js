@@ -51,7 +51,7 @@ export function buildSignatureHtml(origin, person, opts = {}) {
               padding:10px 14px;
               border-left:1px solid #cfcfcf;
               font-family:Georgia,serif;
-              font-size:18px;
+              font-size:12px;
               color:#143b74;
               font-weight:bold;">
             ${contact}

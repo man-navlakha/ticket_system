@@ -2,6 +2,11 @@ import { getCurrentUser } from "@/lib/session";
 import { redirect } from "next/navigation";
 import UserDetailClient from "./UserDetailClient";
 import { prisma } from '@/lib/prisma';
+import { SIGNATURES } from '@/lib/email-signatures';
+
+function slugify(name) {
+    return String(name || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+}
 
 export const metadata = { title: "User Details" };
 
@@ -33,5 +38,20 @@ export default async function UserDetailPage({ params }) {
         redirect("/dashboard/team");
     }
 
-    return <UserDetailClient currentUser={currentUser} targetUser={targetUser} />;
+    // Suggest a signature by matching the user's name to a signature slug.
+    const fullName =
+        [targetUser.firstName, targetUser.lastName].filter(Boolean).join(' ').trim() ||
+        targetUser.username ||
+        '';
+    const guess = slugify(fullName);
+    const suggestedSlug = SIGNATURES.some((s) => s.slug === guess) ? guess : null;
+
+    return (
+        <UserDetailClient
+            currentUser={currentUser}
+            targetUser={targetUser}
+            signatures={SIGNATURES}
+            suggestedSlug={suggestedSlug}
+        />
+    );
 }

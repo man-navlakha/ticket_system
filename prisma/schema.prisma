@@ -19,6 +19,7 @@ model User {
   phoneNumber      String?
   department       String?
   location         String?
+  signatureSlug    String?         // assigned email-signature page slug
   role             Role            @default(USER)
   status           UserStatus      @default(PENDING)
   inviteToken      String?         @unique

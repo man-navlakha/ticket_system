@@ -50,6 +50,7 @@ export default async function PublicReportPage({ params }) {
                     phoneNumber: true,
                     department: true,
                     status: true,
+                    signatureSlug: true,
                 },
             },
         },
@@ -94,6 +95,7 @@ export default async function PublicReportPage({ params }) {
                 phoneNumber: true,
                 department: true,
                 status: true,
+                signatureSlug: true,
             },
             take: 2,
         });
@@ -172,8 +174,13 @@ export default async function PublicReportPage({ params }) {
             // True when the linked user has not yet set a password — they
             // can request a fresh activation link to their own email.
             canActivate: Boolean(personEmail) && item.user?.status === 'PENDING',
-            // Direct link to this person's email-signature page (null if no match).
-            signatureSlug: signatureSlugFor(personName),
+            // Direct link to this person's email-signature page. Prefer the
+            // explicit assignment from the team page; fall back to a name match.
+            signatureSlug:
+                (item.user?.signatureSlug &&
+                    SIGNATURES.some((p) => p.slug === item.user.signatureSlug) &&
+                    item.user.signatureSlug) ||
+                signatureSlugFor(personName),
         },
     };
 

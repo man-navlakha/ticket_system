@@ -49,7 +49,7 @@ export async function POST(request) {
                 where: { pid },
                 select: {
                     user: {
-                        select: { email: true, firstName: true, lastName: true, username: true },
+                        select: { email: true, firstName: true, lastName: true, username: true, signatureSlug: true },
                     },
                 },
             });
@@ -67,8 +67,10 @@ export async function POST(request) {
                 [item.user.firstName, item.user.lastName].filter(Boolean).join(' ').trim() ||
                 item.user.username ||
                 '';
-            // Prefer the slug the page already resolved; fall back to the name.
+            // Prefer the explicit team-page assignment, then the slug the page
+            // resolved, then a name match.
             const matched =
+                SIGNATURES.find((p) => p.slug === item.user.signatureSlug) ||
                 (slug && SIGNATURES.find((p) => p.slug === slug)) ||
                 SIGNATURES.find((p) => p.slug === slugify(fullName));
             const personLink = `${baseUrl(request)}/email-signature${matched ? `/${matched.slug}` : ''}`;
