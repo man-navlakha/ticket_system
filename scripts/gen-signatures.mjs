@@ -48,7 +48,7 @@ const body = `// AUTO-GENERATED from public/Email Signature/. Do not edit by han
 // Run \`npm run gen:signatures\` after adding/removing a signature image.
 
 export const SIGNATURE_DIR = "Email Signature";
-export const ATLAS_GIF = "Atlas GIF.gif";
+export const ATLAS_GIF = "Atlas latest.gif";
 // Atlas banner native size 1734x142; signature cards native 1901x448.
 export const RENDER_WIDTH = 600;
 export const ATLAS_HEIGHT = 49;   // 600 * 142/1734

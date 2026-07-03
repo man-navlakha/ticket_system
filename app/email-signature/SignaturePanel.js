@@ -20,7 +20,7 @@ export function fileUrl(origin, file) {
 
 // Editable text defaults.
 const DEFAULT_CONTACT = 'Feel free to contact us in case of any query.';
-const DEFAULT_CLOSING = 'Thanking you,\nBest regards,';
+const DEFAULT_CLOSING = 'Thanking you,\nWith best regards,';
 
 // Keep user-typed text valid inside HTML.
 function escapeHtml(s) {
@@ -42,16 +42,11 @@ export function buildSignatureHtml(origin, person, opts = {}) {
     <td style="padding:0 0 16px 0;">
 
       <table cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;">
-        <tr>
-          <td style="border-top:2px dashed #6d2db7;height:8px;font-size:0;line-height:0;">&nbsp;</td>
-        </tr>
 
         <tr>
           <td style="
-              padding:10px 14px;
-              border-left:1px solid #cfcfcf;
               font-family:Georgia,serif;
-              font-size:12px;
+              font-size:14px;
               color:#143b74;
               font-weight:bold;">
             ${contact}
@@ -71,7 +66,7 @@ export function buildSignatureHtml(origin, person, opts = {}) {
     <td style="
         padding:0 0 16px 0;
         font-family:Tahoma,Arial,sans-serif;
-        font-size:16px;
+        font-size:14px;
         line-height:28px;
         color:#6d2db7;
         font-weight:bold;">
