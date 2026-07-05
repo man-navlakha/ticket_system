@@ -7,9 +7,12 @@ import { useState } from 'react';
 import LogoutButton from './LogoutButton';
 import { ThemeToggle } from './theme-toggle';
 import ThemeLogo from './ThemeLogo';
+import { formatFullName } from '@/lib/user';
 
 export default function Sidebar({ user }) {
     const pathname = usePathname();
+    const displayName = formatFullName(user) || 'User';
+    const displayInitial = displayName[0]?.toUpperCase() || 'U';
     // Default open state for specific menus if desired, or let user toggle
     const [openSubMenu, setOpenSubMenu] = useState({
         tickets: true,
@@ -265,10 +268,10 @@ export default function Sidebar({ user }) {
                     </div>
                     <div className="flex items-center gap-3 px-3 py-3 rounded-xl bg-muted/30 border border-border hover:border-foreground/10 transition-colors group cursor-pointer">
                         <div className="w-9 h-9 rounded-full  bg-gradient-to-tr from-[#ec4269] to-[#ec3176]  flex items-center justify-center text-xs font-bold text-white shadow-lg">
-                            {user?.username?.[0] || 'U'}
+                            {displayInitial}
                         </div>
                         <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-foreground truncate">{user?.username || 'User'}</p>
+                            <p className="text-sm font-medium text-foreground truncate">{displayName}</p>
                             <p className="text-[11px] text-muted-foreground truncate font-mono">{user?.email}</p>
                         </div>
                         <div className="opacity-0 group-hover:opacity-100 transition-opacity">
@@ -325,7 +328,7 @@ export default function Sidebar({ user }) {
                         className={`flex flex-col items-center justify-center p-2 rounded-xl transition-all w-16 group ${isActive('/dashboard/profile') ? 'text-foreground' : 'text-muted-foreground'}`}
                     >
                         <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-[#ec4269] to-[#ec3176] flex items-center justify-center text-[10px] font-bold text-white mb-1">
-                            {user?.username?.[0] || 'U'}
+                            {displayInitial}
                         </div>
                         <span className="text-[10px] font-medium">You</span>
                     </Link>

@@ -17,6 +17,7 @@ export default async function ProfilePage() {
             }
         }
     });
+    if (!profile) redirect('/auth/login');
 
     return <ProfileClient user={profile} />;
 }

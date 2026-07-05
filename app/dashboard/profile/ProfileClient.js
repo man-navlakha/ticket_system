@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import LogoutButton from '@/components/LogoutButton';
+import { formatFullName } from '@/lib/user';
 
 const DEPARTMENT_LABELS = {
     accounts: 'Accounts Team',
@@ -22,7 +22,8 @@ const DEPARTMENT_LABELS = {
 };
 
 export default function ProfileClient({ user }) {
-    const [activeTab, setActiveTab] = useState('overview');
+    const displayName = formatFullName(user) || 'User';
+    const displayInitial = displayName[0]?.toUpperCase() || 'U';
 
     return (
         <div className="space-y-12 animate-in fade-in duration-700">
@@ -40,10 +41,10 @@ export default function ProfileClient({ user }) {
                         <div className="absolute inset-0 bg-gradient-to-tr from-[#ec4269] to-purple-500 rounded-full blur-2xl opacity-20 group-hover:opacity-40 transition-opacity duration-700" />
                         <div className="relative w-32 h-32 rounded-full border-2 border-border bg-background flex items-center justify-center overflow-hidden">
                             {user.image ? (
-                                <Image src={user.image} alt={user.username} fill className="object-cover" />
+                                <Image src={user.image} alt={displayName} fill className="object-cover" />
                             ) : (
                                 <span className="text-4xl font-bold text-foreground tracking-tighter">
-                                    {user.username?.[0]?.toUpperCase()}
+                                    {displayInitial}
                                 </span>
                             )}
                         </div>
@@ -51,7 +52,7 @@ export default function ProfileClient({ user }) {
 
                     <div className="space-y-4">
                         <div className="space-y-1">
-                            <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground">{user.username}</h1>
+                            <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground">{displayName}</h1>
                             <p className="text-lg text-muted-foreground font-mono tracking-tight">{user.email}</p>
                             {/* Department & Location badges */}
                             {(user.department || user.location) && (

@@ -53,7 +53,18 @@ export async function POST(req) {
 
         return NextResponse.json({
             message: 'Login successful',
-            user: { id: user.id, email: user.email, username: user.username, role: user.role },
+            user: {
+                id: user.id,
+                email: user.email,
+                username: user.username,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                phoneNumber: user.phoneNumber,
+                department: user.department,
+                location: user.location,
+                role: user.role,
+                status: user.status,
+            },
             accessToken,
         });
     } catch (error) {
