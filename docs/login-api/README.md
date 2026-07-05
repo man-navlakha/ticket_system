@@ -2,7 +2,7 @@
 
 This document is for the mobile app team integrating login with the ticket system backend.
 
-Related docs: [User Devices API](./devices-api.md)
+Related docs: [User Devices API](./devices-api.md), [User Profile API](./profile-api.md), [QR Ticket API](./qr-ticket-api.md)
 
 ## Base URL
 
