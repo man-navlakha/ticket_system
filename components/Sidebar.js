@@ -102,7 +102,43 @@ export default function Sidebar({ user }) {
                     )
                 }
             ]
-        }
+        },
+        ...(user?.role === 'ADMIN' || user?.role === 'AGENT'
+            ? [
+                {
+                    title: 'Laptop Data',
+                    items: [
+                        {
+                            label: 'Devices',
+                            href: '/dashboard/laptop-data/devices',
+                            icon: (
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                </svg>
+                            )
+                        },
+                        {
+                            label: 'File Search',
+                            href: '/dashboard/laptop-data/files',
+                            icon: (
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v2M3 7v10a2 2 0 002 2h7M21 21l-4.35-4.35M18 14a4 4 0 11-8 0 4 4 0 018 0z" />
+                                </svg>
+                            )
+                        },
+                        {
+                            label: 'File Requests',
+                            href: '/dashboard/laptop-data/file-requests',
+                            icon: (
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.5L19 8.5V19a2 2 0 01-2 2z" />
+                                </svg>
+                            )
+                        },
+                    ]
+                }
+            ]
+            : [])
     ];
 
     // Admin / Config Section
