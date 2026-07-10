@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import LogoutButton from './LogoutButton';
 import { ThemeToggle } from './theme-toggle';
 import ThemeLogo from './ThemeLogo';
@@ -11,6 +11,7 @@ import { formatFullName } from '@/lib/user';
 
 export default function Sidebar({ user }) {
     const pathname = usePathname();
+    const [pendingHref, setPendingHref] = useState('');
     const displayName = formatFullName(user) || 'User';
     const displayInitial = displayName[0]?.toUpperCase() || 'U';
     // Default open state for specific menus if desired, or let user toggle
@@ -23,6 +24,48 @@ export default function Sidebar({ user }) {
     const toggleSubMenu = (key) => {
         setOpenSubMenu(prev => ({ ...prev, [key]: !prev[key] }));
     };
+
+    useEffect(() => {
+        const clearPending = window.setTimeout(() => {
+            setPendingHref('');
+        }, 0);
+
+        return () => window.clearTimeout(clearPending);
+    }, [pathname]);
+
+    useEffect(() => {
+        if (!pendingHref) return undefined;
+
+        const timeout = window.setTimeout(() => {
+            setPendingHref('');
+        }, 2500);
+
+        return () => window.clearTimeout(timeout);
+    }, [pendingHref]);
+
+    const handleNavigate = (event, href) => {
+        if (!href) return;
+        if (
+            event.defaultPrevented ||
+            event.metaKey ||
+            event.ctrlKey ||
+            event.shiftKey ||
+            event.altKey ||
+            event.button !== 0
+        ) {
+            return;
+        }
+
+        const targetPath = getHrefPathname(href);
+        const isCurrentPath = targetPath === pathname;
+        const changesQuery = String(href).includes('?');
+
+        if (!isCurrentPath || changesQuery) {
+            setPendingHref(href);
+        }
+    };
+
+    const isPending = (href) => pendingHref === href;
 
     const isActive = (path) => {
         if (path === '/dashboard' && pathname === '/dashboard') return true;
@@ -216,12 +259,17 @@ export default function Sidebar({ user }) {
     return (
         <>
             {/* Desktop Sidebar */}
-            <aside data-print-hide className="hidden md:flex flex-col w-[280px] min-h-screen bg-background border-r border-border sticky top-0 h-screen overflow-y-auto z-50 no-scrollbar transition-colors duration-300">
+            <aside data-print-hide aria-busy={Boolean(pendingHref)} className="hidden md:flex flex-col w-[280px] min-h-screen bg-background border-r border-border sticky top-0 h-screen overflow-y-auto z-50 no-scrollbar transition-colors duration-300">
                 {/* Brand Header */}
-                <div className="flex items-center gap-3 px-6 h-16 border-b border-border shrink-0 bg-background/50 backdrop-blur-md sticky top-0 z-10">
-                    <Link href="/dashboard" className="flex items-center group hover:opacity-80 transition-opacity">
+                <div className="relative flex items-center gap-3 px-6 h-16 border-b border-border shrink-0 bg-background/50 backdrop-blur-md sticky top-0 z-10">
+                    <Link href="/dashboard" onClick={(event) => handleNavigate(event, '/dashboard')} className="flex items-center group hover:opacity-80 transition-opacity">
                         <ThemeLogo />
                     </Link>
+                    {pendingHref && (
+                        <div className="absolute inset-x-0 bottom-0 h-px bg-foreground/10">
+                            <div className="h-full w-1/2 animate-pulse bg-foreground/70" />
+                        </div>
+                    )}
                 </div>
 
                 {/* Navigation Items */}
@@ -266,12 +314,14 @@ export default function Sidebar({ user }) {
                                                             <Link
                                                                 key={subItem.href}
                                                                 href={subItem.href}
-                                                                className={`block pl-6 pr-3 py-1.5 text-[13px] rounded-r-md border-l-2 border-transparent transition-colors ${isSubActive(subItem.href)
+                                                                onClick={(event) => handleNavigate(event, subItem.href)}
+                                                                className={`flex items-center justify-between gap-2 pl-6 pr-3 py-1.5 text-[13px] rounded-r-md border-l-2 border-transparent transition-colors ${isSubActive(subItem.href)
                                                                     ? 'text-foreground border-foreground bg-muted/50 font-medium'
                                                                     : 'text-muted-foreground hover:text-foreground hover:border-foreground/20'
                                                                     }`}
                                                             >
-                                                                {subItem.label}
+                                                                <span className="truncate">{subItem.label}</span>
+                                                                {isPending(subItem.href) && <NavSpinner />}
                                                             </Link>
                                                         ))}
                                                     </div>
@@ -280,13 +330,15 @@ export default function Sidebar({ user }) {
                                         ) : (
                                             <Link
                                                 href={item.href}
+                                                onClick={(event) => handleNavigate(event, item.href)}
                                                 className={`flex items-center gap-3 px-3 py-2 text-sm rounded-md transition-all duration-200 group ${isActive(item.href)
                                                     ? 'text-foreground bg-muted/50 font-medium'
                                                     : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
                                                     }`}
                                             >
                                                 <span className={isActive(item.href) ? 'text-foreground' : 'text-muted-foreground group-hover:text-foreground'}>{item.icon}</span>
-                                                {item.label}
+                                                <span className="min-w-0 flex-1 truncate">{item.label}</span>
+                                                {isPending(item.href) && <NavSpinner />}
                                             </Link>
                                         )}
                                     </div>
@@ -322,8 +374,10 @@ export default function Sidebar({ user }) {
                 <div className="flex items-center justify-around h-16">
                     <Link
                         href="/dashboard"
-                        className={`flex flex-col items-center justify-center p-2 rounded-xl transition-all w-16 group ${isActive('/dashboard') ? 'text-foreground' : 'text-muted-foreground'}`}
+                        onClick={(event) => handleNavigate(event, '/dashboard')}
+                        className={`relative flex flex-col items-center justify-center p-2 rounded-xl transition-all w-16 group ${isActive('/dashboard') ? 'text-foreground' : 'text-muted-foreground'}`}
                     >
+                        {isPending('/dashboard') && <NavSpinner className="absolute right-1 top-1 h-3 w-3" />}
                         <svg className="w-6 h-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                         </svg>
@@ -332,8 +386,10 @@ export default function Sidebar({ user }) {
 
                     <Link
                         href="/dashboard/inventory"
-                        className={`flex flex-col items-center justify-center p-2 rounded-xl transition-all w-16 group ${isActive('/dashboard/inventory') ? 'text-foreground' : 'text-muted-foreground'}`}
+                        onClick={(event) => handleNavigate(event, '/dashboard/inventory')}
+                        className={`relative flex flex-col items-center justify-center p-2 rounded-xl transition-all w-16 group ${isActive('/dashboard/inventory') ? 'text-foreground' : 'text-muted-foreground'}`}
                     >
+                        {isPending('/dashboard/inventory') && <NavSpinner className="absolute right-1 top-1 h-3 w-3" />}
                         <svg className="w-6 h-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                         </svg>
@@ -342,8 +398,10 @@ export default function Sidebar({ user }) {
 
                     <Link
                         href="/dashboard/create"
-                        className="flex items-center justify-center w-12 h-12 rounded-full bg-foreground text-background shadow-lg shadow-foreground/10 transform -translate-y-4 border-4 border-background active:scale-95 transition-all"
+                        onClick={(event) => handleNavigate(event, '/dashboard/create')}
+                        className="relative flex items-center justify-center w-12 h-12 rounded-full bg-foreground text-background shadow-lg shadow-foreground/10 transform -translate-y-4 border-4 border-background active:scale-95 transition-all"
                     >
+                        {isPending('/dashboard/create') && <NavSpinner className="absolute -right-1 -top-1 h-4 w-4 text-foreground" />}
                         <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                         </svg>
@@ -351,8 +409,10 @@ export default function Sidebar({ user }) {
 
                     <Link
                         href="/dashboard/knowledge-base"
-                        className={`flex flex-col items-center justify-center p-2 rounded-xl transition-all w-16 group ${isActive('/dashboard/knowledge-base') ? 'text-foreground' : 'text-muted-foreground'}`}
+                        onClick={(event) => handleNavigate(event, '/dashboard/knowledge-base')}
+                        className={`relative flex flex-col items-center justify-center p-2 rounded-xl transition-all w-16 group ${isActive('/dashboard/knowledge-base') ? 'text-foreground' : 'text-muted-foreground'}`}
                     >
+                        {isPending('/dashboard/knowledge-base') && <NavSpinner className="absolute right-1 top-1 h-3 w-3" />}
                         <svg className="w-6 h-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                         </svg>
@@ -361,8 +421,10 @@ export default function Sidebar({ user }) {
 
                     <Link
                         href="/dashboard/profile"
-                        className={`flex flex-col items-center justify-center p-2 rounded-xl transition-all w-16 group ${isActive('/dashboard/profile') ? 'text-foreground' : 'text-muted-foreground'}`}
+                        onClick={(event) => handleNavigate(event, '/dashboard/profile')}
+                        className={`relative flex flex-col items-center justify-center p-2 rounded-xl transition-all w-16 group ${isActive('/dashboard/profile') ? 'text-foreground' : 'text-muted-foreground'}`}
                     >
+                        {isPending('/dashboard/profile') && <NavSpinner className="absolute right-1 top-1 h-3 w-3" />}
                         <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-[#ec4269] to-[#ec3176] flex items-center justify-center text-[10px] font-bold text-white mb-1">
                             {displayInitial}
                         </div>
@@ -372,4 +434,21 @@ export default function Sidebar({ user }) {
             </nav>
         </>
     );
+}
+
+function NavSpinner({ className = 'ml-auto h-3.5 w-3.5' }) {
+    return (
+        <span
+            aria-hidden="true"
+            className={`inline-block shrink-0 animate-spin rounded-full border-2 border-current/20 border-t-current ${className}`}
+        />
+    );
+}
+
+function getHrefPathname(href) {
+    try {
+        return new URL(String(href), 'https://epdesk.local').pathname;
+    } catch {
+        return String(href || '');
+    }
 }

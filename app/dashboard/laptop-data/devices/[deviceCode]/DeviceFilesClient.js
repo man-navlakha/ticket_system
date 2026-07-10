@@ -12,6 +12,7 @@ import {
     getFileKey,
     waitForCompletedRequest,
 } from '../../_components/fileRequestClient';
+import DeviceOperationsPanel from './DeviceOperationsPanel';
 
 const DEFAULT_RESULT = {
     page: 1,
@@ -596,6 +597,8 @@ export default function DeviceFilesClient({ deviceCode, requestedByDefault }) {
                     </div>
                 </div>
             </section>
+
+            <DeviceOperationsPanel deviceCode={deviceCode} requestedByDefault={requestedByDefault} />
         </div>
     );
 }
