@@ -2,13 +2,17 @@
 
 import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Clock3, FolderOpen, MonitorSmartphone, RefreshCw, Search, Wifi, WifiOff } from 'lucide-react';
+import { Check, Clock3, FolderOpen, MonitorSmartphone, Pencil, RefreshCw, Search, X, Wifi, WifiOff } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function DevicesClient() {
     const [devices, setDevices] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [search, setSearch] = useState('');
+    const [editingDeviceCode, setEditingDeviceCode] = useState('');
+    const [nicknameDraft, setNicknameDraft] = useState('');
+    const [savingNickname, setSavingNickname] = useState('');
 
     const fetchDevices = useCallback(async () => {
         try {
@@ -47,10 +51,58 @@ export default function DevicesClient() {
 
         return sorted.filter((device) =>
             [device.deviceCode, device.hostname, device.username, device.status]
+                .concat(device.nickname)
                 .filter(Boolean)
                 .some((value) => String(value).toLowerCase().includes(term))
         );
     }, [devices, search]);
+
+    const startNicknameEdit = (device) => {
+        setEditingDeviceCode(device.deviceCode || '');
+        setNicknameDraft(device.nickname || '');
+    };
+
+    const cancelNicknameEdit = () => {
+        setEditingDeviceCode('');
+        setNicknameDraft('');
+    };
+
+    const saveNickname = async (deviceCode) => {
+        const nickname = nicknameDraft.trim();
+
+        if (!nickname) {
+            toast.error('Nickname is required.');
+            return;
+        }
+
+        try {
+            setSavingNickname(deviceCode);
+            const res = await fetch(`/api/admin/devices/${encodeURIComponent(deviceCode)}/nickname`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nickname }),
+            });
+            const data = await res.json().catch(() => null);
+
+            if (!res.ok) {
+                throw new Error(data?.error || 'Unable to update nickname.');
+            }
+
+            setDevices((currentDevices) =>
+                currentDevices.map((device) =>
+                    device.deviceCode === deviceCode
+                        ? { ...device, ...(data && typeof data === 'object' ? data : {}), nickname }
+                        : device
+                )
+            );
+            cancelNicknameEdit();
+            toast.success('Device nickname updated.');
+        } catch (saveError) {
+            toast.error(saveError.message || 'Unable to update nickname.');
+        } finally {
+            setSavingNickname('');
+        }
+    };
 
     const stats = useMemo(() => {
         const online = devices.filter((device) => device.status === 'online').length;
@@ -117,10 +169,11 @@ export default function DevicesClient() {
 
             <section className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
                 <div className="overflow-x-auto">
-                    <table className="w-full min-w-[860px] text-left text-sm">
+                    <table className="w-full min-w-[980px] text-left text-sm">
                         <thead className="border-b border-border bg-muted/30 text-xs uppercase">
                             <tr>
                                 <th className="px-6 py-4 font-bold tracking-widest text-muted-foreground">Device</th>
+                                <th className="px-6 py-4 font-bold tracking-widest text-muted-foreground">Nickname</th>
                                 <th className="px-6 py-4 font-bold tracking-widest text-muted-foreground">Hostname</th>
                                 <th className="px-6 py-4 font-bold tracking-widest text-muted-foreground">Signed In User</th>
                                 <th className="px-6 py-4 font-bold tracking-widest text-muted-foreground">Status</th>
@@ -131,13 +184,13 @@ export default function DevicesClient() {
                         <tbody className="divide-y divide-border">
                             {loading && devices.length === 0 ? (
                                 <tr>
-                                    <td colSpan="6" className="px-6 py-16 text-center text-sm text-muted-foreground">
+                                    <td colSpan="7" className="px-6 py-16 text-center text-sm text-muted-foreground">
                                         Loading laptop devices...
                                     </td>
                                 </tr>
                             ) : filteredDevices.length === 0 ? (
                                 <tr>
-                                    <td colSpan="6" className="px-6 py-16 text-center text-sm text-muted-foreground">
+                                    <td colSpan="7" className="px-6 py-16 text-center text-sm text-muted-foreground">
                                         {search ? 'No devices matched the current search.' : 'No laptop devices were returned.'}
                                     </td>
                                 </tr>
@@ -163,6 +216,18 @@ export default function DevicesClient() {
                                                     <p className="text-xs text-muted-foreground">Agent device</p>
                                                 </div>
                                             </div>
+                                        </td>
+                                        <td className="px-6 py-5">
+                                            <NicknameCell
+                                                device={device}
+                                                isEditing={editingDeviceCode === device.deviceCode}
+                                                draft={nicknameDraft}
+                                                isSaving={savingNickname === device.deviceCode}
+                                                onStart={() => startNicknameEdit(device)}
+                                                onDraftChange={setNicknameDraft}
+                                                onCancel={cancelNicknameEdit}
+                                                onSave={() => saveNickname(device.deviceCode)}
+                                            />
                                         </td>
                                         <td className="px-6 py-5 font-semibold text-foreground">{device.hostname || '-'}</td>
                                         <td className="px-6 py-5 font-mono text-xs text-muted-foreground">{device.username || '-'}</td>
@@ -215,6 +280,69 @@ function StatusBadge({ status }) {
             <span className={`h-1.5 w-1.5 rounded-full ${isOnline ? 'bg-green-500' : 'bg-amber-500'}`} />
             {status || 'unknown'}
         </span>
+    );
+}
+
+function NicknameCell({ device, isEditing, draft, isSaving, onStart, onDraftChange, onCancel, onSave }) {
+    if (!device.deviceCode) {
+        return <span className="text-xs font-medium text-muted-foreground">Unavailable</span>;
+    }
+
+    if (isEditing) {
+        return (
+            <div className="flex min-w-[220px] items-center gap-2">
+                <input
+                    type="text"
+                    value={draft}
+                    onChange={(event) => onDraftChange(event.target.value)}
+                    onKeyDown={(event) => {
+                        if (event.key === 'Enter') onSave();
+                        if (event.key === 'Escape') onCancel();
+                    }}
+                    placeholder="Office Laptop"
+                    disabled={isSaving}
+                    autoFocus
+                    className="h-9 w-40 rounded-full border border-input bg-background px-3 text-xs font-semibold text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60"
+                />
+                <button
+                    type="button"
+                    onClick={onSave}
+                    disabled={isSaving}
+                    aria-label="Save nickname"
+                    title="Save nickname"
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-green-500/20 bg-green-500/10 text-green-600 transition hover:bg-green-500/15 disabled:opacity-50"
+                >
+                    <Check className="h-4 w-4" />
+                </button>
+                <button
+                    type="button"
+                    onClick={onCancel}
+                    disabled={isSaving}
+                    aria-label="Cancel nickname edit"
+                    title="Cancel"
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border bg-background text-muted-foreground transition hover:bg-muted/50 disabled:opacity-50"
+                >
+                    <X className="h-4 w-4" />
+                </button>
+            </div>
+        );
+    }
+
+    return (
+        <div className="flex min-w-[180px] items-center gap-2">
+            <span className="max-w-40 truncate font-semibold text-foreground">
+                {device.nickname || <span className="font-medium text-muted-foreground">No nickname</span>}
+            </span>
+            <button
+                type="button"
+                onClick={onStart}
+                aria-label="Edit nickname"
+                title="Edit nickname"
+                className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-border bg-background text-muted-foreground transition hover:bg-muted/50 hover:text-foreground"
+            >
+                <Pencil className="h-3.5 w-3.5" />
+            </button>
+        </div>
     );
 }
 
