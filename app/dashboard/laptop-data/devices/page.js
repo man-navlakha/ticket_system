@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic';
 
 export const metadata = {
     title: 'Laptop Devices - Dashboard',
-    description: 'View online and offline laptop agents.',
+    description: 'View laptop agents, online state, and agent version rollout.',
 };
 
 export default async function DevicesPage() {
@@ -16,7 +16,7 @@ export default async function DevicesPage() {
         <LaptopDataShell
             active="devices"
             title="Laptop Devices"
-            description="Monitor registered agent devices, online state, signed-in user, and last heartbeat."
+            description="Monitor registered agent devices, online state, heartbeat, and agent version rollout."
             user={user}
         >
             <DevicesClient />
