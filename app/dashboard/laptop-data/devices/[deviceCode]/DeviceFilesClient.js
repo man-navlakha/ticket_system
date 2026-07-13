@@ -2,7 +2,25 @@
 
 import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Archive, ArrowLeft, ChevronLeft, ChevronRight, Database, Download, FileText, Filter, FolderArchive, RefreshCw, Search, X } from 'lucide-react';
+import {
+    Archive,
+    ArrowLeft,
+    ChevronDown,
+    ChevronLeft,
+    ChevronRight,
+    Database,
+    Download,
+    FileText,
+    Filter,
+    Folder,
+    FolderArchive,
+    FolderOpen,
+    ListTree,
+    RefreshCw,
+    Search,
+    Table2,
+    X,
+} from 'lucide-react';
 import { toast } from 'sonner';
 import {
     createFileRequest,
@@ -37,6 +55,8 @@ export default function DeviceFilesClient({ deviceCode, requestedByDefault }) {
     const [folderPath, setFolderPath] = useState('');
     const [zipRequesting, setZipRequesting] = useState(false);
     const [folderRequesting, setFolderRequesting] = useState(false);
+    const [viewMode, setViewMode] = useState('table');
+    const [expandedFolders, setExpandedFolders] = useState({});
 
     const loadFiles = useCallback(async () => {
         const params = new URLSearchParams({
@@ -80,11 +100,27 @@ export default function DeviceFilesClient({ deviceCode, requestedByDefault }) {
     }, [loadFiles]);
 
     const visibleFiles = useMemo(() => result.files || [], [result.files]);
+    const fileTree = useMemo(() => buildFileTree(visibleFiles), [visibleFiles]);
+    const treeFolderPaths = useMemo(() => collectTreeFolderPaths(fileTree.children), [fileTree]);
     const activeFilters = Boolean(query || extension);
     const totalPages = Math.max(Number(result.totalPages || 0), 1);
     const canGoPrevious = page > 1;
     const canGoNext = page < totalPages;
     const isAnyRequesting = Boolean(downloadingFileKey) || zipRequesting || folderRequesting;
+    const allFoldersExpanded = treeFolderPaths.length > 0
+        && treeFolderPaths.every((path) => expandedFolders[path] !== false);
+
+    useEffect(() => {
+        setExpandedFolders((current) => {
+            const next = {};
+
+            treeFolderPaths.forEach((path) => {
+                next[path] = current[path] ?? true;
+            });
+
+            return next;
+        });
+    }, [treeFolderPaths]);
 
     const stats = useMemo(() => {
         const pageBytes = visibleFiles.reduce((total, file) => total + Number(file.sizeBytes || 0), 0);
@@ -184,6 +220,25 @@ export default function DeviceFilesClient({ deviceCode, requestedByDefault }) {
 
     const clearSelection = () => {
         setSelectedFiles({});
+    };
+
+    const toggleFolder = (path) => {
+        setExpandedFolders((current) => ({
+            ...current,
+            [path]: current[path] !== false ? false : true,
+        }));
+    };
+
+    const expandAllFolders = () => {
+        setExpandedFolders(Object.fromEntries(treeFolderPaths.map((path) => [path, true])));
+    };
+
+    const collapseAllFolders = () => {
+        setExpandedFolders(Object.fromEntries(treeFolderPaths.map((path) => [path, false])));
+    };
+
+    const useFolderForZip = (path) => {
+        setFolderPath(path);
     };
 
     const waitAndDownload = async (requestId, fallbackName) => {
@@ -475,97 +530,167 @@ export default function DeviceFilesClient({ deviceCode, requestedByDefault }) {
             )}
 
             <section className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
-                <div className="overflow-x-auto">
-                    <table className="w-full min-w-[1180px] text-left text-sm">
-                        <thead className="border-b border-border bg-muted/30 text-xs uppercase">
-                            <tr>
-                                <th className="w-12 px-6 py-4">
-                                    <input
-                                        type="checkbox"
-                                        checked={allVisibleSelected}
-                                        onChange={toggleVisibleSelection}
-                                        disabled={!selectableVisibleFiles.length || isAnyRequesting}
-                                        aria-label="Select all files on this page"
-                                        className="h-4 w-4 rounded border-border bg-background text-foreground"
-                                    />
-                                </th>
-                                <th className="px-6 py-4 font-bold tracking-widest text-muted-foreground">File</th>
-                                <th className="px-6 py-4 font-bold tracking-widest text-muted-foreground">Directory</th>
-                                <th className="px-6 py-4 font-bold tracking-widest text-muted-foreground">Size</th>
-                                <th className="px-6 py-4 font-bold tracking-widest text-muted-foreground">Updated</th>
-                                <th className="px-6 py-4 font-bold tracking-widest text-muted-foreground">Indexed</th>
-                                <th className="px-6 py-4 text-right font-bold tracking-widest text-muted-foreground">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-border">
-                            {loading && visibleFiles.length === 0 ? (
-                                <tr>
-                                    <td colSpan="7" className="px-6 py-16 text-center text-sm text-muted-foreground">
-                                        Loading files from {deviceCode}...
-                                    </td>
-                                </tr>
-                            ) : visibleFiles.length === 0 ? (
-                                <tr>
-                                    <td colSpan="7" className="px-6 py-16 text-center text-sm text-muted-foreground">
-                                        {activeFilters ? 'No files matched these filters.' : 'No files were returned for this device.'}
-                                    </td>
-                                </tr>
-                            ) : (
-                                visibleFiles.map((file) => {
-                                    const fileKey = getFileKey(file);
-                                    const isDownloading = downloadingFileKey === fileKey;
+                <div className="flex flex-col gap-4 border-b border-border p-5 lg:flex-row lg:items-center lg:justify-between">
+                    <div className="space-y-1">
+                        <p className="text-[10px] font-bold uppercase tracking-[0.26em] text-muted-foreground">File Browser</p>
+                        <h2 className="text-xl font-bold tracking-tight text-foreground">
+                            {viewMode === 'tree' ? 'Tree view' : 'Table view'}
+                        </h2>
+                        <p className="text-xs font-medium text-muted-foreground">
+                            {viewMode === 'tree'
+                                ? `${formatNumber(fileTree.folderCount)} folders, ${formatNumber(fileTree.fileCount)} loaded files`
+                                : `${formatNumber(visibleFiles.length)} loaded files on this page`}
+                        </p>
+                    </div>
 
-                                    return (
-                                        <tr key={file.id || fileKey} className="transition-colors hover:bg-muted/20">
-                                            <td className="px-6 py-5">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={Boolean(selectedFiles[fileKey])}
-                                                    onChange={() => toggleFileSelection(file)}
-                                                    disabled={file.isDeleted || !file.fullPath || isAnyRequesting}
-                                                    aria-label={`Select ${file.fileName || file.fullPath || 'file'}`}
-                                                    className="h-4 w-4 rounded border-border bg-background text-foreground disabled:opacity-40"
-                                                />
-                                            </td>
-                                            <td className="px-6 py-5">
-                                                <div className="space-y-1">
-                                                    <div className="flex flex-wrap items-center gap-2">
-                                                        <p className="font-semibold text-foreground">{file.fileName || '-'}</p>
-                                                        {file.isDeleted && (
-                                                            <span className="rounded-full border border-red-500/20 bg-red-500/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-red-600">
-                                                                Deleted
-                                                            </span>
-                                                        )}
-                                                    </div>
-                                                    <p className="font-mono text-[11px] text-muted-foreground">{file.extension || 'file'}</p>
-                                                </div>
-                                            </td>
-                                            <td className="max-w-md px-6 py-5">
-                                                <p className="truncate font-mono text-xs text-muted-foreground" title={file.fullPath || file.directoryPath}>
-                                                    {file.directoryPath || file.fullPath || '-'}
-                                                </p>
-                                            </td>
-                                            <td className="px-6 py-5 text-xs text-muted-foreground">{formatBytes(file.sizeBytes)}</td>
-                                            <td className="px-6 py-5 text-xs text-muted-foreground">{formatDateTime(file.updatedAtUtc)}</td>
-                                            <td className="px-6 py-5 text-xs text-muted-foreground">{formatDateTime(file.lastIndexedAtUtc)}</td>
-                                            <td className="px-6 py-5 text-right">
-                                                <button
-                                                    type="button"
-                                                    onClick={() => handleDownload(file)}
-                                                    disabled={isAnyRequesting || file.isDeleted}
-                                                    className="inline-flex h-9 items-center justify-center gap-2 rounded-full bg-foreground px-4 text-xs font-bold text-background transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-45"
-                                                >
-                                                    {isDownloading ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
-                                                    {isDownloading ? 'Preparing' : 'Download'}
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    );
-                                })
-                            )}
-                        </tbody>
-                    </table>
+                    <div className="flex flex-wrap items-center gap-2">
+                        {viewMode === 'tree' && treeFolderPaths.length > 0 && (
+                            <button
+                                type="button"
+                                onClick={allFoldersExpanded ? collapseAllFolders : expandAllFolders}
+                                className="inline-flex h-10 items-center gap-2 rounded-full border border-border bg-background px-4 text-xs font-bold text-foreground transition hover:bg-muted/50"
+                            >
+                                {allFoldersExpanded ? <ChevronRight className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+                                {allFoldersExpanded ? 'Collapse All' : 'Expand All'}
+                            </button>
+                        )}
+                        <div className="inline-flex rounded-full border border-border bg-background p-1">
+                            <button
+                                type="button"
+                                onClick={() => setViewMode('table')}
+                                aria-pressed={viewMode === 'table'}
+                                className={`inline-flex h-8 items-center gap-2 rounded-full px-3 text-xs font-bold transition ${viewMode === 'table'
+                                    ? 'bg-foreground text-background'
+                                    : 'text-muted-foreground hover:text-foreground'
+                                    }`}
+                            >
+                                <Table2 className="h-3.5 w-3.5" />
+                                Table
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setViewMode('tree')}
+                                aria-pressed={viewMode === 'tree'}
+                                className={`inline-flex h-8 items-center gap-2 rounded-full px-3 text-xs font-bold transition ${viewMode === 'tree'
+                                    ? 'bg-foreground text-background'
+                                    : 'text-muted-foreground hover:text-foreground'
+                                    }`}
+                            >
+                                <ListTree className="h-3.5 w-3.5" />
+                                Tree
+                            </button>
+                        </div>
+                    </div>
                 </div>
+
+                {viewMode === 'tree' ? (
+                    <DeviceFileTree
+                        activeFilters={activeFilters}
+                        deviceCode={deviceCode}
+                        downloadingFileKey={downloadingFileKey}
+                        expandedFolders={expandedFolders}
+                        isAnyRequesting={isAnyRequesting}
+                        loading={loading}
+                        onDownload={handleDownload}
+                        onToggleFile={toggleFileSelection}
+                        onToggleFolder={toggleFolder}
+                        onUseFolder={useFolderForZip}
+                        selectedFiles={selectedFiles}
+                        tree={fileTree}
+                    />
+                ) : (
+                    <div className="overflow-x-auto">
+                        <table className="w-full min-w-[1180px] text-left text-sm">
+                            <thead className="border-b border-border bg-muted/30 text-xs uppercase">
+                                <tr>
+                                    <th className="w-12 px-6 py-4">
+                                        <input
+                                            type="checkbox"
+                                            checked={allVisibleSelected}
+                                            onChange={toggleVisibleSelection}
+                                            disabled={!selectableVisibleFiles.length || isAnyRequesting}
+                                            aria-label="Select all files on this page"
+                                            className="h-4 w-4 rounded border-border bg-background text-foreground"
+                                        />
+                                    </th>
+                                    <th className="px-6 py-4 font-bold tracking-widest text-muted-foreground">File</th>
+                                    <th className="px-6 py-4 font-bold tracking-widest text-muted-foreground">Directory</th>
+                                    <th className="px-6 py-4 font-bold tracking-widest text-muted-foreground">Size</th>
+                                    <th className="px-6 py-4 font-bold tracking-widest text-muted-foreground">Updated</th>
+                                    <th className="px-6 py-4 font-bold tracking-widest text-muted-foreground">Indexed</th>
+                                    <th className="px-6 py-4 text-right font-bold tracking-widest text-muted-foreground">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-border">
+                                {loading && visibleFiles.length === 0 ? (
+                                    <tr>
+                                        <td colSpan="7" className="px-6 py-16 text-center text-sm text-muted-foreground">
+                                            Loading files from {deviceCode}...
+                                        </td>
+                                    </tr>
+                                ) : visibleFiles.length === 0 ? (
+                                    <tr>
+                                        <td colSpan="7" className="px-6 py-16 text-center text-sm text-muted-foreground">
+                                            {activeFilters ? 'No files matched these filters.' : 'No files were returned for this device.'}
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    visibleFiles.map((file) => {
+                                        const fileKey = getFileKey(file);
+                                        const isDownloading = downloadingFileKey === fileKey;
+
+                                        return (
+                                            <tr key={file.id || fileKey} className="transition-colors hover:bg-muted/20">
+                                                <td className="px-6 py-5">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={Boolean(selectedFiles[fileKey])}
+                                                        onChange={() => toggleFileSelection(file)}
+                                                        disabled={file.isDeleted || !file.fullPath || isAnyRequesting}
+                                                        aria-label={`Select ${file.fileName || file.fullPath || 'file'}`}
+                                                        className="h-4 w-4 rounded border-border bg-background text-foreground disabled:opacity-40"
+                                                    />
+                                                </td>
+                                                <td className="px-6 py-5">
+                                                    <div className="space-y-1">
+                                                        <div className="flex flex-wrap items-center gap-2">
+                                                            <p className="font-semibold text-foreground">{file.fileName || '-'}</p>
+                                                            {file.isDeleted && (
+                                                                <span className="rounded-full border border-red-500/20 bg-red-500/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-red-600">
+                                                                    Deleted
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                        <p className="font-mono text-[11px] text-muted-foreground">{file.extension || 'file'}</p>
+                                                    </div>
+                                                </td>
+                                                <td className="max-w-md px-6 py-5">
+                                                    <p className="truncate font-mono text-xs text-muted-foreground" title={file.fullPath || file.directoryPath}>
+                                                        {file.directoryPath || file.fullPath || '-'}
+                                                    </p>
+                                                </td>
+                                                <td className="px-6 py-5 text-xs text-muted-foreground">{formatBytes(file.sizeBytes)}</td>
+                                                <td className="px-6 py-5 text-xs text-muted-foreground">{formatDateTime(file.updatedAtUtc)}</td>
+                                                <td className="px-6 py-5 text-xs text-muted-foreground">{formatDateTime(file.lastIndexedAtUtc)}</td>
+                                                <td className="px-6 py-5 text-right">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleDownload(file)}
+                                                        disabled={isAnyRequesting || file.isDeleted}
+                                                        className="inline-flex h-9 items-center justify-center gap-2 rounded-full bg-foreground px-4 text-xs font-bold text-background transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-45"
+                                                    >
+                                                        {isDownloading ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
+                                                        {isDownloading ? 'Preparing' : 'Download'}
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
 
                 <div className="flex flex-col gap-3 border-t border-border bg-muted/20 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
                     <div className="text-xs font-medium text-muted-foreground">
@@ -599,6 +724,197 @@ export default function DeviceFilesClient({ deviceCode, requestedByDefault }) {
             </section>
 
             <DeviceOperationsPanel deviceCode={deviceCode} requestedByDefault={requestedByDefault} />
+        </div>
+    );
+}
+
+function DeviceFileTree({
+    activeFilters,
+    deviceCode,
+    downloadingFileKey,
+    expandedFolders,
+    isAnyRequesting,
+    loading,
+    onDownload,
+    onToggleFile,
+    onToggleFolder,
+    onUseFolder,
+    selectedFiles,
+    tree,
+}) {
+    if (loading && tree.fileCount === 0) {
+        return (
+            <div className="px-6 py-16 text-center text-sm text-muted-foreground">
+                Loading files from {deviceCode}...
+            </div>
+        );
+    }
+
+    if (tree.fileCount === 0) {
+        return (
+            <div className="px-6 py-16 text-center text-sm text-muted-foreground">
+                {activeFilters ? 'No files matched these filters.' : 'No files were returned for this device.'}
+            </div>
+        );
+    }
+
+    return (
+        <div className="overflow-x-auto">
+            <div className="min-w-[920px]">
+                <div className="grid grid-cols-[minmax(0,1fr)_120px_210px_130px] border-b border-border bg-muted/30 px-5 py-3 text-xs uppercase">
+                    <div className="font-bold tracking-widest text-muted-foreground">Name</div>
+                    <div className="font-bold tracking-widest text-muted-foreground">Size / Files</div>
+                    <div className="font-bold tracking-widest text-muted-foreground">Updated / Path</div>
+                    <div className="text-right font-bold tracking-widest text-muted-foreground">Action</div>
+                </div>
+
+                <div role="tree" aria-label={`File tree for ${deviceCode}`} className="max-h-[680px] overflow-y-auto">
+                    {tree.children.map((node) => (
+                        <TreeNode
+                            key={node.type === 'folder' ? node.path : getFileKey(node.file)}
+                            downloadingFileKey={downloadingFileKey}
+                            expandedFolders={expandedFolders}
+                            isAnyRequesting={isAnyRequesting}
+                            node={node}
+                            onDownload={onDownload}
+                            onToggleFile={onToggleFile}
+                            onToggleFolder={onToggleFolder}
+                            onUseFolder={onUseFolder}
+                            selectedFiles={selectedFiles}
+                        />
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+}
+
+function TreeNode({
+    downloadingFileKey,
+    expandedFolders,
+    isAnyRequesting,
+    node,
+    onDownload,
+    onToggleFile,
+    onToggleFolder,
+    onUseFolder,
+    selectedFiles,
+}) {
+    const indent = `${16 + (node.depth * 22)}px`;
+
+    if (node.type === 'folder') {
+        const isExpanded = expandedFolders[node.path] !== false;
+
+        return (
+            <div>
+                <div
+                    role="treeitem"
+                    aria-expanded={isExpanded}
+                    aria-selected={false}
+                    className="grid min-h-11 grid-cols-[minmax(0,1fr)_120px_210px_130px] items-center border-b border-border/70 px-5 text-sm transition-colors hover:bg-muted/20"
+                >
+                    <button
+                        type="button"
+                        onClick={() => onToggleFolder(node.path)}
+                        className="flex min-w-0 items-center gap-2 py-2 text-left font-semibold text-foreground"
+                        style={{ paddingLeft: indent }}
+                    >
+                        {isExpanded ? <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" /> : <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />}
+                        {isExpanded ? <FolderOpen className="h-4 w-4 shrink-0 text-amber-600" /> : <Folder className="h-4 w-4 shrink-0 text-amber-600" />}
+                        <span className="truncate" title={node.path}>{node.name}</span>
+                    </button>
+
+                    <span className="font-mono text-xs text-muted-foreground">
+                        {formatNumber(node.fileCount)}
+                    </span>
+
+                    <span className="truncate font-mono text-[11px] text-muted-foreground" title={node.path}>
+                        {node.path}
+                    </span>
+
+                    <div className="flex justify-end">
+                        <button
+                            type="button"
+                            onClick={() => onUseFolder(node.path)}
+                            className="inline-flex h-8 items-center gap-2 rounded-full border border-border bg-background px-3 text-[11px] font-bold text-foreground transition hover:bg-muted/50"
+                        >
+                            <FolderArchive className="h-3.5 w-3.5" />
+                            ZIP
+                        </button>
+                    </div>
+                </div>
+
+                {isExpanded && node.children.map((child) => (
+                    <TreeNode
+                        key={child.type === 'folder' ? child.path : getFileKey(child.file)}
+                        downloadingFileKey={downloadingFileKey}
+                        expandedFolders={expandedFolders}
+                        isAnyRequesting={isAnyRequesting}
+                        node={child}
+                        onDownload={onDownload}
+                        onToggleFile={onToggleFile}
+                        onToggleFolder={onToggleFolder}
+                        onUseFolder={onUseFolder}
+                        selectedFiles={selectedFiles}
+                    />
+                ))}
+            </div>
+        );
+    }
+
+    const fileKey = getFileKey(node.file);
+    const isDownloading = downloadingFileKey === fileKey;
+
+    return (
+        <div
+            role="treeitem"
+            aria-selected={Boolean(selectedFiles[fileKey])}
+            className="grid min-h-11 grid-cols-[minmax(0,1fr)_120px_210px_130px] items-center border-b border-border/70 px-5 text-sm transition-colors hover:bg-muted/20"
+        >
+            <div className="flex min-w-0 items-center gap-2 py-2" style={{ paddingLeft: indent }}>
+                <input
+                    type="checkbox"
+                    checked={Boolean(selectedFiles[fileKey])}
+                    onChange={() => onToggleFile(node.file)}
+                    disabled={node.file.isDeleted || !node.file.fullPath || isAnyRequesting}
+                    aria-label={`Select ${node.name || node.path || 'file'}`}
+                    className="h-4 w-4 shrink-0 rounded border-border bg-background text-foreground disabled:opacity-40"
+                />
+                <FileText className="h-4 w-4 shrink-0 text-blue-600" />
+                <div className="min-w-0">
+                    <div className="flex min-w-0 items-center gap-2">
+                        <span className="truncate font-semibold text-foreground" title={node.path}>{node.name}</span>
+                        {node.file.isDeleted && (
+                            <span className="shrink-0 rounded-full border border-red-500/20 bg-red-500/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-red-600">
+                                Deleted
+                            </span>
+                        )}
+                    </div>
+                    <p className="truncate font-mono text-[11px] text-muted-foreground" title={node.path}>
+                        {node.path}
+                    </p>
+                </div>
+            </div>
+
+            <span className="font-mono text-xs text-muted-foreground">
+                {formatBytes(node.file.sizeBytes)}
+            </span>
+
+            <span className="font-mono text-[11px] text-muted-foreground">
+                {formatDateTime(node.file.updatedAtUtc)}
+            </span>
+
+            <div className="flex justify-end">
+                <button
+                    type="button"
+                    onClick={() => onDownload(node.file)}
+                    disabled={isAnyRequesting || node.file.isDeleted}
+                    className="inline-flex h-8 items-center justify-center gap-2 rounded-full bg-foreground px-3 text-[11px] font-bold text-background transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-45"
+                >
+                    {isDownloading ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
+                    {isDownloading ? 'Preparing' : 'Download'}
+                </button>
+            </div>
         </div>
     );
 }
@@ -657,4 +973,91 @@ function getPathBaseName(path) {
     if (!path) return '';
     const parts = String(path).split(/[\\/]/).filter(Boolean);
     return parts.at(-1) || '';
+}
+
+function buildFileTree(files) {
+    const root = createTreeFolder('', '', -1);
+    let folderCount = 0;
+
+    files.forEach((file) => {
+        const fileName = file.fileName || getPathBaseName(file.fullPath) || 'Unknown file';
+        const directorySegments = splitPath(file.directoryPath);
+        const fullPathSegments = splitPath(file.fullPath);
+        const folderSegments = directorySegments.length > 0
+            ? directorySegments
+            : fullPathSegments.slice(0, Math.max(fullPathSegments.length - 1, 0));
+        let current = root;
+        const pathSegments = [];
+
+        folderSegments.forEach((segment, index) => {
+            pathSegments.push(segment);
+            const folderPath = pathSegments.join('\\');
+
+            if (!current.childrenMap.has(segment)) {
+                current.childrenMap.set(segment, createTreeFolder(segment, folderPath, index));
+                folderCount += 1;
+            }
+
+            current = current.childrenMap.get(segment);
+            current.fileCount += 1;
+        });
+
+        current.files.push({
+            type: 'file',
+            name: fileName,
+            path: file.fullPath || [...folderSegments, fileName].join('\\'),
+            depth: folderSegments.length,
+            file,
+        });
+    });
+
+    return {
+        children: materializeTreeChildren(root),
+        fileCount: files.length,
+        folderCount,
+    };
+}
+
+function createTreeFolder(name, path, depth) {
+    return {
+        type: 'folder',
+        name,
+        path,
+        depth,
+        fileCount: 0,
+        childrenMap: new Map(),
+        files: [],
+    };
+}
+
+function materializeTreeChildren(node) {
+    const folders = Array.from(node.childrenMap.values())
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .map((folder) => ({
+            type: 'folder',
+            name: folder.name,
+            path: folder.path,
+            depth: folder.depth,
+            fileCount: folder.fileCount,
+            children: materializeTreeChildren(folder),
+        }));
+
+    const files = [...node.files].sort((a, b) => a.name.localeCompare(b.name));
+
+    return [...folders, ...files];
+}
+
+function collectTreeFolderPaths(nodes) {
+    return nodes.flatMap((node) => {
+        if (node.type !== 'folder') return [];
+
+        return [node.path, ...collectTreeFolderPaths(node.children)];
+    });
+}
+
+function splitPath(path) {
+    return String(path || '')
+        .split(/[\\/]+/)
+        .map((segment) => segment.trim())
+        .filter(Boolean);
 }
