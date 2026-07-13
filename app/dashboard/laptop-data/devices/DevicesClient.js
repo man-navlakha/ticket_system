@@ -17,6 +17,7 @@ import {
     RefreshCw,
     Search,
     SlidersHorizontal,
+    UploadCloud,
     X,
     Wifi,
 } from 'lucide-react';
@@ -65,6 +66,15 @@ const UPDATE_STATUS_SORT_ORDER = {
     unknown: 1,
     newer: 2,
     latest: 3,
+};
+
+const DEFAULT_AGENT_UPDATE_FORM = {
+    version: '',
+    downloadUrl: '',
+    sha256: '',
+    isMandatory: false,
+    makeActive: false,
+    releaseNotes: '',
 };
 
 export default function DevicesClient() {
@@ -272,7 +282,13 @@ export default function DevicesClient() {
                 <MetricCard icon={ArrowUpCircle} label="Newer" value={stats.newer} accent="text-blue-600" />
             </div>
 
-            <VersionSummaryPanel groups={versionGroups} highlights={versionHighlights} error={summaryError} loading={loading && !versionSummary} />
+            <VersionSummaryPanel
+                groups={versionGroups}
+                highlights={versionHighlights}
+                error={summaryError}
+                loading={loading && !versionSummary}
+                onUpdatePublished={fetchDevices}
+            />
 
             <section className="rounded-2xl border border-border bg-card p-5 shadow-sm ring-1 ring-foreground/[0.02]">
                 <div className="flex flex-col gap-5">
@@ -523,12 +539,12 @@ function SortableHeader({ label, sortKey, sortConfig, onSort }) {
     );
 }
 
-function VersionSummaryPanel({ groups, highlights, error, loading }) {
+function VersionSummaryPanel({ groups, highlights, error, loading, onUpdatePublished }) {
     const maxCount = Math.max(...groups.map((group) => group.count), 1);
 
     return (
         <section className="rounded-2xl border border-border bg-card p-5 shadow-sm">
-            <div className="grid gap-5 xl:grid-cols-[320px_minmax(0,1fr)]">
+            <div className="grid gap-5 xl:grid-cols-[300px_minmax(0,1fr)_minmax(340px,0.9fr)]">
                 <div className="space-y-4">
                     <div className="space-y-1">
                         <p className="text-[10px] font-bold uppercase tracking-[0.26em] text-muted-foreground">Rollout Summary</p>
@@ -587,9 +603,197 @@ function VersionSummaryPanel({ groups, highlights, error, loading }) {
                         ))
                     )}
                 </div>
+
+                <AgentUpdateForm onPublished={onUpdatePublished} />
             </div>
         </section>
     );
+}
+
+function AgentUpdateForm({ onPublished }) {
+    const [form, setForm] = useState(DEFAULT_AGENT_UPDATE_FORM);
+    const [submitting, setSubmitting] = useState(false);
+
+    const updateField = (field, value) => {
+        setForm((current) => ({
+            ...current,
+            [field]: value,
+        }));
+    };
+
+    const handleSubmit = async (event) => {
+        event.preventDefault();
+
+        const payload = {
+            version: form.version.trim(),
+            downloadUrl: form.downloadUrl.trim(),
+            sha256: form.sha256.trim().toUpperCase(),
+            isMandatory: form.isMandatory,
+            makeActive: form.makeActive,
+            releaseNotes: form.releaseNotes.trim(),
+        };
+        const validationError = validateAgentUpdateForm(payload);
+
+        if (validationError) {
+            toast.error(validationError);
+            return;
+        }
+
+        try {
+            setSubmitting(true);
+            const res = await fetch('/api/admin/agent-updates', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+            });
+            const data = await res.json().catch(() => null);
+
+            if (!res.ok) {
+                throw new Error(data?.error || 'Unable to upload agent version.');
+            }
+
+            toast.success(`Agent version ${payload.version} uploaded.`);
+            setForm(DEFAULT_AGENT_UPDATE_FORM);
+            await onPublished?.();
+        } catch (publishError) {
+            toast.error(publishError.message || 'Unable to upload agent version.');
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    return (
+        <form onSubmit={handleSubmit} className="rounded-xl border border-border bg-background p-4">
+            <div className="flex items-start justify-between gap-3">
+                <div className="space-y-1">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">Upload Version</p>
+                    <h3 className="text-lg font-bold tracking-tight text-foreground">New agent release</h3>
+                </div>
+                <UploadCloud className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
+            </div>
+
+            <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2">
+                <FieldInput
+                    id="agent-version"
+                    label="Version"
+                    value={form.version}
+                    onChange={(value) => updateField('version', value)}
+                    placeholder="1.0.10"
+                    required
+                />
+                <FieldInput
+                    id="agent-sha256"
+                    label="SHA-256"
+                    value={form.sha256}
+                    onChange={(value) => updateField('sha256', value.toUpperCase())}
+                    placeholder="64 character hash"
+                    className="font-mono"
+                    required
+                />
+            </div>
+
+            <div className="mt-3">
+                <FieldInput
+                    id="agent-download-url"
+                    label="Download URL"
+                    value={form.downloadUrl}
+                    onChange={(value) => updateField('downloadUrl', value)}
+                    placeholder="https://github.com/.../EPDeskAgentSetup-1.0.10.msi"
+                    type="url"
+                    required
+                />
+            </div>
+
+            <div className="mt-3 space-y-2">
+                <label htmlFor="agent-release-notes" className="text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+                    Release Notes
+                </label>
+                <textarea
+                    id="agent-release-notes"
+                    value={form.releaseNotes}
+                    onChange={(event) => updateField('releaseNotes', event.target.value)}
+                    placeholder="Endpoint changed, exclusions support added, version updated."
+                    rows={4}
+                    className="min-h-24 w-full rounded-xl border border-input bg-card px-3 py-3 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                />
+            </div>
+
+            <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                <BooleanOption
+                    label="Mandatory"
+                    checked={form.isMandatory}
+                    onChange={(checked) => updateField('isMandatory', checked)}
+                />
+                <BooleanOption
+                    label="Make Active"
+                    checked={form.makeActive}
+                    onChange={(checked) => updateField('makeActive', checked)}
+                />
+            </div>
+
+            <button
+                type="submit"
+                disabled={submitting}
+                className="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-sm font-bold text-background transition hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+                {submitting ? <RefreshCw className="h-4 w-4 motion-safe:animate-spin" aria-hidden="true" /> : <UploadCloud className="h-4 w-4" aria-hidden="true" />}
+                {submitting ? 'Uploading Version' : 'Upload New Version'}
+            </button>
+        </form>
+    );
+}
+
+function FieldInput({ id, label, value, onChange, placeholder, type = 'text', className = '', required = false }) {
+    return (
+        <div className="space-y-2">
+            <label htmlFor={id} className="text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+                {label}
+            </label>
+            <input
+                id={id}
+                type={type}
+                value={value}
+                onChange={(event) => onChange(event.target.value)}
+                placeholder={placeholder}
+                required={required}
+                autoComplete="off"
+                spellCheck={false}
+                className={`h-10 w-full rounded-full border border-input bg-card px-4 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${className}`}
+            />
+        </div>
+    );
+}
+
+function BooleanOption({ label, checked, onChange }) {
+    return (
+        <label className="flex min-h-11 cursor-pointer items-center gap-3 rounded-xl border border-border bg-card px-3 py-2 text-sm font-semibold text-foreground transition hover:bg-muted/40">
+            <input
+                type="checkbox"
+                checked={checked}
+                onChange={(event) => onChange(event.target.checked)}
+                className="h-4 w-4 rounded border-border bg-background text-foreground"
+            />
+            {label}
+        </label>
+    );
+}
+
+function validateAgentUpdateForm(payload) {
+    if (!payload.version) return 'Version is required.';
+    if (!payload.downloadUrl) return 'Download URL is required.';
+    if (!isValidHttpUrl(payload.downloadUrl)) return 'Download URL must be a valid HTTP or HTTPS URL.';
+    if (!payload.sha256) return 'SHA-256 hash is required.';
+    if (!/^[A-F0-9]{64}$/.test(payload.sha256)) return 'SHA-256 hash must be 64 hex characters.';
+    return '';
+}
+
+function isValidHttpUrl(value) {
+    try {
+        const url = new URL(value);
+        return url.protocol === 'http:' || url.protocol === 'https:';
+    } catch {
+        return false;
+    }
 }
 
 function VersionHighlightCard({ label, value }) {
