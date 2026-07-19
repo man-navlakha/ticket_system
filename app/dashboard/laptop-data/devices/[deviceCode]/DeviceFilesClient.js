@@ -57,6 +57,10 @@ export default function DeviceFilesClient({ deviceCode, requestedByDefault }) {
     const [folderRequesting, setFolderRequesting] = useState(false);
     const [viewMode, setViewMode] = useState('table');
     const [expandedFolders, setExpandedFolders] = useState({});
+    // Device-wide total size across ALL indexed files (not just this page).
+    const [totalBytes, setTotalBytes] = useState(null);
+    const [totalBytesLoading, setTotalBytesLoading] = useState(false);
+    const [totalBytesCapped, setTotalBytesCapped] = useState(false);
 
     const loadFiles = useCallback(async () => {
         const params = new URLSearchParams({
@@ -98,6 +102,69 @@ export default function DeviceFilesClient({ deviceCode, requestedByDefault }) {
     useEffect(() => {
         loadFiles();
     }, [loadFiles]);
+
+    // Compute the total size of every indexed file for this device (respecting
+    // the active name/extension filter). Prefers a device-wide total from the
+    // API if it returns one; otherwise sums every page, capped for safety.
+    const loadTotalBytes = useCallback(async () => {
+        const SCAN_SIZE = 1000;   // files per scan request
+        const MAX_PAGES = 200;    // safety cap → up to 200k files
+        setTotalBytesLoading(true);
+        setTotalBytesCapped(false);
+        try {
+            let sum = 0;
+            let collected = 0;
+            let total = Infinity;
+            let pageNum = 1;
+            let capped = false;
+
+            while (pageNum <= MAX_PAGES) {
+                const params = new URLSearchParams({
+                    page: String(pageNum),
+                    pageSize: String(SCAN_SIZE),
+                });
+                if (query) params.append('query', query);
+                if (extension) params.append('extension', extension);
+
+                const res = await fetch(
+                    `/api/admin/devices/${encodeURIComponent(deviceCode)}/files?${params.toString()}`,
+                    { cache: 'no-store' }
+                );
+                const data = await res.json().catch(() => null);
+                if (!res.ok) throw new Error(data?.error || 'Unable to total device files.');
+
+                // If the backend already reports a device-wide total, trust it.
+                const upstreamTotal = Number(
+                    data?.totalBytes ?? data?.totalSizeBytes ?? data?.totalSize ?? 0
+                );
+                if (upstreamTotal > 0) {
+                    sum = upstreamTotal;
+                    collected = Number(data?.totalFiles || upstreamTotal);
+                    break;
+                }
+
+                const files = Array.isArray(data?.files) ? data.files : [];
+                for (const file of files) sum += Number(file.sizeBytes || 0);
+                collected += files.length;
+                total = Number(data?.totalFiles || collected);
+
+                if (files.length === 0 || collected >= total) break;
+                pageNum += 1;
+                if (pageNum > MAX_PAGES && collected < total) capped = true;
+            }
+
+            setTotalBytes(sum);
+            setTotalBytesCapped(capped);
+        } catch {
+            setTotalBytes(null);
+        } finally {
+            setTotalBytesLoading(false);
+        }
+    }, [deviceCode, query, extension]);
+
+    useEffect(() => {
+        loadTotalBytes();
+    }, [loadTotalBytes]);
 
     const visibleFiles = useMemo(() => result.files || [], [result.files]);
     const fileTree = useMemo(() => buildFileTree(visibleFiles), [visibleFiles]);
@@ -377,7 +444,14 @@ export default function DeviceFilesClient({ deviceCode, requestedByDefault }) {
                 <MetricCard icon={Database} label="Total Indexed" value={formatNumber(stats.totalFiles)} />
                 <MetricCard icon={FileText} label="This Page" value={formatNumber(stats.pageFiles)} accent="text-blue-600" />
                 <MetricCard icon={Filter} label="Page Size" value={formatNumber(result.pageSize || pageSize)} />
-                <MetricCard icon={Database} label="Page Bytes" value={formatBytes(stats.pageBytes)} compact />
+                <MetricCard
+                    icon={Database}
+                    label={activeFilters ? 'Total Size (filtered)' : 'Total Size'}
+                    value={totalBytesLoading && totalBytes === null
+                        ? '…'
+                        : `${formatBytes(totalBytes ?? stats.pageBytes)}${totalBytesCapped ? '+' : ''}`}
+                    compact
+                />
             </div>
 
             <section className="rounded-2xl border border-border bg-card p-5 shadow-sm">
