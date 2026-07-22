@@ -178,6 +178,15 @@ export default function Sidebar({ user }) {
                                 </svg>
                             )
                         },
+                        {
+                            label: 'Upload Control',
+                            href: '/dashboard/laptop-data/uploads',
+                            icon: (
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.9A5.5 5.5 0 0116.9 6.5H17a4 4 0 011 7.87M12 12v9m0-9l-3 3m3-3l3 3" />
+                                </svg>
+                            )
+                        },
                     ]
                 }
             ]

@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ClipboardList, FolderSearch, MonitorSmartphone } from 'lucide-react';
+import { ClipboardList, CloudUpload, FolderSearch, MonitorSmartphone } from 'lucide-react';
 
 const navItems = [
     {
@@ -19,6 +19,12 @@ const navItems = [
         label: 'File Requests',
         href: '/dashboard/laptop-data/file-requests',
         icon: ClipboardList,
+    },
+    {
+        id: 'uploads',
+        label: 'Uploads',
+        href: '/dashboard/laptop-data/uploads',
+        icon: CloudUpload,
     },
 ];
 

@@ -43,6 +43,7 @@ next-env.d.ts
 # superdesign
 .superdesign/
 .superdesign_init.md
+.firecrawl/
 
 .commandcode/
 .claude/
