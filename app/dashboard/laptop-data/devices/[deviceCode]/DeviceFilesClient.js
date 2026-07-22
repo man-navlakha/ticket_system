@@ -1,10 +1,8 @@
 'use client';
 
-import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
     Archive,
-    ArrowLeft,
     ChevronDown,
     ChevronLeft,
     ChevronRight,
@@ -30,7 +28,6 @@ import {
     getFileKey,
     waitForCompletedRequest,
 } from '../../_components/fileRequestClient';
-import DeviceOperationsPanel from './DeviceOperationsPanel';
 
 const DEFAULT_RESULT = {
     page: 1,
@@ -420,15 +417,7 @@ export default function DeviceFilesClient({ deviceCode, requestedByDefault }) {
 
     return (
         <div className="space-y-6">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-                <Link
-                    href="/dashboard/laptop-data/devices"
-                    className="inline-flex h-10 items-center gap-2 rounded-full border border-border bg-background px-4 text-sm font-bold text-foreground transition hover:bg-muted/50"
-                >
-                    <ArrowLeft className="h-4 w-4" />
-                    Back to Devices
-                </Link>
-
+            <div className="flex justify-end">
                 <button
                     type="button"
                     onClick={loadFiles}
@@ -796,8 +785,6 @@ export default function DeviceFilesClient({ deviceCode, requestedByDefault }) {
                     </div>
                 </div>
             </section>
-
-            <DeviceOperationsPanel deviceCode={deviceCode} requestedByDefault={requestedByDefault} />
         </div>
     );
 }

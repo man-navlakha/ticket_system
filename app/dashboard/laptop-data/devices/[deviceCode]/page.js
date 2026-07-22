@@ -1,7 +1,7 @@
 import { formatFullName } from '@/lib/user';
 import LaptopDataShell from '../../_components/LaptopDataShell';
 import { getLaptopDataUser } from '../../_components/auth';
-import DeviceFilesClient from './DeviceFilesClient';
+import DeviceDashboardClient from './DeviceDashboardClient';
 
 export const dynamic = 'force-dynamic';
 
@@ -22,7 +22,7 @@ export default async function DeviceFilesPage({ params }) {
             description="Browse indexed files for this laptop, filter by name or extension, and request downloads from the agent."
             user={user}
         >
-            <DeviceFilesClient deviceCode={deviceCode} requestedByDefault={requestedBy} />
+            <DeviceDashboardClient deviceCode={deviceCode} requestedByDefault={requestedBy} />
         </LaptopDataShell>
     );
 }
