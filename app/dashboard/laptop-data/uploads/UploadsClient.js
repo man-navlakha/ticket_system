@@ -15,6 +15,7 @@ import {
     Save,
     Search,
     ShieldCheck,
+    Trash2,
     X,
 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -62,6 +63,7 @@ export default function UploadsClient() {
     const [filters, setFilters] = useState(INITIAL_FILTERS);
     const [uploadsLoading, setUploadsLoading] = useState(true);
     const [uploadsError, setUploadsError] = useState('');
+    const [deletingUploadId, setDeletingUploadId] = useState('');
 
     const applyPolicy = useCallback((policy) => {
         const nextExtensions = normalizeExtensions(policy?.extensions);
@@ -232,6 +234,36 @@ export default function UploadsClient() {
     const handleFilterSubmit = (event) => {
         event.preventDefault();
         loadUploads(filters);
+    };
+
+    const handleDeleteUpload = async (upload) => {
+        const confirmed = window.confirm(
+            `Delete the completed upload record for "${upload.fileName || upload.id}"? This action cannot be undone.`
+        );
+
+        if (!confirmed) return;
+
+        try {
+            setDeletingUploadId(upload.id);
+            setUploadsError('');
+            const response = await fetch(`/api/admin/file-uploads/${encodeURIComponent(upload.id)}`, {
+                method: 'DELETE',
+            });
+            const data = await response.json().catch(() => null);
+
+            if (!response.ok) {
+                throw new Error(data?.error || 'Unable to delete the file upload.');
+            }
+
+            setUploads((current) => current.filter((item) => item.id !== upload.id));
+            toast.success('Completed upload deleted.');
+        } catch (error) {
+            const message = error.message || 'Unable to delete the file upload.';
+            setUploadsError(message);
+            toast.error(message);
+        } finally {
+            setDeletingUploadId('');
+        }
     };
 
     return (
@@ -453,16 +485,22 @@ export default function UploadsClient() {
                                         <th className="px-6 py-4 font-bold tracking-widest text-muted-foreground">Status</th>
                                         <th className="px-6 py-4 font-bold tracking-widest text-muted-foreground">Lifecycle</th>
                                         <th className="px-6 py-4 font-bold tracking-widest text-muted-foreground">Diagnostics</th>
+                                        <th className="px-6 py-4 text-right font-bold tracking-widest text-muted-foreground">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-border">
                                     {uploadsLoading && uploads.length === 0 ? (
-                                        <tr><td colSpan="6" className="px-6 py-16 text-center text-sm text-muted-foreground">Loading automatic uploads...</td></tr>
+                                        <tr><td colSpan="7" className="px-6 py-16 text-center text-sm text-muted-foreground">Loading automatic uploads...</td></tr>
                                     ) : uploads.length === 0 ? (
-                                        <tr><td colSpan="6" className="px-6 py-16 text-center text-sm text-muted-foreground">No automatic file uploads matched these filters.</td></tr>
+                                        <tr><td colSpan="7" className="px-6 py-16 text-center text-sm text-muted-foreground">No automatic file uploads matched these filters.</td></tr>
                                     ) : (
                                         uploads.map((upload) => (
-                                            <UploadRow key={upload.id} upload={upload} />
+                                            <UploadRow
+                                                key={upload.id}
+                                                upload={upload}
+                                                deleting={deletingUploadId === upload.id}
+                                                onDelete={handleDeleteUpload}
+                                            />
                                         ))
                                     )}
                                 </tbody>
@@ -487,7 +525,7 @@ function MetricCard({ icon: Icon, label, value, accent = 'text-foreground', spin
     );
 }
 
-function UploadRow({ upload }) {
+function UploadRow({ upload, deleting, onDelete }) {
     const status = String(upload.status || 'unknown').toLowerCase();
     const hasError = Boolean(upload.errorMessage);
 
@@ -520,6 +558,22 @@ function UploadRow({ upload }) {
                     <p className="flex items-start gap-1.5 text-xs font-medium leading-relaxed text-red-600"><AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" />{upload.errorMessage}</p>
                 ) : (
                     <p className="text-xs text-muted-foreground">No reported error.</p>
+                )}
+            </td>
+            <td className="px-6 py-5 text-right">
+                {status === 'completed' ? (
+                    <button
+                        type="button"
+                        onClick={() => onDelete(upload)}
+                        disabled={deleting}
+                        className="inline-flex h-9 items-center justify-center gap-2 rounded-full border border-red-500/20 bg-red-500/10 px-3.5 text-xs font-bold text-red-600 transition hover:bg-red-500/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
+                        aria-label={`Delete completed upload ${upload.fileName || upload.id}`}
+                    >
+                        {deleting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
+                        {deleting ? 'Deleting' : 'Delete'}
+                    </button>
+                ) : (
+                    <span className="text-xs text-muted-foreground">—</span>
                 )}
             </td>
         </tr>

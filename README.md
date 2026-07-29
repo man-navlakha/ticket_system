@@ -63,7 +63,26 @@ GMAIL_USER="you@yourdomain.com"
 GMAIL_APP_PASSWORD="your-16-char-app-password"
 
 NEXT_PUBLIC_APP_URL="http://localhost:3000"
+
+# Public, always-online host for copied email-signature images.
+# Use the production app URL or a CDN, never localhost.
+NEXT_PUBLIC_SIGNATURE_ASSET_BASE_URL="https://it.excellentpublicity.com"
 ```
+
+### Cloudinary-hosted email signatures
+
+The project includes a bulk uploader that moves every image in
+`public/Email Signature` to Cloudinary and generates the public URL manifest used
+by the signature editor:
+
+```bash
+npm run cloudinary:signatures:dry-run
+npm run cloudinary:signatures:check
+npm run cloudinary:signatures
+```
+
+See [Cloudinary setup for email signatures](docs/cloudinary-email-signatures.md)
+for signup, API credential, upload, security, and deployment instructions.
 
 ### 3. Database Setup
 ```bash
@@ -87,7 +106,9 @@ This project is pre-configured for **Netlify**. Follow these steps:
 3. **Environment Variables**: In Netlify UI, go to *Site Settings > Build & deploy > Environment variables* and add:
    - `DATABASE_URL` (From Neon or your DB provider)
    - `GMAIL_USER` & `GMAIL_APP_PASSWORD`
+   - `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, and `CLOUDINARY_API_SECRET`
    - `NEXT_PUBLIC_APP_URL` (Set this to `https://it.excellentpublicity.com/`)
+   - `NEXT_PUBLIC_SIGNATURE_ASSET_BASE_URL` (Set this to the always-online HTTPS host that serves the signature images)
    - `NEXTAUTH_SECRET` (A random secure string)
 4. **Build Settings**: Netlify will automatically use the `netlify.toml` settings:
    - Build Command: `npm run build`
