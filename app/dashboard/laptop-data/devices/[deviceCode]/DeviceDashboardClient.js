@@ -5,6 +5,7 @@ import Link from 'next/link';
 import {
     ArrowLeft, Check, LayoutDashboard, FolderOpen, Stethoscope,
     Pencil, ScrollText, Laptop, User, Cpu, Wifi, WifiOff, Loader2,
+    ShieldAlert, Trash2, X,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import DeviceOverview from './DeviceOverview';
@@ -18,7 +19,9 @@ const TABS = [
     { id: 'diagnostics', label: 'Diagnostics & Activity', icon: Stethoscope },
 ];
 
-export default function DeviceDashboardClient({ deviceCode, requestedByDefault }) {
+const REMOVAL_CONFIRMATION = 'REMOVE EPDesk Agent';
+
+export default function DeviceDashboardClient({ deviceCode, requestedByDefault, canRemoveAgent = false }) {
     const [tab, setTab] = useState('overview');
     const [device, setDevice] = useState(null);
     const [nickname, setNickname] = useState('');
@@ -27,6 +30,9 @@ export default function DeviceDashboardClient({ deviceCode, requestedByDefault }
     const [savingNick, setSavingNick] = useState(false);
     const [runningDiag, setRunningDiag] = useState(false);
     const [requestingLogs, setRequestingLogs] = useState(false);
+    const [removalDialogOpen, setRemovalDialogOpen] = useState(false);
+    const [removalConfirmation, setRemovalConfirmation] = useState('');
+    const [removingAgent, setRemovingAgent] = useState(false);
 
     // Pull this device's row from the devices list for header metadata.
     const loadDevice = useCallback(async () => {
@@ -45,6 +51,26 @@ export default function DeviceDashboardClient({ deviceCode, requestedByDefault }
     }, [deviceCode]);
 
     useEffect(() => { loadDevice(); }, [loadDevice]);
+
+    useEffect(() => {
+        if (!removalDialogOpen) return undefined;
+
+        const previousOverflow = document.body.style.overflow;
+        const closeOnEscape = (event) => {
+            if (event.key === 'Escape' && !removingAgent) {
+                setRemovalDialogOpen(false);
+                setRemovalConfirmation('');
+            }
+        };
+
+        document.body.style.overflow = 'hidden';
+        window.addEventListener('keydown', closeOnEscape);
+
+        return () => {
+            document.body.style.overflow = previousOverflow;
+            window.removeEventListener('keydown', closeOnEscape);
+        };
+    }, [removalDialogOpen, removingAgent]);
 
     const saveNickname = async () => {
         const value = nickDraft.trim();
@@ -104,8 +130,50 @@ export default function DeviceDashboardClient({ deviceCode, requestedByDefault }
         }
     };
 
+    const openRemovalDialog = () => {
+        setRemovalConfirmation('');
+        setRemovalDialogOpen(true);
+    };
+
+    const closeRemovalDialog = () => {
+        if (removingAgent) return;
+        setRemovalDialogOpen(false);
+        setRemovalConfirmation('');
+    };
+
+    const removeAgent = async () => {
+        if (removalConfirmation !== REMOVAL_CONFIRMATION) return;
+
+        setRemovingAgent(true);
+        try {
+            const res = await fetch('/api/admin/remote-commands/remove-epdesk-agent', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    deviceCode,
+                    confirmation: removalConfirmation,
+                }),
+            });
+            const data = await res.json().catch(() => null);
+
+            if (!res.ok || data?.success === false) {
+                throw new Error(data?.error || data?.message || 'Unable to queue Agent removal.');
+            }
+
+            setRemovalDialogOpen(false);
+            setRemovalConfirmation('');
+            setTab('diagnostics');
+            toast.success('EPDesk Agent removal queued.');
+        } catch (error) {
+            toast.error(error.message || 'Unable to queue Agent removal.');
+        } finally {
+            setRemovingAgent(false);
+        }
+    };
+
     const lastSeen = device?.lastSeenAtUtc;
     const online = device ? (String(device.status || '').toLowerCase() === 'online' || isRecent(lastSeen)) : false;
+    const removalSupported = supportsAgentRemoval(device?.agentVersion);
 
     return (
         <div className="space-y-6">
@@ -180,6 +248,22 @@ export default function DeviceDashboardClient({ deviceCode, requestedByDefault }
                         >
                             {requestingLogs ? <Loader2 className="h-4 w-4 animate-spin" /> : <ScrollText className="h-4 w-4" />} Request logs
                         </button>
+                        {canRemoveAgent && (
+                            <button
+                                type="button"
+                                onClick={openRemovalDialog}
+                                disabled={!removalSupported}
+                                title={
+                                    removalSupported
+                                        ? 'Remove EPDesk Agent from this device'
+                                        : 'Requires EPDesk Agent version 1.0.13 or newer'
+                                }
+                                className="inline-flex h-10 items-center gap-2 rounded-full border border-red-500/30 bg-red-500/5 px-4 text-sm font-bold text-red-600 transition hover:border-red-500/50 hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-45"
+                            >
+                                <Trash2 className="h-4 w-4" />
+                                Remove Agent
+                            </button>
+                        )}
                     </div>
                 </div>
 
@@ -207,6 +291,127 @@ export default function DeviceDashboardClient({ deviceCode, requestedByDefault }
             {tab === 'overview' && <DeviceOverview deviceCode={deviceCode} />}
             {tab === 'files' && <DeviceFilesClient deviceCode={deviceCode} requestedByDefault={requestedByDefault} />}
             {tab === 'diagnostics' && <DeviceOperationsPanel deviceCode={deviceCode} requestedByDefault={requestedByDefault} />}
+
+            {removalDialogOpen && (
+                <div
+                    className="fixed inset-0 z-[80] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
+                    role="presentation"
+                    onMouseDown={(event) => {
+                        if (event.target === event.currentTarget) closeRemovalDialog();
+                    }}
+                >
+                    <section
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="remove-agent-title"
+                        aria-describedby="remove-agent-description"
+                        className="w-full max-w-lg overflow-hidden rounded-2xl border border-red-500/25 bg-card shadow-2xl"
+                    >
+                        <div className="flex items-start justify-between gap-4 border-b border-red-500/20 bg-red-500/10 p-6">
+                            <div className="flex items-start gap-3">
+                                <span className="mt-0.5 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-red-500/25 bg-card text-red-600">
+                                    <ShieldAlert className="h-5 w-5" />
+                                </span>
+                                <div>
+                                    <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-red-600">
+                                        Destructive action
+                                    </p>
+                                    <h2 id="remove-agent-title" className="mt-1 text-xl font-bold tracking-tight text-foreground">
+                                        Remove EPDesk Agent?
+                                    </h2>
+                                </div>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={closeRemovalDialog}
+                                disabled={removingAgent}
+                                aria-label="Close removal confirmation"
+                                className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border bg-background text-muted-foreground transition hover:text-foreground disabled:opacity-50"
+                            >
+                                <X className="h-4 w-4" />
+                            </button>
+                        </div>
+
+                        <div className="space-y-5 p-6">
+                            <p id="remove-agent-description" className="text-sm leading-relaxed text-muted-foreground">
+                                This will uninstall every MSI named <strong className="text-foreground">EPDesk Agent</strong> from{' '}
+                                <strong className="font-mono text-foreground">{deviceCode}</strong>. The device will stop sending
+                                heartbeats and must be manually reinstalled to reconnect.
+                            </p>
+
+                            <div className="rounded-xl border border-border bg-muted/50 p-4">
+                                <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                                    Type this phrase to confirm
+                                </p>
+                                <code className="mt-2 block select-all text-sm font-bold text-foreground">
+                                    {REMOVAL_CONFIRMATION}
+                                </code>
+                            </div>
+
+                            <label className="block space-y-2">
+                                <span className="text-sm font-bold text-foreground">Confirmation</span>
+                                <input
+                                    autoFocus
+                                    type="text"
+                                    value={removalConfirmation}
+                                    onChange={(event) => setRemovalConfirmation(event.target.value)}
+                                    onKeyDown={(event) => {
+                                        if (event.key === 'Enter' && removalConfirmation === REMOVAL_CONFIRMATION) {
+                                            removeAgent();
+                                        }
+                                    }}
+                                    autoComplete="off"
+                                    spellCheck={false}
+                                    placeholder={REMOVAL_CONFIRMATION}
+                                    className="h-11 w-full rounded-xl border border-input bg-background px-4 font-mono text-sm text-foreground outline-none transition placeholder:text-muted-foreground/50 focus:border-red-500/50 focus:ring-2 focus:ring-red-500/20"
+                                />
+                            </label>
+
+                            <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+                                <button
+                                    type="button"
+                                    onClick={closeRemovalDialog}
+                                    disabled={removingAgent}
+                                    className="inline-flex h-11 items-center justify-center rounded-full border border-border bg-background px-5 text-sm font-bold text-foreground transition hover:bg-muted/50 disabled:opacity-50"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={removeAgent}
+                                    disabled={removingAgent || removalConfirmation !== REMOVAL_CONFIRMATION}
+                                    className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-red-600 px-5 text-sm font-bold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-45"
+                                >
+                                    {removingAgent ? (
+                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                    ) : (
+                                        <Trash2 className="h-4 w-4" />
+                                    )}
+                                    {removingAgent ? 'Queuing removal...' : 'Remove Agent'}
+                                </button>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            )}
         </div>
     );
+}
+
+function supportsAgentRemoval(version) {
+    const parts = String(version || '')
+        .replace(/^v/i, '')
+        .split('.')
+        .slice(0, 3)
+        .map((part) => Number.parseInt(part, 10));
+
+    if (parts.length < 3 || parts.some((part) => Number.isNaN(part))) return false;
+
+    const minimum = [1, 0, 13];
+    for (let index = 0; index < minimum.length; index += 1) {
+        if (parts[index] > minimum[index]) return true;
+        if (parts[index] < minimum[index]) return false;
+    }
+
+    return true;
 }

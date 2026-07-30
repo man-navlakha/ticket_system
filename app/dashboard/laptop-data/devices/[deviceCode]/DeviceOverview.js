@@ -13,6 +13,7 @@ import {
     TerminalSquare,
 } from 'lucide-react';
 import { formatBytes, formatNumber, formatDateTime, timeAgo, extensionOf } from './deviceFormat';
+import DeviceActivityControls from './DeviceActivityControls';
 
 const BAR_COLORS = [
     '#6d2db7', '#2563eb', '#059669', '#d97706', '#dc2626',
@@ -142,6 +143,8 @@ export default function DeviceOverview({ deviceCode }) {
                 <StatTile icon={HardDrive} label="Free Disk" value={diag ? formatBytes(diag.systemDriveFreeBytes) : '—'} />
                 <StatTile icon={Clock} label="Last Check-in" value={diag ? timeAgo(diag.lastHeartbeatUtc || diag.createdAtUtc) : '—'} />
             </div>
+
+            <DeviceActivityControls deviceCode={deviceCode} />
 
             <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
                 {/* Storage by type */}

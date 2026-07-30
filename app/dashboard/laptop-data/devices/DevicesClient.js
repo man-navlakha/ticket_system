@@ -22,6 +22,7 @@ import {
     Wifi,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import DeviceActivityControls from './[deviceCode]/DeviceActivityControls';
 
 const UPDATE_STATUS_FILTERS = [
     { value: 'all', label: 'All', icon: MonitorSmartphone },
@@ -395,26 +396,27 @@ export default function DevicesClient() {
 
             <section className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
                 <div className="overflow-x-auto">
-                    <table className="w-full min-w-[840px] text-left text-sm">
-                        <caption className="sr-only">Laptop agent devices with online status, installed versions, version rollout status, and last heartbeat.</caption>
+                    <table className="w-full min-w-[1120px] text-left text-sm">
+                        <caption className="sr-only">Laptop agent devices with online status, installed versions, activity controls, version rollout status, and last heartbeat.</caption>
                         <thead className="border-b border-border bg-muted/30 text-xs uppercase">
                             <tr>
                                 <th scope="col" className="px-6 py-4 font-bold tracking-widest text-muted-foreground">Device</th>
                                 <th scope="col" className="px-6 py-4 font-bold tracking-widest text-muted-foreground">Hostname</th>
                                 <SortableHeader label="Agent Version" sortKey="agentVersion" sortConfig={sortConfig} onSort={toggleSort} />
+                                <th scope="col" className="px-6 py-4 font-bold tracking-widest text-muted-foreground">Activities</th>
                                 <SortableHeader label="Last Seen" sortKey="lastSeenAtUtc" sortConfig={sortConfig} onSort={toggleSort} />
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-border">
                             {loading && devices.length === 0 ? (
                                 <tr>
-                                    <td colSpan="4" className="px-6 py-16 text-center text-sm text-muted-foreground">
+                                    <td colSpan="5" className="px-6 py-16 text-center text-sm text-muted-foreground">
                                         Loading laptop devices...
                                     </td>
                                 </tr>
                             ) : filteredDevices.length === 0 ? (
                                 <tr>
-                                    <td colSpan="4" className="px-6 py-16 text-center text-sm text-muted-foreground">
+                                    <td colSpan="5" className="px-6 py-16 text-center text-sm text-muted-foreground">
                                         {hasActiveFilters ? 'No devices matched the current filters.' : 'No laptop devices were returned.'}
                                     </td>
                                 </tr>
@@ -460,6 +462,16 @@ export default function DevicesClient() {
                                                 updateStatus={device.updateStatus}
                                                 updateAvailable={device.updateAvailable}
                                             />
+                                        </td>
+                                        <td
+                                            className="px-6 py-3"
+                                            onClick={(event) => event.stopPropagation()}
+                                        >
+                                            {device.deviceCode ? (
+                                                <DeviceActivityControls deviceCode={device.deviceCode} compact />
+                                            ) : (
+                                                <span className="text-xs text-muted-foreground">Unavailable</span>
+                                            )}
                                         </td>
                                         <td className="px-6 py-5 text-xs text-muted-foreground">{formatDateTime(device.lastSeenAtUtc)}</td>
                                     </tr>

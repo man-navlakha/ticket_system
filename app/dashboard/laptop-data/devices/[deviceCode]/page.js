@@ -22,7 +22,11 @@ export default async function DeviceFilesPage({ params }) {
             description="Browse indexed files for this laptop, filter by name or extension, and request downloads from the agent."
             user={user}
         >
-            <DeviceDashboardClient deviceCode={deviceCode} requestedByDefault={requestedBy} />
+            <DeviceDashboardClient
+                deviceCode={deviceCode}
+                requestedByDefault={requestedBy}
+                canRemoveAgent={user.role === 'ADMIN'}
+            />
         </LaptopDataShell>
     );
 }
